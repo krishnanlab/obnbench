@@ -27,8 +27,8 @@ def setup_data():
             common_genes = common_genes.intersection(set(g.node_ids))
 
     nleval.logger.info(f"Exporting {len(common_genes):,} common genes to "
-                       f"{config.GENE_LIST_DIR}")
-    with open(config.GENE_LIST_DIR, "w") as f:
+                       f"{config.GENE_LIST_PATH}")
+    with open(config.GENE_LIST_PATH, "w") as f:
         for i in sorted(common_genes):
             f.write(f"{i}\n")
 
@@ -46,7 +46,7 @@ def get_splitter_filter(log_level: str = "INFO"):
         property_converter=pubmedcnt_converter,
     )
 
-    common_genes = np.loadtxt(config.GENE_LIST_DIR, dtype=str).tolist()
+    common_genes = np.loadtxt(config.GENE_LIST_PATH, dtype=str).tolist()
     filter_ = label.filters.Compose(
         label.filters.EntityExistenceFilter(common_genes, log_level=log_level),
         label.filters.LabelsetRangeFilterSize(min_val=50, log_level=log_level),

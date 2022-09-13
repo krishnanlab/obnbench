@@ -25,11 +25,12 @@ def set_up_mdl(mdl_name: str, g, lsc, log_level="INFO"):
     if mdl_name in config.GNN_METHODS:
         num_tasks = lsc.size
         opts = {"aggr": "add", "normalize": True} if mdl_name == "GraphSAGE" else {}
-        mdl = getattr(pygnn, mdl_name)(in_channels=1, hidden_channels=128,
-                                       num_layers=3, out_channels=num_tasks, **opts)
+        mdl = getattr(pygnn, mdl_name)(in_channels=1, hidden_channels=config.HID_DIM,
+                                       num_layers=config.NUM_LAYERS,
+                                       out_channels=num_tasks, **opts)
         mdl_trainer = SimpleGNNTrainer(config.METRICS, metric_best=config.METRIC_BEST,
-                                       device=config.DEVICE, epochs=10_000,
-                                       eval_steps=100, log_level=log_level)
+                                       device=config.DEVICE, epochs=config.EPOCHS,
+                                       eval_steps=config.EVAL_STEPS, log_level=log_level)
 
     elif mdl_name in config.GML_METHODS:
         dense_g = g.to_dense_graph()
@@ -42,8 +43,10 @@ def set_up_mdl(mdl_name: str, g, lsc, log_level="INFO"):
             pecanpy_g = PreCompFirstOrder.from_mat(dense_g.mat, g.node_ids,
                                                    workers=config.NUM_WORKERS,
                                                    verbose=pecanpy_verbose)
-            feat = pecanpy_g.embed(dim=128, num_walks=10, walk_length=80,
-                                   window_size=10, verbose=pecanpy_verbose)
+            feat = pecanpy_g.embed(dim=config.N2V_DIM, num_walks=config.N2V_NUM_WALKS,
+                                   walk_length=config.N2V_WALK_LENGTH,
+                                   window_size=config.N2V_WINDOW_SIZE,
+                                   verbose=pecanpy_verbose)
         else:
             raise ValueError(f"Unrecognized model option {mdl_name!r}")
         feat = FeatureVec.from_mat(feat, g.idmap)
