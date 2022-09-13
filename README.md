@@ -9,7 +9,7 @@ This is a benchmarking repository accompanying the [`nleval`](https://github.com
 Use the setup script provided to set up the `nleval` environment
 
 ```bash
-git clone --depth 1 --branch v0.1.0-dev5 https://github.com/krishnanlab/NetworkLearningEval && cd NetworkLearningEval
+git clone --depth 1 --branch v0.1.0-dev4 https://github.com/krishnanlab/NetworkLearningEval && cd NetworkLearningEval
 source install.sh cu102  # other options are [cpu,cu113]
 ```
 
