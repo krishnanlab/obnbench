@@ -35,7 +35,7 @@ METRIC_BEST = "log2pr"
 # GNN
 HID_DIM = 128  # hidden feature dimension
 NUM_LAYERS = 3  # number of hidden layers
-EPOCHS = 10_000  # total number of training epochs
+EPOCHS = 100_000  # total number of training epochs
 EVAL_STEPS = 100  # evaluation interval
 
 # Node2vec
