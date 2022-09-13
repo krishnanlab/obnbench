@@ -1,0 +1,18 @@
+#!/bin/bash --login
+
+#SBATCH -N 1
+#SBATCH -c 1
+#SBATCH --array=0-9  # 10 repetitions
+#SBATCH --mem=16GB
+#SBATCH -o ../slurm_history/slurm-%x-%A_%a.out
+#SBATCH -A cmse
+#SBATCH -t 3:55:00
+
+conda activate nle
+
+cd $SLURM_SUBMIT_DIR
+cd ..
+
+i=$SLURM_ARRAY_TASK_ID
+echo $@ --rep $i
+eval $@ --rep $i
