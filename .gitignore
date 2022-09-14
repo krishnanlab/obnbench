@@ -1,3 +1,9 @@
+# Benchmarking files and results
+genes.txt
+results/
+slurm_history/
+datasets/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
