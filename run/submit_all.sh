@@ -29,9 +29,11 @@ function submit_job {
 for network in ${networks[@]}; do
     for label in ${labels[@]}; do
         for model in ${gnn_models[@]}; do
-            if [[ $network != STRING ]]; then  # OOM
-                submit_job $network $label $model 1
+            if [[ $network == STRING ]] && [[ $model == GAT ]]; then
+                continue  # OOM
             fi
+
+            submit_job $network $label $model 1
         done
 
         for model in ${gml_models[@]}; do
