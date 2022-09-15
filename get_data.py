@@ -23,6 +23,10 @@ def setup_data():
     common_genes = None
     for network_name in config.NETWORKS:
         g = getattr(data, network_name)(config.DATA_DIR, version=config.DATA_VERSION)
+        print(
+            f"{network_name:<15}# nodes = {g.num_nodes:,}, # edges = {g.num_edges:,}, "
+            f"edge density = {g.num_edges / g.num_nodes / (g.num_nodes - 1):.4f}",
+        )
 
         if common_genes is None:
             common_genes = set(g.node_ids)
