@@ -1,5 +1,8 @@
+from typing import Dict, List, Tuple
+
 import numpy as np
 import nleval
+import pandas as pd
 from nleval import data, label
 from nleval.util.converter import GenePropertyConverter
 
@@ -32,10 +35,60 @@ def setup_data():
         for i in sorted(common_genes):
             f.write(f"{i}\n")
 
-    _, filter_ = get_splitter_filter()
+    splitter, filter_ = get_splitter_filter()
     for label_name in config.LABELS:
-        getattr(data, label_name)(config.DATA_DIR, version=config.DATA_VERSION,
-                                  transform=filter_)
+        lsc = getattr(data, label_name)(config.DATA_DIR, transform=filter_,
+                                        version=config.DATA_VERSION)
+
+        nleval.logger.info(f"Start obtaining stats for {label_name}")
+        print_label_stats(lsc, splitter, common_genes)
+
+
+def print_label_stats(lsc, splitter, common_genes):
+    y, masks = lsc.split(target_ids=tuple(common_genes), splitter=splitter)
+    num_nodes, num_classes = y.shape
+
+    effective_class_dict: Dict[Tuple[int, ...], int] = {}
+    y_effective: List[int] = [0] * y.shape[0]
+    current = 0
+    for i, j in enumerate(y.astype(int)):
+        if j.sum() > 0:
+            if (z := tuple(j.tolist())) not in effective_class_dict:
+                effective_class_dict[z] = (current := current + 1)
+
+            y_effective[i] = effective_class_dict[z]
+
+    df = pd.DataFrame(y_effective)
+    num_effective_classes = df[0].unique().size - 1
+    nleval.logger.info(f"Total number of classes: {num_classes}")
+    nleval.logger.info(f"Total number of effective classes: {num_effective_classes:,}")
+
+    stats_lst = []
+    mask_names = ["train", "val", "test"]
+    for mask_name in mask_names:
+        mask = masks[mask_name][:, 0]
+        num_pos_per_class = y[mask].sum(axis=0)
+        num_pos_per_eff_class = df.iloc[np.where(mask)[0], 0].value_counts()
+        stats_lst.append(
+            (
+                (y[mask].sum(axis=1) > 0).sum() / num_nodes,  # label rate
+                num_pos_per_class.mean(),  # avg number of examples
+                num_pos_per_class.std(),
+                num_pos_per_eff_class.mean(),  # effective avg number of examples
+                num_pos_per_eff_class.std(),
+            )
+        )
+    stats_df = pd.DataFrame(stats_lst).rename(
+        columns={
+            0: "Label rate",
+            1: "Number of examples per class (avg)",
+            2: "Number of examples per class (std)",
+            3: "Effective number of examples per class (avg)",
+            4: "Effective number of examples per class (std)",
+        },
+        index={i: j for i, j in enumerate(mask_names)},
+    )
+    nleval.logger.info(f"\n{stats_df}")
 
 
 def get_splitter_filter(log_level: str = "INFO"):
