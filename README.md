@@ -55,3 +55,38 @@ sh submit_all.sh
 ```
 
 which submit all experiements as SLURM jobs to run.
+
+
+## Stats
+
+### Network stats
+
+| Network | # nodes | # edges | Edge density |
+| :-------: | -------: | -------: | -------: |
+| BioGRID | 18,951 | 1,103,298 | 0.0031 |
+| HumanNet | 17,211 | 847,104 | 0.0029 |
+| STRING | 17,942 | 10,951,202 | 0.0340 |
+
+### Label stats
+
+**Note:** To make the comparison against label-rate from other benchmarks that are in multi-class settings instead of multi-label, we consider the notion of *effective class*, where each unique combinations of labels is considered as a "class".
+
+#### DisGeNet
+
+Total number of (effective) classes: 123 (2,947)
+
+| | Label rate | Number of examples per class (avg) | Number of examples per class (std) | Effective number of examples per class (avg) | Effective number of examples per class (std)|
+| ---------- | ---------: | ---------: | ---------: | ---------: | ---------: |
+| Train | 0.210414 | 139.723577 | 87.124087 | 1.569231 | 3.607748 |
+| Validation | 0.070138 | 43.560976 | 28.280001 | 1.637956 | 2.534618 |
+| Testest | 0.070201 | 28.065041 | 17.743310 | 2.359244 | 4.862655 |
+
+#### GOBP
+
+Total number of (effective) classes: 203 (3,969)
+
+| | Label rate | Number of examples per class (avg) | Number of examples per class (std) | Effective number of examples per class (avg) | Effective number of examples per class (std)|
+| ---------- | ---------: | ---------: | ---------: | ---------: | ---------: |
+| train | 0.274739 | 85.842365 | 31.674838 | 1.500512 | 2.258730 |
+| val | 0.091580 | 19.881773 | 7.133202 | 1.622370 | 1.594832 |
+| test | 0.091580 | 18.024631 | 8.608301 | 1.873402 | 2.260405 |
