@@ -59,6 +59,14 @@ which submit all experiements as SLURM jobs to run.
 
 ## Stats
 
+### Network stats
+
+| Network | # nodes | # edges | Edge density |
+| :-------: | -------: | -------: | -------: |
+| BioGRID | 18,951 | 1,103,298 | 0.0031 |
+| HumanNet | 17,211 | 847,104 | 0.0029 |
+| STRING | 17,942 | 10,951,202 | 0.0340 |
+
 ### Label stats
 
 **Note:** To make the comparison against label-rate from other benchmarks that are in multi-class settings instead of multi-label, we consider the notion of *effective class*, where each unique combinations of labels is considered as a "class".
