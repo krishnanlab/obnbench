@@ -72,14 +72,18 @@ def print_label_stats(lsc, splitter, common_genes):
     for mask_name in mask_names:
         mask = masks[mask_name][:, 0]
         num_pos_per_class = y[mask].sum(axis=0)
-        num_pos_per_eff_class = df.iloc[np.where(mask)[0], 0].value_counts()
+        num_pos_per_eff_class = (df.iloc[np.where(mask)[0], 0]
+                                 .value_counts().values.tolist())
+        num_pos_per_eff_class = (num_pos_per_eff_class
+                                 + [0] * (num_effective_classes
+                                          - len(num_pos_per_eff_class)))  # pad with zeros
         stats_lst.append(
             (
                 (y[mask].sum(axis=1) > 0).sum() / num_nodes,  # label rate
                 num_pos_per_class.mean(),  # avg number of examples
                 num_pos_per_class.std(),
-                num_pos_per_eff_class.mean(),  # effective avg number of examples
-                num_pos_per_eff_class.std(),
+                np.mean(num_pos_per_eff_class),  # effective avg number of examples
+                np.std(num_pos_per_eff_class),
             )
         )
     stats_df = pd.DataFrame(stats_lst).rename(

@@ -77,9 +77,9 @@ Total number of (effective) classes: 123 (2,947)
 
 | | Label rate | Number of examples per class (avg) | Number of examples per class (std) | Effective number of examples per class (avg) | Effective number of examples per class (std)|
 | ---------- | ---------: | ---------: | ---------: | ---------: | ---------: |
-| Train | 0.210414 | 139.723577 | 87.124087 | 1.569231 | 3.607748 |
-| Validation | 0.070138 | 43.560976 | 28.280001 | 1.637956 | 2.534618 |
-| Test | 0.070201 | 28.065041 | 17.743310 | 2.359244 | 4.862655 |
+| Train | 0.210414 | 139.723577 | 87.124087 | 1.142178 | 3.155479 |
+| Validation | 0.070138 | 43.560976 | 28.280001 | 0.380726 | 1.403474 |
+| Test | 0.070201 | 28.065041 | 17.743310 | 0.381065 | 2.136587 |
 
 #### GOBP
 
@@ -87,6 +87,6 @@ Total number of (effective) classes: 203 (3,969)
 
 | | Label rate | Number of examples per class (avg) | Number of examples per class (std) | Effective number of examples per class (avg) | Effective number of examples per class (std)|
 | ---------- | ---------: | ---------: | ---------: | ---------: | ---------: |
-| Train | 0.274739 | 85.842365 | 31.674838 | 1.500512 | 2.258730 |
-| Validation | 0.091580 | 19.881773 | 7.133202 | 1.622370 | 1.594832 |
-| Test | 0.091580 | 18.024631 | 8.608301 | 1.873402 | 2.260405 |
+| Train | 0.274739 | 85.842365 | 31.674838 | 1.107332 | 2.049174 |
+| Validation | 0.091580 | 19.881773 | 7.133202 | 0.369111 | 1.020112 |
+| Test | 0.091580 | 18.024631 | 8.608301 | 0.369111 | 1.249263 |
