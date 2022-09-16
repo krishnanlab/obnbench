@@ -4,7 +4,7 @@ mkdir -p ../slurm_history
 
 networks=(BioGRID HumanNet STRING)
 labels=(DisGeNet GOBP)
-gml_models=(ADJ-LogReg ADJ-SVM N2V-LogReg N2V-SVM)
+gml_models=(ADJ-LogReg ADJ-SVM N2V-LogReg N2V-SVM, LabelProp)
 gnn_models=(GCN GIN GAT GraphSAGE)
 
 function submit_job {

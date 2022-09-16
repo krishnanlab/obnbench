@@ -5,8 +5,9 @@ import os
 import nleval
 from nleval import Dataset
 from nleval.feature import FeatureVec
+from nleval.model.label_propagation import RandomWalkRestart
 from nleval.model_trainer.gnn import SimpleGNNTrainer
-from nleval.model_trainer import SupervisedLearningTrainer
+from nleval.model_trainer import SupervisedLearningTrainer, LabelPropagationTrainer
 from nleval.util.logger import display_pbar
 from pecanpy.pecanpy import PreCompFirstOrder
 from sklearn.linear_model import LogisticRegression
@@ -19,8 +20,9 @@ from get_data import load_data
 
 
 def set_up_mdl(mdl_name: str, g, lsc, log_level="INFO"):
-    """Set up model, trainer, and features."""
+    """Set up model, trainer, graph, and features."""
     feat = None
+    dense_g = g.to_dense_graph()
 
     if mdl_name in config.GNN_METHODS:
         num_tasks = lsc.size
@@ -33,12 +35,10 @@ def set_up_mdl(mdl_name: str, g, lsc, log_level="INFO"):
                                        eval_steps=config.EVAL_STEPS, log_level=log_level)
 
     elif mdl_name in config.GML_METHODS:
-        dense_g = g.to_dense_graph()
+        feat = dense_g.mat
 
-        # Generate features
-        if mdl_name.startswith("ADJ"):
-            feat = dense_g.mat
-        elif mdl_name.startswith("N2V"):
+        # Node2vec embedding
+        if mdl_name.startswith("N2V"):
             pecanpy_verbose = display_pbar(log_level)
             pecanpy_g = PreCompFirstOrder.from_mat(dense_g.mat, g.node_ids,
                                                    workers=config.NUM_WORKERS,
@@ -47,8 +47,6 @@ def set_up_mdl(mdl_name: str, g, lsc, log_level="INFO"):
                                    walk_length=config.N2V_WALK_LENGTH,
                                    window_size=config.N2V_WINDOW_SIZE,
                                    verbose=pecanpy_verbose)
-        else:
-            raise ValueError(f"Unrecognized model option {mdl_name!r}")
         feat = FeatureVec.from_mat(feat, g.idmap)
 
         # Initialize model
@@ -60,10 +58,15 @@ def set_up_mdl(mdl_name: str, g, lsc, log_level="INFO"):
             raise ValueError(f"Unrecognized model option {mdl_name!r}")
         mdl_trainer = SupervisedLearningTrainer(config.METRICS, log_level=log_level)
 
+    elif mdl_name == "LabelProp":
+        g = dense_g
+        mdl = RandomWalkRestart(max_iter=20, warn=False)
+        mdl_trainer = LabelPropagationTrainer(config.METRICS, log_level=log_level)
+
     else:
         raise ValueError(f"Unrecognized model option {mdl_name!r}")
 
-    return mdl, mdl_trainer, feat
+    return mdl, mdl_trainer, g, feat
 
 
 def results_to_json(
@@ -96,11 +99,11 @@ def get_gnn_results(mdl, dataset) -> Dict[str, List[float]]:
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--network_name", required=True, choices=config.NETWORKS)
-    parser.add_argument("--label_name", required=True, choices=config.LABELS)
-    parser.add_argument("--model_name", required=True, choices=config.ALL_METHODS)
-    parser.add_argument("--rep", type=int, default=0, help="Repetition number.")
-    parser.add_argument("--out_dir", default="results", help="Output directory.")
+    parser.add_argument("-n", "--network_name", required=True, choices=config.NETWORKS)
+    parser.add_argument("-l", "--label_name", required=True, choices=config.LABELS)
+    parser.add_argument("-m", "--model_name", required=True, choices=config.ALL_METHODS)
+    parser.add_argument("-r", "--rep", type=int, default=0, help="Repetition number.")
+    parser.add_argument("-o", "--out_dir", default="results", help="Output directory.")
 
     args = parser.parse_args()
     nleval.logger.info(args)
@@ -125,7 +128,7 @@ def main():
 
     # Load data
     g, lsc, splitter = load_data(network_name, label_name)
-    mdl, mdl_trainer, feat = set_up_mdl(model_name, g, lsc)
+    mdl, mdl_trainer, g, feat = set_up_mdl(model_name, g, lsc)
     dataset = Dataset(graph=g, feature=feat, label=lsc, splitter=splitter)
     nleval.logger.info(lsc.stats())
 

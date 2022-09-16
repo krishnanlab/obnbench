@@ -21,7 +21,7 @@ NETWORKS = ["STRING", "BioGRID", "HumanNet"]
 LABELS = ["DisGeNet", "GOBP"]
 GNN_METHODS = ["GCN", "GAT", "GIN", "GraphSAGE"]
 GML_METHODS = ["ADJ-LogReg", "ADJ-SVM", "N2V-LogReg", "N2V-SVM"]
-ALL_METHODS = GNN_METHODS + GML_METHODS
+ALL_METHODS = GNN_METHODS + GML_METHODS + ["LabelProp"]
 
 ####################
 # Evaluation metrics
