@@ -99,11 +99,11 @@ def get_gnn_results(mdl, dataset) -> Dict[str, List[float]]:
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--network_name", required=True, choices=config.NETWORKS)
-    parser.add_argument("--label_name", required=True, choices=config.LABELS)
-    parser.add_argument("--model_name", required=True, choices=config.ALL_METHODS)
-    parser.add_argument("--rep", type=int, default=0, help="Repetition number.")
-    parser.add_argument("--out_dir", default="results", help="Output directory.")
+    parser.add_argument("-n", "--network_name", required=True, choices=config.NETWORKS)
+    parser.add_argument("-l", "--label_name", required=True, choices=config.LABELS)
+    parser.add_argument("-m", "--model_name", required=True, choices=config.ALL_METHODS)
+    parser.add_argument("-r", "--rep", type=int, default=0, help="Repetition number.")
+    parser.add_argument("-o", "--out_dir", default="results", help="Output directory.")
 
     args = parser.parse_args()
     nleval.logger.info(args)
