@@ -28,18 +28,3 @@ ALL_METHODS = GNN_METHODS + GML_METHODS + ["LabelProp"]
 ####################
 METRICS = {"log2pr": log2_auprc_prior, "auroc": auroc}
 METRIC_BEST = "log2pr"
-
-###############
-# Model configs
-###############
-# GNN
-HID_DIM = 128  # hidden feature dimension
-NUM_LAYERS = 3  # number of hidden layers
-EPOCHS = 30_000  # total number of training epochs
-EVAL_STEPS = 100  # evaluation interval
-
-# Node2vec
-N2V_DIM = 128
-N2V_NUM_WALKS = 10
-N2V_WALK_LENGTH = 80
-N2V_WINDOW_SIZE = 10
