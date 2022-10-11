@@ -13,10 +13,12 @@ git clone https://b10200cbde7d/r/NetworkLearningEval-A862 && cd NetworkLearningE
 source install.sh cu102  # other options are [cpu,cu113]
 ```
 
-Install an additional library [`PecanPy`](https://github.com/krishnanlab/PecanPy) for generating node2vec embeddings
+Install two additional libraries: [`PecanPy`](https://github.com/krishnanlab/PecanPy) for generating node2vec embeddings,
+and [`Hydra`](https://github.com/facebookresearch/hydra) for managing experiments.
 
 ```bash
 pip install pecanpy==2.0.8
+pip install hydra-core==1.2.0
 ```
 
 ### Set up data
