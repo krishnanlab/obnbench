@@ -1,0 +1,15 @@
+network: ???
+label: ???
+model: ???
+runid: 0
+out_dir: results
+gnn_params:
+  hid_dim: 128
+  num_layers: 3
+  epochs: 30000
+  eval_steps: 100
+n2v_params:
+  hid_dim: 128
+  walk_length: 80
+  window_size: 10
+  num_walks: 10
