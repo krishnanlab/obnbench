@@ -30,11 +30,11 @@ function submit_job {
     script+=" out_dir=hp_tune_results hp_tune=true gnn_params.epochs=5000 gnn_params.epochs=20"
 
     if [[ ${n2v_models[*]} =~ $model ]]; then
-        hp_tune_gnn $script
-    elif [[ ${lp_models[*]} =~ $model ]]; then
         hp_tune_n2v $script
-    elif [[ ${gnn_models[*]} =~ $model ]]; then
+    elif [[ ${lp_models[*]} =~ $model ]]; then
         hp_tune_lp $script
+    elif [[ ${gnn_models[*]} =~ $model ]]; then
+        hp_tune_gnn $script
     else
         echo ERROR: unknown model ${model}
         exit 1
