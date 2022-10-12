@@ -14,5 +14,5 @@ cd $SLURM_SUBMIT_DIR
 cd ..
 
 i=$SLURM_ARRAY_TASK_ID
-echo $@ --rep $i
-eval $@ --rep $i
+echo $@ runid=$i
+eval $@ runid=$i
