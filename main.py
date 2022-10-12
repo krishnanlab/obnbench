@@ -96,7 +96,7 @@ def set_up_mdl(cfg: DictConfig, g, lsc, log_level="INFO"):
     elif mdl_name in config.GML_METHODS:
         feat = dense_g.mat
         n2v_opts = _parse_n2v_params(cfg.n2v_params)
-        result_path = _get_paths(cfg, gnn_opts)[0]
+        result_path = _get_paths(cfg, n2v_opts)[0]
 
         # Node2vec embedding
         if mdl_name.startswith("N2V"):

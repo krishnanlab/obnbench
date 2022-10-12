@@ -60,6 +60,7 @@ To run experiments for all combinations of network, label, and model, with ten r
 ```bash
 cd run
 sh submit_all.sh
+# sh submit_all_hp_tune.sh  # hyper-parameter tuning
 ```
 
 which submit all experiements as SLURM jobs to run.
