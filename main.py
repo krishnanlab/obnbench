@@ -120,7 +120,7 @@ def set_up_mdl(cfg: DictConfig, g, lsc, log_level="INFO"):
         lp_opts = _parse_lp_params(cfg.lp_params)
         result_path = _get_paths(cfg, lp_opts)[0]
         g = dense_g
-        mdl = RandomWalkRestart(max_iter=20, warn=False)
+        mdl = RandomWalkRestart(max_iter=20, warn=False, **lp_opts)
         mdl_trainer = LabelPropagationTrainer(config.METRICS, log_level=log_level)
 
     else:
