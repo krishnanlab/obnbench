@@ -45,9 +45,11 @@ function hp_tune_gnn {
     for lr in ${gnn_lr_opts[@]}; do
         for hid_dim in ${gnn_hid_dim_opts[@]}; do
             for num_layers in ${gnn_num_layers_opts[@]}; do
-                sbatch -J hp_tune-${name} --gres=gpu:v100:1 job_template_single.sb \
-                    ${script} gnn_params.num_layers=${num_layers} \
-                    gnn_params.lr=${lr} gnn_params.hid_dim=${hid_dim}
+                jobscript="sbatch -J hp_tune-${name} --gres=gpu:v100:1 job_template_single.sb "
+                jobscript+="${script} gnn_params.num_layers=${num_layers} gnn_params.lr=${lr} "
+                jobscript+="gnn_params.hid_dim=${hid_dim}"
+                echo ${jobscript}
+                eval ${jobscript}
             done
         done
     done
@@ -57,10 +59,11 @@ function hp_tune_n2v {
     for hid_dim in ${n2v_hid_dim_opts[@]}; do
         for walk_length in ${n2v_walk_length_opts[@]}; do
             for window_size in ${n2v_walk_length_opts[@]}; do
-                sbatch -J hp_tune-${name} -C amd20 job_template_single.sb \
-                    ${script} n2v_params.hid_dim=${hid_dim} \
-                    n2v_params.walk_length=${walk_length} \
-                    n2v_params.window_size=${window_size}
+                jobscript="sbatch -J hp_tune-${name} -C amd20 job_template_single.sb "
+                jobscript+="${script} n2v_params.hid_dim=${hid_dim} "
+                jobscript+="n2v_params.walk_length=${walk_length} n2v_params.window_size=${window_size}"
+                echo ${jobscript}
+                eval ${jobscript}
             done
         done
     done
@@ -68,8 +71,9 @@ function hp_tune_n2v {
 
 function hp_tune_lp {
     for beta in ${lp_beta_opts[@]}; do
-        sbatch -J hp_tune-${name} -C amd20 job_template_single.sb \
-            ${script} lp_params.beta=${hbeta}
+        jobscript="sbatch -J hp_tune-${name} -C amd20 job_template_single.sb ${script} lp_params.beta=${beta}"
+        echo ${jobscript}
+        eval ${jobscript}
     done
 }
 
