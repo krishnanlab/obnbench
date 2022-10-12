@@ -16,7 +16,7 @@ function submit_job {
     job_name="${network,,}-${label,,}-${model,,}"
     echo $job_name
 
-    script="/bin/time -v python main.py --network_name ${network} --label_name ${label} --model_name ${model}"
+    script="/bin/time -v python main.py network=${network} label=${label} model=${model}"
 
     if (( gpu == 1 ))
     then

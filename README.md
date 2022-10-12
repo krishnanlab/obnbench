@@ -35,7 +35,13 @@ python get_data.py
 After setting up the data, one can run a single experiment by specifying the choices of network, label, and model:
 
 ```bash
-python main.py --network_name BioGRID --label_name DisGeNet --model_name GCN
+python main.py network=BioGRID label=DisGeNet model=GCN
+```
+
+For testing with hyperparameter tuning option:
+
+```bash
+python main.py network=BioGRID label=DisGeNet model=GCN out_dir=test gnn_params.epochs=5000 gnn_params.eval_steps=20 hp_tune=true
 ```
 
 The result file will be saved under the `results/` directory as a JSON file.
@@ -43,9 +49,9 @@ The file name for this particular run will be `biogrid_disgenet_gcn_0.json`.
 
 All available options are
 
-* `--network_name: [BioGRID,HumanNet,STRING]`
-* `--label_name: [DisGeNet,GOBP]`
-* `--model_name: [ADJ-LogReg,ADJ-SVM,N2V-LogReg,N2V-SVM,GCN,GIN,GAT,GraphSAGE]`
+* `network: [BioGRID,HumanNet,STRING]`
+* `label: [DisGeNet,GOBP]`
+* `model: [ADJ-LogReg,ADJ-SVM,N2V-LogReg,N2V-SVM,GCN,GIN,GAT,GraphSAGE]`
 
 ### Submit batch jobs
 
@@ -54,6 +60,7 @@ To run experiments for all combinations of network, label, and model, with ten r
 ```bash
 cd run
 sh submit_all.sh
+# sh submit_all_hp_tune.sh  # hyper-parameter tuning
 ```
 
 which submit all experiements as SLURM jobs to run.

@@ -2,7 +2,6 @@
 
 #SBATCH -N 1
 #SBATCH -c 1
-#SBATCH --array=0-4  # 5 repetitions
 #SBATCH --mem=16GB
 #SBATCH -o ../slurm_history/slurm-%x-%A_%a.out
 #SBATCH -A cmse
@@ -13,6 +12,7 @@ conda activate nle
 cd $SLURM_SUBMIT_DIR
 cd ..
 
-i=$SLURM_ARRAY_TASK_ID
-echo $@ runid=$i
-eval $@ runid=$i
+for i in $(seq 0 4); do
+    echo $@ runid=$i
+    eval $@ runid=$i
+done

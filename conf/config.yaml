@@ -3,7 +3,10 @@ label: ???
 model: ???
 runid: 0
 out_dir: results
+hp_tune: false
+log_level: INFO
 gnn_params:
+  lr: 0.001
   hid_dim: 128
   num_layers: 3
   epochs: 30000
@@ -13,3 +16,5 @@ n2v_params:
   walk_length: 80
   window_size: 10
   num_walks: 10
+lp_params:
+  beta: 0.85
