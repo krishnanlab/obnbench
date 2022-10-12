@@ -2,7 +2,7 @@
 
 #SBATCH -N 1
 #SBATCH -c 1
-#SBATCH --array=0-9  # 10 repetitions
+#SBATCH --array=0-4  # 5 repetitions
 #SBATCH --mem=16GB
 #SBATCH -o ../slurm_history/slurm-%x-%A_%a.out
 #SBATCH -A cmse
