@@ -14,7 +14,7 @@ from pecanpy.pecanpy import PreCompFirstOrder
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import LinearSVC
 from torch_geometric import nn as pygnn
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import config
 from get_data import load_data
@@ -26,6 +26,7 @@ def _parse_gnn_params(gnn_params: DictConfig) -> Tuple[Dict[str, int], Dict[str,
         "num_layers": gnn_params.num_layers,
     }
     trainer_opts = {
+        "lr": gnn_params.lr,
         "epochs": gnn_params.epochs,
         "eval_steps": gnn_params.eval_steps,
     }
@@ -42,7 +43,38 @@ def _parse_n2v_params(n2v_params: DictConfig) -> Dict[str, int]:
     return n2v_opts
 
 
-def set_up_mdl(cfg: DictConfig, g, lsc, log_level="INFO", log_path=None):
+def _parse_lp_params(lp_params: DictConfig) -> Dict[str, float]:
+    lp_opts = {"beta": lp_params.beta}
+    return lp_opts
+
+
+def _get_paths(cfg: DictConfig, opt: Optional[Dict[str, float]] = None) -> Tuple[str, str]:
+    """<out_dir>/{method}/{settings}/{dataset}/{runid}"""
+    # Get output file name and path
+    os.makedirs(cfg.out_dir, exist_ok=True)
+
+    # Only results are saved directly under the out_dir as json
+    if not cfg.hp_tune:
+        log_path = None
+        exp_name = "_".join([i.lower() for i in (cfg.network, cfg.label, cfg.model)])
+        result_path = os.path.join(cfg.out_dir, f"{exp_name}_{cfg.runid}.json")
+
+    # Nested dir struct for organizing different hyperparameter tuning exps
+    else:
+        dataset = "_".join(i.lower() for i in (cfg.network, cfg.label))
+        settings = "_".join(f"{i.replace('_', '-')}={j}" for i, j in opt.items()) if opt else "none"
+        out_path = os.path.join(cfg.out_dir, cfg.model, settings, dataset, str(cfg.runid))
+        os.makedirs(out_path, exist_ok=True)
+
+        result_path = os.path.join(out_path, "score.json")
+        log_path = os.path.join(out_path, "run.log")
+
+    nleval.logger.info(f"Results will be saved to {result_path}")
+
+    return result_path, log_path
+
+
+def set_up_mdl(cfg: DictConfig, g, lsc, log_level="INFO"):
     """Set up model, trainer, graph, and features."""
     mdl_name = cfg.model
 
@@ -52,6 +84,7 @@ def set_up_mdl(cfg: DictConfig, g, lsc, log_level="INFO", log_path=None):
     if mdl_name in config.GNN_METHODS:
         num_tasks = lsc.size
         gnn_opts, trainer_opts = _parse_gnn_params(cfg.gnn_params)
+        result_path, log_path = _get_paths(cfg, gnn_opts)
         if mdl_name == "GraphSAGE":
             gnn_opts.update({"aggr": "add", "normalize": True})
 
@@ -63,6 +96,7 @@ def set_up_mdl(cfg: DictConfig, g, lsc, log_level="INFO", log_path=None):
     elif mdl_name in config.GML_METHODS:
         feat = dense_g.mat
         n2v_opts = _parse_n2v_params(cfg.n2v_params)
+        result_path = _get_paths(cfg, gnn_opts)[0]
 
         # Node2vec embedding
         if mdl_name.startswith("N2V"):
@@ -80,19 +114,19 @@ def set_up_mdl(cfg: DictConfig, g, lsc, log_level="INFO", log_path=None):
             mdl = LinearSVC(penalty="l2", max_iter=2000)
         else:
             raise ValueError(f"Unrecognized model option {mdl_name!r}")
-        mdl_trainer = SupervisedLearningTrainer(config.METRICS, log_level=log_level,
-                                                log_path=log_path)
+        mdl_trainer = SupervisedLearningTrainer(config.METRICS, log_level=log_level)
 
     elif mdl_name == "LabelProp":
+        lp_opts = _parse_lp_params(cfg.lp_params)
+        result_path = _get_paths(cfg, lp_opts)[0]
         g = dense_g
         mdl = RandomWalkRestart(max_iter=20, warn=False)
-        mdl_trainer = LabelPropagationTrainer(config.METRICS, log_level=log_level,
-                                              log_path=log_path)
+        mdl_trainer = LabelPropagationTrainer(config.METRICS, log_level=log_level)
 
     else:
         raise ValueError(f"Unrecognized model option {mdl_name!r}")
 
-    return mdl, mdl_trainer, g, feat
+    return mdl, mdl_trainer, g, feat, result_path
 
 
 def results_to_json(
@@ -127,18 +161,9 @@ def get_gnn_results(mdl, dataset) -> Dict[str, List[float]]:
 def main(cfg: DictConfig):
     nleval.logger.info(f"Runing with settings:\n{OmegaConf.to_yaml(cfg)}")
 
-    # Get output file name and path
-    os.makedirs(cfg.out_dir, exist_ok=True)
-    exp_name = "_".join([i.lower() for i in (cfg.network, cfg.label, cfg.model)])
-    out_path = os.path.join(cfg.out_dir, f"{exp_name}_{cfg.runid}.json")
-    nleval.logger.info(f"Results will be saved to {out_path}")
-
-    # Get log file path for performing hyperparameter tuning
-    log_path = None
-
     # Load data
-    g, lsc, splitter = load_data(cfg.network, cfg.label)
-    mdl, mdl_trainer, g, feat = set_up_mdl(cfg, g, lsc, log_path=log_path)
+    g, lsc, splitter = load_data(cfg.network, cfg.label, cfg.log_level)
+    mdl, mdl_trainer, g, feat, result_path = set_up_mdl(cfg, g, lsc, cfg.log_level)
     dataset = Dataset(graph=g, feature=feat, label=lsc, splitter=splitter)
     nleval.logger.info(lsc.stats())
 
@@ -151,7 +176,7 @@ def main(cfg: DictConfig):
 
     # Save results as JSON
     results_json = results_to_json(lsc.label_ids, results)
-    with open(out_path, "w") as f:
+    with open(result_path, "w") as f:
         json.dump(results_json, f, indent=4)
 
 
