@@ -27,7 +27,7 @@ function submit_job {
     name="${network,,}-${label,,}-${model,,}"
 
     script="/bin/time -v python main.py network=${network} label=${label} model=${model}"
-    script+=" out_dir=hp_tune_results hp_tune=true gnn_params.epochs=5000 gnn_params.epochs=20"
+    script+=" out_dir=hp_tune_results hp_tune=true gnn_params.epochs=5000 gnn_params.eval_steps=20"
 
     if [[ ${n2v_models[*]} =~ $model ]]; then
         hp_tune_n2v $script
