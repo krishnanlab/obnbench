@@ -14,13 +14,47 @@ from pecanpy.pecanpy import PreCompFirstOrder
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import LinearSVC
 from torch_geometric import nn as pygnn
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Literal, Optional, Tuple, Union
 
 import config
 from get_data import load_data
 
 
-def _parse_gnn_params(gnn_params: DictConfig) -> Tuple[Dict[str, int], Dict[str, int]]:
+def parse_params(
+    name: Literal["gnn", "n2v", "lp"],
+    /,
+    *,
+    params: DictConfig,
+) -> Tuple[Dict[str, int], Dict[str, int], Optional[Dict[str, int]]]:
+    """Parse model specific hyper parameters.
+
+    Args:
+        name: Name of the model class (gnn, n2v, lp).
+        params: Parameters specific to the model class to be used.
+
+    Returns:
+        Hyper parameters dictionary used for constructing result path; model
+            specific parameters; trainer specific parameters (optional).
+
+    """
+    if name == "gnn":
+        parser = _parse_gnn_params
+    elif name == "n2v":
+        parser = _parse_n2v_params
+    elif name == "lp":
+        parser = _parse_lp_params
+    else:
+        raise ValueError(f"Unknown model class {name!r}")
+
+    return parser(params)
+
+
+def _parse_gnn_params(gnn_params: DictConfig):
+    hp_opts = {
+        "hidden_channels": gnn_params.hid_dim,
+        "num_layers": gnn_params.num_layers,
+        "lr": gnn_params.lr,
+    }  # hyper-parameters to be tuned
     gnn_opts = {
         "hidden_channels": gnn_params.hid_dim,
         "num_layers": gnn_params.num_layers,
@@ -30,22 +64,27 @@ def _parse_gnn_params(gnn_params: DictConfig) -> Tuple[Dict[str, int], Dict[str,
         "epochs": gnn_params.epochs,
         "eval_steps": gnn_params.eval_steps,
     }
-    return gnn_opts, trainer_opts
+    return hp_opts, gnn_opts, trainer_opts
 
 
-def _parse_n2v_params(n2v_params: DictConfig) -> Dict[str, int]:
+def _parse_n2v_params(n2v_params: DictConfig):
+    hp_opts = {
+        "dim": n2v_params.hid_dim,
+        "window_size": n2v_params.window_size,
+        "walk_length": n2v_params.walk_length,
+    }
     n2v_opts = {
         "dim": n2v_params.hid_dim,
         "window_size": n2v_params.window_size,
         "walk_length": n2v_params.walk_length,
         "num_walks": n2v_params.num_walks,
     }
-    return n2v_opts
+    return hp_opts, n2v_opts, None
 
 
-def _parse_lp_params(lp_params: DictConfig) -> Dict[str, float]:
-    lp_opts = {"beta": lp_params.beta}
-    return lp_opts
+def _parse_lp_params(lp_params: DictConfig):
+    hp_opts = lp_opts = {"beta": lp_params.beta}
+    return hp_opts, lp_opts, None
 
 
 def _get_paths(cfg: DictConfig, opt: Optional[Dict[str, float]] = None) -> Tuple[str, str]:
@@ -83,8 +122,8 @@ def set_up_mdl(cfg: DictConfig, g, lsc, log_level="INFO"):
 
     if mdl_name in config.GNN_METHODS:
         num_tasks = lsc.size
-        gnn_opts, trainer_opts = _parse_gnn_params(cfg.gnn_params)
-        result_path, log_path = _get_paths(cfg, gnn_opts)
+        hp_opts, gnn_opts, trainer_opts = parse_params("gnn", cfg.gnn_params)
+        result_path, log_path = _get_paths(cfg, hp_opts)
         if mdl_name == "GraphSAGE":
             gnn_opts.update({"aggr": "add", "normalize": True})
 
@@ -95,8 +134,9 @@ def set_up_mdl(cfg: DictConfig, g, lsc, log_level="INFO"):
 
     elif mdl_name in config.GML_METHODS:
         feat = dense_g.mat
-        n2v_opts = _parse_n2v_params(cfg.n2v_params)
-        result_path = _get_paths(cfg, n2v_opts)[0]
+        hp_opts, n2v_opts, _ = parse_params("n2v", cfg.n2v_params)
+        # Will return n2v hp specific paths only when cfg.hp_tune=True
+        result_path = _get_paths(cfg, hp_opts)[0]
 
         # Node2vec embedding
         if mdl_name.startswith("N2V"):
@@ -117,8 +157,8 @@ def set_up_mdl(cfg: DictConfig, g, lsc, log_level="INFO"):
         mdl_trainer = SupervisedLearningTrainer(config.METRICS, log_level=log_level)
 
     elif mdl_name == "LabelProp":
-        lp_opts = _parse_lp_params(cfg.lp_params)
-        result_path = _get_paths(cfg, lp_opts)[0]
+        hp_opts, lp_opts, _ = parse_params("lp", cfg.lp_params)
+        result_path = _get_paths(cfg, hp_opts)[0]
         g = dense_g
         mdl = RandomWalkRestart(max_iter=20, warn=False, **lp_opts)
         mdl_trainer = LabelPropagationTrainer(config.METRICS, log_level=log_level)
