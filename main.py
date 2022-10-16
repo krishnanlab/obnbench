@@ -23,7 +23,6 @@ from get_data import load_data
 def parse_params(
     name: Literal["gnn", "n2v", "lp"],
     /,
-    *,
     params: DictConfig,
 ) -> Tuple[Dict[str, int], Dict[str, int], Optional[Dict[str, int]]]:
     """Parse model specific hyper parameters.
