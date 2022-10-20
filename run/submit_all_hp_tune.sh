@@ -58,8 +58,8 @@ function hp_tune_gnn {
 function hp_tune_n2v {
     for hid_dim in ${n2v_hid_dim_opts[@]}; do
         for walk_length in ${n2v_walk_length_opts[@]}; do
-            for window_size in ${n2v_walk_length_opts[@]}; do
-                jobscript="sbatch -J hp_tune-${name} -C amd20 job_template_single.sb "
+            for window_size in ${n2v_window_size_opts[@]}; do
+                jobscript="sbatch -J hp_tune-${name} -C NOAUTO:amd20 job_template_single.sb "
                 jobscript+="${script} n2v_params.hid_dim=${hid_dim} "
                 jobscript+="n2v_params.walk_length=${walk_length} n2v_params.window_size=${window_size}"
                 echo ${jobscript}
@@ -71,7 +71,7 @@ function hp_tune_n2v {
 
 function hp_tune_lp {
     for beta in ${lp_beta_opts[@]}; do
-        jobscript="sbatch -J hp_tune-${name} -C amd20 job_template_single.sb ${script} lp_params.beta=${beta}"
+        jobscript="sbatch -J hp_tune-${name} -C NOAUTO:amd20 job_template_single.sb ${script} lp_params.beta=${beta}"
         echo ${jobscript}
         eval ${jobscript}
     done
