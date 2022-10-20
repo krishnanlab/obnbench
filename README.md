@@ -65,6 +65,16 @@ sh submit_all.sh
 
 which submit all experiements as SLURM jobs to run.
 
+### Results aggregation
+
+Run the following commands to aggregate raw results into a csv file
+
+```bash
+python aggregate_results.py -m main
+# python aggregate_results.py -m hp_tune  # aggregate hyperparameter tuning results
+```
+
+The aggregated results will be saved under `aggregated_results/` by default
 
 ## Stats
 
