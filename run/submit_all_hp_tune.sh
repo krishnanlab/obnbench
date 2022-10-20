@@ -9,9 +9,9 @@ n2v_models=(N2V-LogReg N2V-SVM)
 lp_models=(LabelProp)
 gnn_models=(GCN GIN GAT GraphSAGE)
 
-gnn_lr_opts=(0.0001 0.0005 0.001 0.005 0.01)
+gnn_lr_opts=(0.001 0.005 0.01 0.05 0.1)
 gnn_hid_dim_opts=(16 32 64 128)
-gnn_num_layers_opts=(2 3 4)
+gnn_num_layers_opts=(3 4 5)
 
 n2v_hid_dim_opts=(64 128 256 512)
 n2v_walk_length_opts=(20 40 80 120 160)
@@ -27,7 +27,7 @@ function submit_job {
     name="${network,,}-${label,,}-${model,,}"
 
     script="/bin/time -v python main.py network=${network} label=${label} model=${model}"
-    script+=" out_dir=hp_tune_results hp_tune=true gnn_params.epochs=5000 gnn_params.eval_steps=20"
+    script+=" out_dir=hp_tune_results hp_tune=true gnn_params.epochs=5000 gnn_params.eval_steps=100"
 
     if [[ ${n2v_models[*]} =~ $model ]]; then
         hp_tune_n2v $script
