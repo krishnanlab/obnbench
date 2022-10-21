@@ -14,38 +14,41 @@ from pecanpy.pecanpy import PreCompFirstOrder
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import LinearSVC
 from torch_geometric import nn as pygnn
-from typing import Dict, List, Literal, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import config
 from get_data import load_data
 
 
-def parse_params(
-    name: Literal["gnn", "n2v", "lp"],
-    /,
-    params: DictConfig,
-) -> Tuple[Dict[str, int], Dict[str, int], Optional[Dict[str, int]]]:
-    """Parse model specific hyper parameters.
+def parse_params(cfg: DictConfig) -> Tuple[Dict[str, int], Dict[str, int], str, str]:
+    """Parse model specific parameters."""
+    mdl_name = cfg.model
+    optim_params = cfg.optim_params.get(mdl_name)
 
-    Args:
-        name: Name of the model class (gnn, n2v, lp).
-        params: Parameters specific to the model class to be used.
-
-    Returns:
-        Hyper parameters dictionary used for constructing result path; model
-            specific parameters; trainer specific parameters (optional).
-
-    """
-    if name == "gnn":
+    # Parse model and train parameters (hp params is for setting up  paths)
+    if mdl_name in config.GNN_METHODS:
+        params = cfg.gnn_params
         parser = _parse_gnn_params
-    elif name == "n2v":
+    elif mdl_name in config.GML_METHODS:
+        params = cfg.n2v_params
         parser = _parse_n2v_params
-    elif name == "lp":
+    elif mdl_name == "LabelProp":
+        params = cfg.lp_params
         parser = _parse_lp_params
     else:
-        raise ValueError(f"Unknown model class {name!r}")
+        raise ValueError(f"Unrecognized model option {mdl_name!r}")
 
-    return parser(params)
+    # Overwrite parameters using optimally tuned params for the model
+    if not cfg.hp_tune and not mdl_name.startswith("ADJ"):
+        nleval.logger.info(f"{cfg.hp_tune=}, overwriting model parameters using optimal params")
+        nleval.logger.info(f"  Before: {params=}")
+        params.update(optim_params or {})
+        nleval.logger.info(f"  After: {params=}")
+
+    hp_opts, mdl_opts, trainer_opts = parser(params)
+    result_path, log_path = _get_paths(cfg, hp_opts)
+
+    return mdl_opts, trainer_opts, result_path, log_path
 
 
 def _parse_gnn_params(gnn_params: DictConfig):
@@ -87,17 +90,18 @@ def _parse_lp_params(lp_params: DictConfig):
 
 
 def _get_paths(cfg: DictConfig, opt: Optional[Dict[str, float]] = None) -> Tuple[str, str]:
-    """<out_dir>/{method}/{settings}/{dataset}/{runid}"""
     # Get output file name and path
     os.makedirs(cfg.out_dir, exist_ok=True)
 
-    # Only results are saved directly under the out_dir as json
+    # Only results are saved directly under the out_dir as json, no logs
+    # <out_dir>/{network}_{label}_{model}_{runid}.json
     if not cfg.hp_tune:
         log_path = None
         exp_name = "_".join([i.lower() for i in (cfg.network, cfg.label, cfg.model)])
         result_path = os.path.join(cfg.out_dir, f"{exp_name}_{cfg.runid}.json")
 
     # Nested dir struct for organizing different hyperparameter tuning exps
+    # <out_dir>/{method}/{settings}/{dataset}/{runid}
     else:
         dataset = "_".join(i.lower() for i in (cfg.network, cfg.label))
         settings = "_".join(f"{i.replace('_', '-')}={j}" for i, j in opt.items()) if opt else "none"
@@ -118,24 +122,20 @@ def set_up_mdl(cfg: DictConfig, g, lsc, log_level="INFO"):
 
     feat = None
     dense_g = g.to_dense_graph()
+    mdl_opts, trainer_opts, result_path, log_path = parse_params(cfg)
 
     if mdl_name in config.GNN_METHODS:
         num_tasks = lsc.size
-        hp_opts, gnn_opts, trainer_opts = parse_params("gnn", cfg.gnn_params)
-        result_path, log_path = _get_paths(cfg, hp_opts)
         if mdl_name == "GraphSAGE":
-            gnn_opts.update({"aggr": "add", "normalize": True})
+            mdl_opts.update({"aggr": "add", "normalize": True})
 
-        mdl = getattr(pygnn, mdl_name)(in_channels=1, out_channels=num_tasks, **gnn_opts)
+        mdl = getattr(pygnn, mdl_name)(in_channels=1, out_channels=num_tasks, **mdl_opts)
         mdl_trainer = SimpleGNNTrainer(config.METRICS, metric_best=config.METRIC_BEST,
                                        device=config.DEVICE, log_level=log_level,
                                        log_path=log_path, **trainer_opts)
 
     elif mdl_name in config.GML_METHODS:
         feat = dense_g.mat
-        hp_opts, n2v_opts, _ = parse_params("n2v", cfg.n2v_params)
-        # Will return n2v hp specific paths only when cfg.hp_tune=True
-        result_path = _get_paths(cfg, hp_opts)[0]
 
         # Node2vec embedding
         if mdl_name.startswith("N2V"):
@@ -143,7 +143,7 @@ def set_up_mdl(cfg: DictConfig, g, lsc, log_level="INFO"):
             pecanpy_g = PreCompFirstOrder.from_mat(dense_g.mat, g.node_ids,
                                                    workers=config.NUM_WORKERS,
                                                    verbose=pecanpy_verbose)
-            feat = pecanpy_g.embed(verbose=pecanpy_verbose, **n2v_opts)
+            feat = pecanpy_g.embed(verbose=pecanpy_verbose, **mdl_opts)
         feat = FeatureVec.from_mat(feat, g.idmap)
 
         # Initialize model
@@ -156,10 +156,8 @@ def set_up_mdl(cfg: DictConfig, g, lsc, log_level="INFO"):
         mdl_trainer = SupervisedLearningTrainer(config.METRICS, log_level=log_level)
 
     elif mdl_name == "LabelProp":
-        hp_opts, lp_opts, _ = parse_params("lp", cfg.lp_params)
-        result_path = _get_paths(cfg, hp_opts)[0]
         g = dense_g
-        mdl = RandomWalkRestart(max_iter=20, warn=False, **lp_opts)
+        mdl = RandomWalkRestart(max_iter=20, warn=False, **mdl_opts)
         mdl_trainer = LabelPropagationTrainer(config.METRICS, log_level=log_level)
 
     else:
