@@ -18,3 +18,30 @@ n2v_params:
   num_walks: 10
 lp_params:
   beta: 0.85
+optim_params:
+  GAT:
+    lr: 0.001
+    hid_dim: 16
+    num_layers: 3
+  GCN:
+    lr: 0.01
+    hid_dim: 128
+    num_layers: 5
+  GIN:
+    lr: 0.001
+    hid_dim: 128
+    num_layers: 5
+  GraphSAGE:
+    lr: 0.01
+    hid_dim: 64
+    num_layers: 5
+  LabelProp:
+    beta: 0.9
+  N2V-LogReg:
+    hid_dim: 128
+    walk_length: 160
+    window_size: 12
+  N2V-SVM:
+    hid_dim: 128
+    walk_length: 160
+    window_size: 12
