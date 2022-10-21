@@ -3,7 +3,7 @@
 #SBATCH -N 1
 #SBATCH -c 1
 #SBATCH --mem=16GB
-#SBATCH -o ../slurm_history/slurm-%x-%A_%a.out
+#SBATCH -o ../slurm_history/slurm-%x-%A.out
 #SBATCH -A cmse
 #SBATCH -t 3:55:00
 
