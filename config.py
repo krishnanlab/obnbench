@@ -14,6 +14,8 @@ DATA_VERSION = "nledata-v0.1.0-dev2"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 NUM_WORKERS = numba.config.NUMBA_DEFAULT_NUM_THREADS
 
+GNN_NODE_FTRS_DIM = 32
+
 ####################
 # Experiment options
 ####################

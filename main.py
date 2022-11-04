@@ -161,16 +161,15 @@ def set_up_mdl(cfg: DictConfig, g, lsc, log_level="INFO"):
         if mdl_name == "GraphSAGE":
             mdl_opts.update({"aggr": "add", "normalize": True})
 
-        input_dim = 32
         one_hot_disc_deg = KBinsDiscretizer(
-            n_bins=input_dim,
+            n_bins=config.GNN_NODE_FTRS_DIM,
             encode="onehot-dense",
             strategy="uniform",
         ).fit_transform(np.log(dense_g.mat.sum(axis=1, keepdims=True)))
         nleval.logger.info(f"Bins stats: {one_hot_disc_deg.sum(0)}")
         feat = nleval.feature.FeatureVec.from_mat(one_hot_disc_deg, g.idmap)
 
-        mdl = GNN(dim_in=input_dim, dim_out=num_tasks, conv_name=mdl_name, conv_kwargs=mdl_opts)
+        mdl = GNN(dim_in=config.GNN_NODE_FTRS_DIM, dim_out=num_tasks, conv_name=mdl_name, conv_kwargs=mdl_opts)
 
         mdl_trainer = SimpleGNNTrainer(config.METRICS, metric_best=config.METRIC_BEST,
                                        device=config.DEVICE, log_level=log_level,
