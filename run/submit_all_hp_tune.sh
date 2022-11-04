@@ -9,9 +9,9 @@ n2v_models=(N2V-LogReg N2V-SVM)
 lp_models=(LabelProp)
 gnn_models=(GCN GIN GAT GraphSAGE)
 
-gnn_lr_opts=(0.001 0.005 0.01 0.05 0.1)
-gnn_hid_dim_opts=(16 32 64 128)
-gnn_num_layers_opts=(3 4 5)
+gnn_lr_opts=(0.001 0.01 0.1)
+gnn_hid_dim_opts=(32 64 128)
+gnn_num_layers_opts=(3 4 5 6 7)
 
 n2v_hid_dim_opts=(64 128 256 512)
 n2v_walk_length_opts=(20 40 80 120 160)

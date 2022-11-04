@@ -33,7 +33,7 @@ for network in ${networks[@]}; do
             if [[ $network == STRING ]] && [[ $model == GAT ]]; then
                 continue  # OOM on V100
             elif [[ $network == STRING ]] && [[ $model == GCN ]]; then
-                submit_job $network $label $model 2
+                submit_job $network $label $model 1  # 2
             else
                 submit_job $network $label $model 1
             fi
