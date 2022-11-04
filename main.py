@@ -3,6 +3,8 @@ import os
 
 import hydra
 import nleval
+import numpy as np
+import torch.nn as nn
 from nleval import Dataset
 from nleval.feature import FeatureVec
 from nleval.model.label_propagation import RandomWalkRestart
@@ -12,6 +14,7 @@ from nleval.util.logger import display_pbar
 from omegaconf import DictConfig, OmegaConf
 from pecanpy.pecanpy import PreCompFirstOrder
 from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import KBinsDiscretizer
 from sklearn.svm import LinearSVC
 from torch_geometric import nn as pygnn
 from typing import Dict, List, Optional, Tuple, Union
@@ -116,6 +119,35 @@ def _get_paths(cfg: DictConfig, opt: Optional[Dict[str, float]] = None) -> Tuple
     return result_path, log_path
 
 
+class GNN(nn.Module):
+
+    def __init__(
+        self,
+        dim_in: int,
+        dim_out: int,
+        conv_name: str,
+        conv_kwargs,
+        *,
+        num_pre_mp_layers: int = 1,
+        num_post_mp_layers: int = 1,
+    ):
+        super().__init__()
+        dim_hid = conv_kwargs["hidden_channels"]
+
+        self.pre_mp = pygnn.MLP(in_channels=dim_in, hidden_channels=dim_hid, out_channels=dim_hid,
+                                num_layers=num_pre_mp_layers)
+        self.conv = getattr(pygnn, conv_name)(in_channels=dim_hid, out_channels=dim_hid, jk="last", dropout=0.5,
+                                              norm=pygnn.DiffGroupNorm(dim_hid, 5), **conv_kwargs)
+        self.post_mp = pygnn.MLP(in_channels=dim_hid, hidden_channels=dim_hid, out_channels=dim_out,
+                                 num_layers=num_post_mp_layers)
+        nleval.logger.info(f"Model constructed:\n{self}")
+
+    def forward(self, x, adj):
+        for m in self.children():
+            x = m(x, adj) if isinstance(m, pygnn.models.basic_gnn.BasicGNN) else m(x)
+        return x
+
+
 def set_up_mdl(cfg: DictConfig, g, lsc, log_level="INFO"):
     """Set up model, trainer, graph, and features."""
     mdl_name = cfg.model
@@ -129,7 +161,17 @@ def set_up_mdl(cfg: DictConfig, g, lsc, log_level="INFO"):
         if mdl_name == "GraphSAGE":
             mdl_opts.update({"aggr": "add", "normalize": True})
 
-        mdl = getattr(pygnn, mdl_name)(in_channels=1, out_channels=num_tasks, **mdl_opts)
+        input_dim = 32
+        one_hot_disc_deg = KBinsDiscretizer(
+            n_bins=input_dim,
+            encode="onehot-dense",
+            strategy="uniform",
+        ).fit_transform(np.log(dense_g.mat.sum(axis=1, keepdims=True)))
+        nleval.logger.info(f"Bins stats: {one_hot_disc_deg.sum(0)}")
+        feat = nleval.feature.FeatureVec.from_mat(one_hot_disc_deg, g.idmap)
+
+        mdl = GNN(dim_in=input_dim, dim_out=num_tasks, conv_name=mdl_name, conv_kwargs=mdl_opts)
+
         mdl_trainer = SimpleGNNTrainer(config.METRICS, metric_best=config.METRIC_BEST,
                                        device=config.DEVICE, log_level=log_level,
                                        log_path=log_path, **trainer_opts)
@@ -185,6 +227,7 @@ def get_gnn_results(mdl, dataset) -> Dict[str, List[float]]:
     results = {}
     data = dataset.to_pyg_data(device=config.DEVICE)
     for metric_name, metric_func in config.METRICS.items():
+        mdl.eval()
         y_pred = mdl(data.x, data.edge_index).detach().cpu().numpy()
         y_true = dataset.y
         for mask_name in dataset.masks:

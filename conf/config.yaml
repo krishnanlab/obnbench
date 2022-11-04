@@ -8,8 +8,8 @@ log_level: INFO
 gnn_params:
   lr: 0.001
   hid_dim: 128
-  num_layers: 3
-  epochs: 30000
+  num_layers: 5
+  epochs: 20000
   eval_steps: 100
 n2v_params:
   hid_dim: 128
@@ -21,10 +21,10 @@ lp_params:
 optim_params:
   GAT:
     lr: 0.001
-    hid_dim: 16
-    num_layers: 3
+    hid_dim: 128
+    num_layers: 5
   GCN:
-    lr: 0.01
+    lr: 0.001
     hid_dim: 128
     num_layers: 5
   GIN:
@@ -32,8 +32,8 @@ optim_params:
     hid_dim: 128
     num_layers: 5
   GraphSAGE:
-    lr: 0.01
-    hid_dim: 64
+    lr: 0.001
+    hid_dim: 128
     num_layers: 5
   LabelProp:
     beta: 0.9
