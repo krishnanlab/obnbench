@@ -3,7 +3,7 @@
 mkdir -p ../slurm_history
 
 networks=(BioGRID HumanNet STRING)
-labels=(DisGeNet GOBP)
+labels=(DisGeNET GOBP)
 gml_models=(ADJ-LogReg ADJ-SVM N2V-LogReg N2V-SVM LabelProp)
 gnn_models=(GCN GIN GAT GraphSAGE)
 

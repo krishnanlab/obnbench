@@ -35,13 +35,13 @@ python get_data.py
 After setting up the data, one can run a single experiment by specifying the choices of network, label, and model:
 
 ```bash
-python main.py network=BioGRID label=DisGeNet model=GCN
+python main.py network=BioGRID label=DisGeNET model=GCN
 ```
 
 For testing with hyperparameter tuning option:
 
 ```bash
-python main.py network=BioGRID label=DisGeNet model=GCN out_dir=test gnn_params.epochs=5000 gnn_params.eval_steps=20 hp_tune=true
+python main.py network=BioGRID label=DisGeNET model=GCN out_dir=test gnn_params.epochs=5000 gnn_params.eval_steps=20 hp_tune=true
 ```
 
 The result file will be saved under the `results/` directory as a JSON file.
@@ -50,7 +50,7 @@ The file name for this particular run will be `biogrid_disgenet_gcn_0.json`.
 All available options are
 
 * `network: [BioGRID,HumanNet,STRING]`
-* `label: [DisGeNet,GOBP]`
+* `label: [DisGeNET,GOBP]`
 * `model: [ADJ-LogReg,ADJ-SVM,N2V-LogReg,N2V-SVM,GCN,GIN,GAT,GraphSAGE]`
 
 ### Submit batch jobs
@@ -90,7 +90,7 @@ The aggregated results will be saved under `aggregated_results/` by default
 
 **Note:** To make the comparison against label-rate from other benchmarks that are in multi-class settings instead of multi-label, we consider the notion of *effective class*, where each unique combinations of labels is considered as a "class".
 
-#### DisGeNet
+#### DisGeNET
 
 Total number of (effective) classes: 123 (2,947)
 

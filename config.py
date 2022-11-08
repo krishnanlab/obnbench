@@ -20,7 +20,7 @@ GNN_NODE_FTRS_DIM = 32
 # Experiment options
 ####################
 NETWORKS = ["STRING", "BioGRID", "HumanNet"]
-LABELS = ["DisGeNet", "GOBP"]
+LABELS = ["DisGeNET", "GOBP"]
 GNN_METHODS = ["GCN", "GAT", "GIN", "GraphSAGE"]
 GML_METHODS = ["ADJ-LogReg", "ADJ-SVM", "N2V-LogReg", "N2V-SVM"]
 ALL_METHODS = GNN_METHODS + GML_METHODS + ["LabelProp"]
