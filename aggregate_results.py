@@ -22,7 +22,7 @@ def parse_args() -> Tuple[argparse.Namespace, logging.Logger]:
     parser.add_argument("-p", "--results_path", default="auto",
                         help="Path to the results directory, infer from 'mode' if set to 'auto'.")
     parser.add_argument("-n", "--dry_run", action="store_true",
-                        help="Agggregate and print results, but do not save to disk.")
+                        help="Aggregate and print results, but do not save to disk.")
     parser.add_argument("-o", "--output_path", default="aggregated_results/")
     parser.add_argument("-v", "--log_level", type=str, default="INFO")
     parser.add_argument("--methods", type=str, nargs="+", default=config.ALL_METHODS,
