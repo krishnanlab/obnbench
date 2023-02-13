@@ -1,0 +1,10 @@
+---
+homedir: .
+data_version: nledata-v0.1.0-dev2
+labels:
+  - DisGeNET
+  - GOBP
+networks:
+  - STRING
+  - BioGRID
+  - HumanNet

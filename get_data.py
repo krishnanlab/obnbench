@@ -1,51 +1,31 @@
+from pathlib import Path
 from typing import Dict, List, Tuple
 
+import hydra
 import numpy as np
 import nleval
 import pandas as pd
 from nleval import data, label
 from nleval.util.converter import GenePropertyConverter
+from omegaconf import DictConfig, OmegaConf
 
-import config
+from utils import get_data_dir, get_gene_list_path, normalize_path
 
 
-def load_data(network_name: str, label_name: str, log_level: str = "INFO"):
-    g = getattr(data, network_name)(config.DATA_DIR, version=config.DATA_VERSION)
+def load_data(
+    homedir: Path,
+    network_name: str,
+    label_name: str,
+    log_level: str = "INFO",
+):
+    datadir = get_data_dir(homedir)
 
-    splitter, filter_ = get_splitter_filter()
-    lsc = getattr(data, label_name)(config.DATA_DIR, version=config.DATA_VERSION,
-                                    transform=filter_)
+    g = getattr(data, network_name)(datadir)
+
+    splitter, filter_ = get_splitter_filter(homedir)
+    lsc = getattr(data, label_name)(datadir, transform=filter_)
 
     return g, lsc, splitter
-
-
-def setup_data():
-    common_genes = None
-    for network_name in config.NETWORKS:
-        g = getattr(data, network_name)(config.DATA_DIR, version=config.DATA_VERSION)
-        print(
-            f"{network_name:<15}# nodes = {g.num_nodes:,}, # edges = {g.num_edges:,}, "
-            f"edge density = {g.num_edges / g.num_nodes / (g.num_nodes - 1):.4f}",
-        )
-
-        if common_genes is None:
-            common_genes = set(g.node_ids)
-        else:
-            common_genes = common_genes.intersection(set(g.node_ids))
-
-    nleval.logger.info(f"Exporting {len(common_genes):,} common genes to "
-                       f"{config.GENE_LIST_PATH}")
-    with open(config.GENE_LIST_PATH, "w") as f:
-        for i in sorted(common_genes):
-            f.write(f"{i}\n")
-
-    splitter, filter_ = get_splitter_filter()
-    for label_name in config.LABELS:
-        lsc = getattr(data, label_name)(config.DATA_DIR, transform=filter_,
-                                        version=config.DATA_VERSION)
-
-        nleval.logger.info(f"Start obtaining stats for {label_name}")
-        print_label_stats(lsc, splitter, common_genes)
 
 
 def print_label_stats(lsc, splitter, common_genes):
@@ -99,15 +79,18 @@ def print_label_stats(lsc, splitter, common_genes):
     nleval.logger.info(f"\n{stats_df}")
 
 
-def get_splitter_filter(log_level: str = "INFO"):
-    pubmedcnt_converter = GenePropertyConverter(config.DATA_DIR, name="PubMedCount")
+def get_splitter_filter(homedir: Path, log_level: str = "INFO"):
+    datadir = get_data_dir(homedir)
+    gene_list_path = get_gene_list_path(homedir)
+
+    pubmedcnt_converter = GenePropertyConverter(datadir, name="PubMedCount")
     splitter = label.split.RatioPartition(
         *(0.6, 0.2, 0.2),
         ascending=False,
         property_converter=pubmedcnt_converter,
     )
 
-    common_genes = np.loadtxt(config.GENE_LIST_PATH, dtype=str).tolist()
+    common_genes = np.loadtxt(gene_list_path, dtype=str).tolist()
     filter_ = label.filters.Compose(
         label.filters.EntityExistenceFilter(common_genes, log_level=log_level),
         label.filters.LabelsetRangeFilterSize(min_val=50, log_level=log_level),
@@ -118,5 +101,40 @@ def get_splitter_filter(log_level: str = "INFO"):
     return splitter, filter_
 
 
+@hydra.main(version_base=None, config_path="conf", config_name="data_config")
+def main(cfg: DictConfig):
+    nleval.logger.info(f"Running with settings:\n{OmegaConf.to_yaml(cfg)}")
+
+    cfg.homedir = normalize_path(cfg.homedir)
+    datadir = get_data_dir(cfg.homedir)
+    gene_list_path = get_gene_list_path(cfg.homedir)
+
+    common_genes = None
+    for network_name in cfg.networks:
+        g = getattr(data, network_name)(datadir, version=cfg.data_version)
+        print(
+            f"{network_name:<15}# nodes = {g.num_nodes:,}, # edges = {g.num_edges:,}, "
+            f"edge density = {g.num_edges / g.num_nodes / (g.num_nodes - 1):.4f}",
+        )
+
+        if common_genes is None:
+            common_genes = set(g.node_ids)
+        else:
+            common_genes = common_genes.intersection(set(g.node_ids))
+
+    nleval.logger.info(f"Exporting {len(common_genes):,} common genes {gene_list_path}")
+    with open(gene_list_path, "w") as f:
+        for i in sorted(common_genes):
+            f.write(f"{i}\n")
+
+    splitter, filter_ = get_splitter_filter(cfg.homedir)
+    for label_name in cfg.labels:
+        lsc = getattr(data, label_name)(datadir, transform=filter_,
+                                        version=cfg.data_version)
+
+        nleval.logger.info(f"Start obtaining stats for {label_name}")
+        print_label_stats(lsc, splitter, common_genes)
+
+
 if __name__ == "__main__":
-    setup_data()
+    main()

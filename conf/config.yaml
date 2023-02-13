@@ -1,16 +1,22 @@
+---
+homedir: .
+device: auto
 network: ???
 label: ???
 model: ???
 runid: 0
+num_workers: 0  # 0 uses all available threads
 out_dir: results
 hp_tune: false
 log_level: INFO
+metric_best: log2pr
 gnn_params:
   lr: 0.001
   hid_dim: 128
   num_layers: 5
   epochs: 20000
   eval_steps: 100
+  node_feat_dim: 32
 n2v_params:
   hid_dim: 128
   walk_length: 80
