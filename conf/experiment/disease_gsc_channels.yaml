@@ -1,0 +1,17 @@
+# @package _global_
+---
+homedir: experiments/disease_gsc_channels
+data_version: nledata-v0.1.0-dev5
+labels:
+  - DisGeNET
+  - DisGeNET_Curated
+  - DisGeNET_BEFREE
+  - DisGeNET_Animal
+  - DisGeNET_GWAS
+  - DISEASES
+  - DISEASES_ExperimentsFiltered
+  - DISEASES_KnowledgeFiltered
+  - DISEASES_TextminingFiltered
+  - HPO
+networks:
+  - HumanNet
