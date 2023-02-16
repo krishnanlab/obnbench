@@ -100,21 +100,22 @@ def _parse_lp_params(lp_params: DictConfig):
 
 def _get_paths(cfg: DictConfig, opt: Optional[Dict[str, float]] = None) -> Tuple[str, str]:
     # Get output file name and path
-    os.makedirs(cfg.out_dir, exist_ok=True)
+    out_dir = os.path.join(cfg.homedir, cfg.out_dir)
+    os.makedirs(out_dir, exist_ok=True)
 
     # Only results are saved directly under the out_dir as json, no logs
     # <out_dir>/{network}_{label}_{model}_{runid}.json
     if not cfg.hp_tune:
         log_path = None
         exp_name = "_".join([i.lower() for i in (cfg.network, cfg.label, cfg.model)])
-        result_path = os.path.join(cfg.out_dir, f"{exp_name}_{cfg.runid}.json")
+        result_path = os.path.join(cfg.homedir, out_dir, f"{exp_name}_{cfg.runid}.json")
 
     # Nested dir struct for organizing different hyperparameter tuning exps
     # <out_dir>/{method}/{settings}/{dataset}/{runid}
     else:
         dataset = "_".join(i.lower() for i in (cfg.network, cfg.label))
         settings = "_".join(f"{i.replace('_', '-')}={j}" for i, j in opt.items()) if opt else "none"
-        out_path = os.path.join(cfg.out_dir, cfg.model, settings, dataset, str(cfg.runid))
+        out_path = os.path.join(cfg.homedir, out_dir, cfg.model, settings, dataset, str(cfg.runid))
         os.makedirs(out_path, exist_ok=True)
 
         result_path = os.path.join(out_path, "score.json")
