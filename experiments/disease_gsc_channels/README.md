@@ -33,11 +33,13 @@ python aggregate_results.py -d -m main -b experiments/disease_gsc_channels
       *experiments* > *inferred* > *curated* > *text-mined*
     - TODOs
       - [x] Fix `n2v` results.
-      - [ ] Finish running `DisGeNET_BEFREE` experiments using `ADJ-LOGREG`.
+      - [x] Finish running `DisGeNET_BEFREE` experiments using `ADJ-LOGREG`.
       - [ ] Tune `GAT` to get more reasonable performance (now it is the worst
         performing GNN).
 
 ## Logs notes
+- [logs/aggregate_results_2023-02-16_2.txt](logs/aggregate_results_2023-02-16_1.txt)
+  Aggregate results after the reran `DisGeNET_BEFREE` finished (~4.5 hours).
 - [logs/aggregate_results_2023-02-16_1.txt](logs/aggregate_results_2023-02-16_1.txt)
   Aggregate results after the patched `n2v` runs are finished (previously
   bugged due to incorrectly set `num_workers` in `w2v`).

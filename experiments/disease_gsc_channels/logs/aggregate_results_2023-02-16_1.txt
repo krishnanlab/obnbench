@@ -1,0 +1,37 @@
+[INFO][nleval][parse_args] Settings:
+{'basedir': 'experiments/disease_gsc_channels',
+ 'dry_run': False,
+ 'log_level': 'INFO',
+ 'methods': ['GCN',
+             'GAT',
+             'GIN',
+             'GraphSAGE',
+             'ADJ-LogReg',
+             'ADJ-SVM',
+             'N2V-LogReg',
+             'N2V-SVM',
+             'LabelProp'],
+ 'mode': 'main',
+ 'output_path': 'aggregated_results/',
+ 'results_path': 'auto',
+ 'suffix_date': True}
+[INFO][nleval][main] Raw results path to aggregate from: results
+[INFO][nleval][main] Results will be aggregated from experiments/disease_gsc_channels/results
+[INFO][nleval][main] Start aggregating results for methods: ['GCN', 'GAT', 'GIN', 'GraphSAGE', 'ADJ-LogReg', 'ADJ-SVM', 'N2V-LogReg', 'N2V-SVM', 'LabelProp']
+  0%|          | 0/446 [00:00<?, ?it/s]  6%|▌         | 25/446 [00:00<00:01, 246.72it/s] 11%|█         | 50/446 [00:00<00:01, 245.37it/s] 17%|█▋        | 76/446 [00:00<00:01, 250.40it/s] 23%|██▎       | 102/446 [00:00<00:01, 253.01it/s] 29%|██▊       | 128/446 [00:00<00:01, 254.04it/s] 35%|███▍      | 154/446 [00:00<00:01, 255.93it/s] 40%|████      | 180/446 [00:00<00:01, 255.52it/s] 46%|████▌     | 206/446 [00:00<00:00, 251.49it/s] 52%|█████▏    | 233/446 [00:00<00:00, 255.64it/s] 58%|█████▊    | 260/446 [00:01<00:00, 258.25it/s] 64%|██████▍   | 287/446 [00:01<00:00, 261.05it/s] 70%|███████   | 314/446 [00:01<00:00, 260.03it/s] 76%|███████▋  | 341/446 [00:01<00:00, 257.85it/s] 83%|████████▎ | 368/446 [00:01<00:00, 258.53it/s] 89%|████████▊ | 395/446 [00:01<00:00, 261.52it/s] 95%|█████████▍| 422/446 [00:01<00:00, 259.16it/s]100%|██████████| 446/446 [00:01<00:00, 257.27it/s]
+[INFO][nleval][main] Aggregated results:
+        task_name  train_log2pr  val_log2pr  ...     label  method  runid
+0   MONDO:0002245      1.094043    0.484935  ...  disgenet     gat      2
+1   MONDO:0001703      2.426843    2.917937  ...  disgenet     gat      2
+2   MONDO:0000066      6.270823    5.152112  ...  disgenet     gat      2
+3   MONDO:0000087      1.402420    1.446807  ...  disgenet     gat      2
+4   MONDO:0019040      1.492270    1.684242  ...  disgenet     gat      2
+..            ...           ...         ...  ...       ...     ...    ...
+90  MONDO:0015244      5.208145    1.587073  ...  diseases     gcn      4
+91  MONDO:0016297      6.086409   -0.177010  ...  diseases     gcn      4
+92  MONDO:0020133      7.107904    2.258830  ...  diseases     gcn      4
+93  MONDO:0019042      3.040891    0.732435  ...  diseases     gcn      4
+94  MONDO:0024322      5.120488    3.806064  ...  diseases     gcn      4
+
+[65978 rows x 11 columns]
+[INFO][nleval][main] Results saved to experiments/disease_gsc_channels/aggregated_results/main_results_2023-02-16.csv
