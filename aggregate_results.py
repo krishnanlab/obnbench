@@ -18,6 +18,7 @@ def parse_args() -> Tuple[argparse.Namespace, logging.Logger]:
     global logger
 
     parser = argparse.ArgumentParser()
+    parser.add_argument("-b", "--basedir", default=".", help="Base directory")
     parser.add_argument("-m", "--mode", required=True, choices=["main", "hp_tune"],
                         help="'main' and 'hp' for main and hyperparameter tuning experiments.")
     parser.add_argument("-p", "--results_path", default="auto",
@@ -89,6 +90,8 @@ def main():
     dry_run = args.dry_run
     methods = args.methods
     mode = args.mode
+    suffix_date = args.suffix_date
+    basedir = args.basedir
     output_path = args.output_path
     results_path = args.results_path
 
@@ -97,20 +100,24 @@ def main():
         results_path = "results" if mode == "main" else "hp_tune_results"
     logger.info(f"Raw results path to aggregate from: {results_path}")
 
-    # Get aggregation function
-    agg_func = _agg_main_results if mode == "main" else _agg_hp_results
+    # Attach base directory to paths
+    output_path = osp.join(basedir, output_path)
+    results_path = osp.join(basedir, results_path)
+    os.makedirs(output_path, exist_ok=True)
+    os.makedirs(results_path, exist_ok=True)
 
-    # Aggregate results
+    # Get aggregation function and aggregate results
+    agg_func = _agg_main_results if mode == "main" else _agg_hp_results
+    logger.info(f"Results will be aggregated from {results_path}")
     logger.info(f"Start aggregating results for methods: {methods}")
     results_df = agg_func(results_path, methods)
     logger.info(f"Aggregated results:\n{results_df}")
 
-    # Save or print results
-    os.makedirs(output_path, exist_ok=True)
-    suffix = ""
-    if args.suffix_date:
-        suffix = f"_{datetime.now().strftime('%Y-%m-%d')}"
+    # Construct output path
+    suffix = f"_{datetime.now().strftime('%Y-%m-%d')}" if suffix_date else ""
     path = osp.join(output_path, f"{mode}_results{suffix}.csv")
+
+    # Save or print results
     if dry_run:
         logger.info(f"Results will be saved to {path}")
     else:
