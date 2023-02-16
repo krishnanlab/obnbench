@@ -10,7 +10,7 @@ import pandas as pd
 from tqdm import tqdm
 from nleval.util.logger import get_logger
 
-import config
+from main import ALL_METHODS
 
 
 def parse_args() -> Tuple[argparse.Namespace, logging.Logger]:
@@ -25,7 +25,7 @@ def parse_args() -> Tuple[argparse.Namespace, logging.Logger]:
                         help="Aggregate and print results, but do not save to disk.")
     parser.add_argument("-o", "--output_path", default="aggregated_results/")
     parser.add_argument("-v", "--log_level", type=str, default="INFO")
-    parser.add_argument("--methods", type=str, nargs="+", default=config.ALL_METHODS,
+    parser.add_argument("--methods", type=str, nargs="+", default=ALL_METHODS,
                         help="List of methods to consider when aggregating results.")
 
     # Parse arguments from command line and set up logger
@@ -44,6 +44,16 @@ def _agg_main_results(
     target_methods_lower = list(map(str.lower, target_methods))
     for path in tqdm(glob(osp.join(results_path, "*.json"))):
         terms = osp.splitext(osp.split(path)[1])[0].split("_")  # network, label, method, runid
+
+        # Some label names contains, e.g., disgenet_curated
+        # These would then become [network, labelpart1, labelpart2, method, runid]
+        # We want to combine the label parts into a single string again
+        terms = [
+            terms[0],
+            "_".join(terms[1:-2]),
+            *terms[-2:],
+        ]
+
         if terms[2] not in target_methods_lower:
             logger.warning(f"Skipping {terms[2]}: {path}")
 
