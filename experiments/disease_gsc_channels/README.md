@@ -38,6 +38,11 @@ python aggregate_results.py -d -m main -b experiments/disease_gsc_channels
         performing GNN).
 
 ## Logs notes
+- [logs/get_data_2023-02-16.txt](logs/get_data_2023-02-16.txt)
+  Update experiment setting: add `ConsensusPathDB` network in addition to
+  `HumanNet`. The goal is to see when using `ConsensusPathDB` as the underlying
+  network data, if the network-based machine learning methods can better
+  capture `curated` annotations than the `text-mined` annotations.
 - [logs/aggregate_results_2023-02-16_2.txt](logs/aggregate_results_2023-02-16_1.txt)
   Aggregate results after the reran `DisGeNET_BEFREE` finished (~4.5 hours).
 - [logs/aggregate_results_2023-02-16_1.txt](logs/aggregate_results_2023-02-16_1.txt)
