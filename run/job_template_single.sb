@@ -7,7 +7,8 @@
 #SBATCH -A cmse
 #SBATCH -t 3:55:00
 
-conda activate nle
+# NOTE: nle-dev-pyg is for dev, use nle once the experiment design is settled
+conda activate nle-dev-pyg
 
 cd $SLURM_SUBMIT_DIR
 cd ..
