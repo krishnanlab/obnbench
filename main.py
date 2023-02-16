@@ -7,6 +7,7 @@ import numpy as np
 import torch.nn as nn
 from nleval import Dataset
 from nleval.feature import FeatureVec
+from nleval.metric import auroc, log2_auprc_prior
 from nleval.model.label_propagation import RandomWalkRestart
 from nleval.model_trainer.gnn import SimpleGNNTrainer
 from nleval.model_trainer import SupervisedLearningTrainer, LabelPropagationTrainer
@@ -19,8 +20,13 @@ from sklearn.svm import LinearSVC
 from torch_geometric import nn as pygnn
 from typing import Dict, List, Optional, Tuple, Union
 
-import config
 from get_data import load_data
+from utils import get_device, get_num_workers, normalize_path
+
+GNN_METHODS = ["GCN", "GAT", "GIN", "GraphSAGE"]
+GML_METHODS = ["ADJ-LogReg", "ADJ-SVM", "N2V-LogReg", "N2V-SVM"]
+ALL_METHODS = GNN_METHODS + GML_METHODS + ["LabelProp"]
+METRICS = {"log2pr": log2_auprc_prior, "auroc": auroc}
 
 
 def parse_params(cfg: DictConfig) -> Tuple[Dict[str, int], Dict[str, int], str, str]:
@@ -29,10 +35,10 @@ def parse_params(cfg: DictConfig) -> Tuple[Dict[str, int], Dict[str, int], str, 
     optim_params = cfg.optim_params.get(mdl_name)
 
     # Parse model and train parameters (hp params is for setting up  paths)
-    if mdl_name in config.GNN_METHODS:
+    if mdl_name in GNN_METHODS:
         params = cfg.gnn_params
         parser = _parse_gnn_params
-    elif mdl_name in config.GML_METHODS:
+    elif mdl_name in GML_METHODS:
         params = cfg.n2v_params
         parser = _parse_n2v_params
     elif mdl_name == "LabelProp":
@@ -94,21 +100,22 @@ def _parse_lp_params(lp_params: DictConfig):
 
 def _get_paths(cfg: DictConfig, opt: Optional[Dict[str, float]] = None) -> Tuple[str, str]:
     # Get output file name and path
-    os.makedirs(cfg.out_dir, exist_ok=True)
+    out_dir = os.path.join(cfg.homedir, cfg.out_dir)
+    os.makedirs(out_dir, exist_ok=True)
 
     # Only results are saved directly under the out_dir as json, no logs
     # <out_dir>/{network}_{label}_{model}_{runid}.json
     if not cfg.hp_tune:
         log_path = None
         exp_name = "_".join([i.lower() for i in (cfg.network, cfg.label, cfg.model)])
-        result_path = os.path.join(cfg.out_dir, f"{exp_name}_{cfg.runid}.json")
+        result_path = os.path.join(cfg.homedir, out_dir, f"{exp_name}_{cfg.runid}.json")
 
     # Nested dir struct for organizing different hyperparameter tuning exps
     # <out_dir>/{method}/{settings}/{dataset}/{runid}
     else:
         dataset = "_".join(i.lower() for i in (cfg.network, cfg.label))
         settings = "_".join(f"{i.replace('_', '-')}={j}" for i, j in opt.items()) if opt else "none"
-        out_path = os.path.join(cfg.out_dir, cfg.model, settings, dataset, str(cfg.runid))
+        out_path = os.path.join(cfg.homedir, out_dir, cfg.model, settings, dataset, str(cfg.runid))
         os.makedirs(out_path, exist_ok=True)
 
         result_path = os.path.join(out_path, "score.json")
@@ -151,38 +158,39 @@ class GNN(nn.Module):
 def set_up_mdl(cfg: DictConfig, g, lsc, log_level="INFO"):
     """Set up model, trainer, graph, and features."""
     mdl_name = cfg.model
+    feat_dim = cfg.gnn_params.node_feat_dim
 
     feat = None
     dense_g = g.to_dense_graph()
     mdl_opts, trainer_opts, result_path, log_path = parse_params(cfg)
 
-    if mdl_name in config.GNN_METHODS:
+    if mdl_name in GNN_METHODS:
         num_tasks = lsc.size
         if mdl_name == "GraphSAGE":
             mdl_opts.update({"aggr": "add", "normalize": True})
 
         one_hot_disc_deg = KBinsDiscretizer(
-            n_bins=config.GNN_NODE_FTRS_DIM,
+            n_bins=feat_dim,
             encode="onehot-dense",
             strategy="uniform",
         ).fit_transform(np.log(dense_g.mat.sum(axis=1, keepdims=True)))
         nleval.logger.info(f"Bins stats: {one_hot_disc_deg.sum(0)}")
         feat = nleval.feature.FeatureVec.from_mat(one_hot_disc_deg, g.idmap)
 
-        mdl = GNN(dim_in=config.GNN_NODE_FTRS_DIM, dim_out=num_tasks, conv_name=mdl_name, conv_kwargs=mdl_opts)
+        mdl = GNN(dim_in=feat_dim, dim_out=num_tasks, conv_name=mdl_name, conv_kwargs=mdl_opts)
 
-        mdl_trainer = SimpleGNNTrainer(config.METRICS, metric_best=config.METRIC_BEST,
-                                       device=config.DEVICE, log_level=log_level,
+        mdl_trainer = SimpleGNNTrainer(METRICS, metric_best=cfg.metric_best,
+                                       device=cfg.device, log_level=log_level,
                                        log_path=log_path, **trainer_opts)
 
-    elif mdl_name in config.GML_METHODS:
+    elif mdl_name in GML_METHODS:
         feat = dense_g.mat
 
         # Node2vec embedding
         if mdl_name.startswith("N2V"):
             pecanpy_verbose = display_pbar(log_level)
             pecanpy_g = PreCompFirstOrder.from_mat(dense_g.mat, g.node_ids,
-                                                   workers=config.NUM_WORKERS,
+                                                   workers=cfg.num_workers,
                                                    verbose=pecanpy_verbose)
             feat = pecanpy_g.embed(verbose=pecanpy_verbose, **mdl_opts)
         feat = FeatureVec.from_mat(feat, g.idmap)
@@ -194,12 +202,12 @@ def set_up_mdl(cfg: DictConfig, g, lsc, log_level="INFO"):
             mdl = LinearSVC(penalty="l2", max_iter=2000)
         else:
             raise ValueError(f"Unrecognized model option {mdl_name!r}")
-        mdl_trainer = SupervisedLearningTrainer(config.METRICS, log_level=log_level)
+        mdl_trainer = SupervisedLearningTrainer(METRICS, log_level=log_level)
 
     elif mdl_name == "LabelProp":
         g = dense_g
         mdl = RandomWalkRestart(max_iter=20, warn=False, **mdl_opts)
-        mdl_trainer = LabelPropagationTrainer(config.METRICS, log_level=log_level)
+        mdl_trainer = LabelPropagationTrainer(METRICS, log_level=log_level)
 
     else:
         raise ValueError(f"Unrecognized model option {mdl_name!r}")
@@ -221,11 +229,11 @@ def results_to_json(
     return results_json
 
 
-def get_gnn_results(mdl, dataset) -> Dict[str, List[float]]:
+def get_gnn_results(mdl, dataset, device) -> Dict[str, List[float]]:
     """Generate final results for the GNN model."""
     results = {}
-    data = dataset.to_pyg_data(device=config.DEVICE)
-    for metric_name, metric_func in config.METRICS.items():
+    data = dataset.to_pyg_data(device=device)
+    for metric_name, metric_func in METRICS.items():
         mdl.eval()
         y_pred = mdl(data.x, data.edge_index).detach().cpu().numpy()
         y_true = dataset.y
@@ -238,18 +246,22 @@ def get_gnn_results(mdl, dataset) -> Dict[str, List[float]]:
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg: DictConfig):
-    nleval.logger.info(f"Runing with settings:\n{OmegaConf.to_yaml(cfg)}")
+    nleval.logger.info(f"Running with settings:\n{OmegaConf.to_yaml(cfg)}")
+
+    cfg.homedir = normalize_path(cfg.homedir)
+    cfg.device = get_device(cfg.device)
+    cfg.num_workers = get_num_workers(cfg.num_workers)
 
     # Load data
-    g, lsc, splitter = load_data(cfg.network, cfg.label, cfg.log_level)
+    g, lsc, splitter = load_data(cfg.homedir, cfg.network, cfg.label, cfg.log_level)
     mdl, mdl_trainer, g, feat, result_path = set_up_mdl(cfg, g, lsc, cfg.log_level)
     dataset = Dataset(graph=g, feature=feat, label=lsc, splitter=splitter)
     nleval.logger.info(lsc.stats())
 
     # Train and evaluat model
-    if cfg.model in config.GNN_METHODS:
+    if cfg.model in GNN_METHODS:
         mdl_trainer.train(mdl, dataset)
-        results = get_gnn_results(mdl, dataset)
+        results = get_gnn_results(mdl, dataset, cfg.device)
     else:
         results = mdl_trainer.eval_multi_ovr(mdl, dataset)
 

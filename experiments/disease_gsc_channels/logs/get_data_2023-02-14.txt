@@ -1,0 +1,550 @@
+[INFO][nleval][main] Running with settings:
+homedir: experiments/disease_gsc_channels
+data_version: nledata-v0.1.0-dev4
+labels:
+- DisGeNET
+- DisGeNET_Curated
+- DisGeNET_BEFREE
+- DisGeNET_Animal
+- DisGeNET_GWAS
+- DISEASES
+- DISEASES_ExperimentsFiltered
+- DISEASES_KnowledgeFiltered
+- DISEASES_TextminingFiltered
+- HPO
+networks:
+- STRING
+
+[INFO][nleval][normalize_path] Normlized path: /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels
+[INFO][2023-02-14 12:45:42,648][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/STRING/processed/data.npz
+STRING         # nodes = 18,480, # edges = 11,019,492, edge density = 0.0323
+[INFO][nleval][main] Exporting 18,480 common genes /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/genes.txt
+[INFO][nleval.GenePropertyConverter][_load_cache] Loaded gene conversion cache /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/.cache/geneprop_convert-PubMedCount.json
+[INFO][2023-02-14 12:45:59,809][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET/processed/data.gmt
+[INFO][2023-02-14 12:46:01,088][base][_apply_transform] Loading cached transformed data from /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET/processed/.cache/e1fc4537feb8e66aef1ad224e45c22d8/data.gmt
+[INFO][2023-02-14 12:46:01,088][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET/processed/.cache/e1fc4537feb8e66aef1ad224e45c22d8/data.gmt
+[INFO][nleval][main] Start obtaining stats for DisGeNET
+[INFO][nleval][print_label_stats] Total number of classes: 208
+[INFO][nleval][print_label_stats] Total number of effective classes: 4,960
+[INFO][nleval][print_label_stats]
+       Label rate  Number of examples per class (avg)  Number of examples per class (std)  Effective number of examples per class (avg)  Effective number of examples per class (std)
+train    0.262067                          190.375000                          108.446299                                      0.976411                                      2.085000
+val      0.087392                           41.971154                           26.886498                                      0.325605                                      1.082033
+test     0.087392                           27.341346                           17.079110                                      0.325605                                      1.767604
+[INFO][2023-02-14 12:46:01,859][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET_Curated/processed/data.gmt
+[INFO][2023-02-14 12:46:02,855][base][_apply_transform] Loading cached transformed data from /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET_Curated/processed/.cache/e1fc4537feb8e66aef1ad224e45c22d8/data.gmt
+[INFO][2023-02-14 12:46:02,856][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET_Curated/processed/.cache/e1fc4537feb8e66aef1ad224e45c22d8/data.gmt
+[INFO][nleval][main] Start obtaining stats for DisGeNET_Curated
+[INFO][nleval][print_label_stats] Total number of classes: 133
+[INFO][nleval][print_label_stats] Total number of effective classes: 3,339
+[INFO][nleval][print_label_stats]
+       Label rate  Number of examples per class (avg)  Number of examples per class (std)  Effective number of examples per class (avg)  Effective number of examples per class (std)
+train    0.209794                          160.774436                          109.853396                                      1.161126                                      2.786789
+val      0.069968                           34.812030                           24.984552                                      0.387242                                      1.487927
+test     0.069968                           28.909774                           20.019712                                      0.387242                                      1.981518
+[INFO][2023-02-14 12:46:03,378][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET_BEFREE/processed/data.gmt
+Error executing job with overrides: ['+experiment=disease_gsc_channels']
+Traceback (most recent call last):
+  File "/mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/get_data.py", line 132, in main
+    lsc = getattr(data, label_name)(datadir, transform=filter_,
+  File "/mnt/ufs18/home-026/liurenmi/repo/NetworkLearningEval/src/nleval/util/registers.py", line 30, in __init__
+    super().__init__(*args, **overload_init_kwargs, **kwargs)
+  File "/mnt/ufs18/home-026/liurenmi/repo/NetworkLearningEval/src/nleval/data/annotated_ontology/disgenet.py", line 33, in __init__
+    super().__init__(
+  File "/mnt/ufs18/home-026/liurenmi/repo/NetworkLearningEval/src/nleval/data/annotated_ontology/base.py", line 30, in __init__
+    super().__init__(root, **kwargs)
+  File "/mnt/ufs18/home-026/liurenmi/repo/NetworkLearningEval/src/nleval/data/base.py", line 102, in __init__
+    self._apply_transform(transform)
+  File "/mnt/ufs18/home-026/liurenmi/repo/NetworkLearningEval/src/nleval/data/base.py", line 343, in _apply_transform
+    os.makedirs(cache_dir)
+  File "/mnt/home/liurenmi/software/anaconda3/envs/nle-dev-pyg/lib/python3.9/os.py", line 225, in makedirs
+    mkdir(name, mode)
+FileExistsError: [Errno 17] File exists: '/mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET_BEFREE/processed/.cache/e1fc4537feb8e66aef1ad224e45c22d8'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+(nle-dev-pyg) -bash-4.2$ nvim
+(nle-dev-pyg) -bash-4.2$ python get_data.py +experiment=disease_gsc_channels
+[INFO][nleval][main] Running with settings:
+homedir: experiments/disease_gsc_channels
+data_version: nledata-v0.1.0-dev4
+labels:
+- DisGeNET
+- DisGeNET_Curated
+- DisGeNET_BEFREE
+- DisGeNET_Animal
+- DisGeNET_GWAS
+- DISEASES
+- DISEASES_ExperimentsFiltered
+- DISEASES_KnowledgeFiltered
+- DISEASES_TextminingFiltered
+- HPO
+networks:
+- STRING
+
+[INFO][nleval][normalize_path] Normlized path: /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels
+[INFO][2023-02-14 12:47:06,865][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/STRING/processed/data.npz
+STRING         # nodes = 18,480, # edges = 11,019,492, edge density = 0.0323
+[INFO][nleval][main] Exporting 18,480 common genes /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/genes.txt
+[INFO][nleval.GenePropertyConverter][_load_cache] Loaded gene conversion cache /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/.cache/geneprop_convert-PubMedCount.json
+[INFO][2023-02-14 12:47:23,095][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET/processed/data.gmt
+[INFO][2023-02-14 12:47:24,145][base][_apply_transform] Loading cached transformed data from /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET/processed/.cache/e1fc4537feb8e66aef1ad224e45c22d8/data.gmt
+[INFO][2023-02-14 12:47:24,145][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET/processed/.cache/e1fc4537feb8e66aef1ad224e45c22d8/data.gmt
+[INFO][nleval][main] Start obtaining stats for DisGeNET
+[INFO][nleval][print_label_stats] Total number of classes: 208
+[INFO][nleval][print_label_stats] Total number of effective classes: 4,960
+[INFO][nleval][print_label_stats]
+       Label rate  Number of examples per class (avg)  Number of examples per class (std)  Effective number of examples per class (avg)  Effective number of examples per class (std)
+train    0.262067                          190.375000                          108.446299                                      0.976411                                      2.085000
+val      0.087392                           41.971154                           26.886498                                      0.325605                                      1.082033
+test     0.087392                           27.341346                           17.079110                                      0.325605                                      1.767604
+[INFO][2023-02-14 12:47:24,785][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET_Curated/processed/data.gmt
+[INFO][2023-02-14 12:47:25,582][base][_apply_transform] Loading cached transformed data from /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET_Curated/processed/.cache/e1fc4537feb8e66aef1ad224e45c22d8/data.gmt
+[INFO][2023-02-14 12:47:25,582][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET_Curated/processed/.cache/e1fc4537feb8e66aef1ad224e45c22d8/data.gmt
+[INFO][nleval][main] Start obtaining stats for DisGeNET_Curated
+[INFO][nleval][print_label_stats] Total number of classes: 133
+[INFO][nleval][print_label_stats] Total number of effective classes: 3,339
+[INFO][nleval][print_label_stats]
+       Label rate  Number of examples per class (avg)  Number of examples per class (std)  Effective number of examples per class (avg)  Effective number of examples per class (std)
+train    0.209794                          160.774436                          109.853396                                      1.161126                                      2.786789
+val      0.069968                           34.812030                           24.984552                                      0.387242                                      1.487927
+test     0.069968                           28.909774                           20.019712                                      0.387242                                      1.981518
+[INFO][2023-02-14 12:47:25,969][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET_BEFREE/processed/data.gmt
+[INFO][2023-02-14 12:47:27,725][base][_apply_transform] Before transformation:
+Number of labelsets: 2256
+max: 599
+min: 10
+med: 42.00
+avg: 97.48
+std: 128.05
+
+[INFO][2023-02-14 12:47:27,727][base][_apply_transform] Applying transformation:
+Composition of filters:
+	- EntityExistenceFilter(remove_specified=False)
+	- LabelsetRangeFilterSize(min_val=50, max_val=None)
+	- LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True)
+EntityExistenceFilter(remove_specified=False): 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 12918/12918 [00:13<00:00, 972.72it/s]
+[INFO][nleval.Compose][__call__] Number of labelsets: 2256
+max: 552
+min: 5
+med: 39.00
+avg: 88.81
+std: 115.59
+
+LabelsetRangeFilterSize(min_val=50, max_val=None): 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 2256/2256 [00:00<00:00, 4972.12it/s]
+[INFO][nleval.Compose][__call__] Number of labelsets: 963
+max: 552
+min: 50
+med: 122.00
+avg: 177.93
+std: 131.39
+
+LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True): 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 963/963 [02:24<00:00,  6.68it/s]
+[INFO][nleval.Compose][__call__] Number of labelsets: 357
+max: 552
+min: 61
+med: 306.00
+avg: 308.82
+std: 125.51
+
+[INFO][2023-02-14 12:50:05,591][base][_apply_transform] After transformation:
+Number of labelsets: 357
+max: 552
+min: 61
+med: 306.00
+avg: 308.82
+std: 125.51
+
+[INFO][2023-02-14 12:50:05,614][base][_apply_transform] Saved cache transformation to /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET_BEFREE/processed/.cache/e1fc4537feb8e66aef1ad224e45c22d8/data.gmt
+[INFO][nleval][main] Start obtaining stats for DisGeNET_BEFREE
+[INFO][nleval][print_label_stats] Total number of classes: 357
+[INFO][nleval][print_label_stats] Total number of effective classes: 7,745
+[INFO][nleval][print_label_stats]
+       Label rate  Number of examples per class (avg)  Number of examples per class (std)  Effective number of examples per class (avg)  Effective number of examples per class (std)
+train    0.334524                          260.518207                          110.385588                                      0.798192                                      0.757112
+val      0.111526                           27.414566                           12.767984                                      0.266107                                      0.673443
+test     0.111526                           20.882353                            9.041928                                      0.266107                                      0.874320
+[INFO][2023-02-14 12:50:05,944][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET_Animal/processed/data.gmt
+[INFO][2023-02-14 12:50:06,267][base][_apply_transform] Before transformation:
+Number of labelsets: 318
+max: 575
+min: 10
+med: 27.00
+avg: 63.37
+std: 99.27
+
+[INFO][2023-02-14 12:50:06,269][base][_apply_transform] Applying transformation:
+Composition of filters:
+	- EntityExistenceFilter(remove_specified=False)
+	- LabelsetRangeFilterSize(min_val=50, max_val=None)
+	- LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True)
+EntityExistenceFilter(remove_specified=False): 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 2509/2509 [00:00<00:00, 9084.40it/s]
+[INFO][nleval.Compose][__call__] Number of labelsets: 318
+max: 565
+min: 9
+med: 27.00
+avg: 62.37
+std: 97.64
+
+LabelsetRangeFilterSize(min_val=50, max_val=None): 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 318/318 [00:00<00:00, 6191.26it/s]
+[INFO][nleval.Compose][__call__] Number of labelsets: 88
+max: 565
+min: 51
+med: 110.00
+avg: 167.76
+std: 137.07
+
+LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True): 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 88/88 [00:02<00:00, 42.63it/s]
+[INFO][nleval.Compose][__call__] Number of labelsets: 54
+max: 565
+min: 54
+med: 176.50
+avg: 216.89
+std: 153.62
+
+[INFO][2023-02-14 12:50:08,665][base][_apply_transform] After transformation:
+Number of labelsets: 54
+max: 565
+min: 54
+med: 176.50
+avg: 216.89
+std: 153.62
+
+[INFO][2023-02-14 12:50:08,669][base][_apply_transform] Saved cache transformation to /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET_Animal/processed/.cache/e1fc4537feb8e66aef1ad224e45c22d8/data.gmt
+[INFO][nleval][main] Start obtaining stats for DisGeNET_Animal
+[INFO][nleval][print_label_stats] Total number of classes: 54
+[INFO][nleval][print_label_stats] Total number of effective classes: 1,221
+[INFO][nleval][print_label_stats]
+       Label rate  Number of examples per class (avg)  Number of examples per class (std)  Effective number of examples per class (avg)  Effective number of examples per class (std)
+train    0.078355                          147.611111                          114.931448                                      1.185913                                      2.024582
+val      0.026136                           35.962963                           25.247635                                      0.395577                                      1.165971
+test     0.026136                           33.314815                           26.548923                                      0.395577                                      1.274052
+[INFO][2023-02-14 12:50:08,752][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET_GWAS/processed/data.gmt
+[INFO][2023-02-14 12:50:09,071][base][_apply_transform] Before transformation:
+Number of labelsets: 162
+max: 573
+min: 10
+med: 43.00
+avg: 100.76
+std: 128.78
+
+[INFO][2023-02-14 12:50:09,072][base][_apply_transform] Applying transformation:
+Composition of filters:
+	- EntityExistenceFilter(remove_specified=False)
+	- LabelsetRangeFilterSize(min_val=50, max_val=None)
+	- LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True)
+EntityExistenceFilter(remove_specified=False): 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 4349/4349 [00:00<00:00, 4781.82it/s]
+[INFO][nleval.Compose][__call__] Number of labelsets: 162
+max: 501
+min: 6
+med: 36.00
+avg: 84.51
+std: 107.96
+
+LabelsetRangeFilterSize(min_val=50, max_val=None): 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 162/162 [00:00<00:00, 5720.61it/s]
+[INFO][nleval.Compose][__call__] Number of labelsets: 69
+max: 501
+min: 50
+med: 109.00
+avg: 169.25
+std: 121.18
+
+LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True): 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 69/69 [00:01<00:00, 40.26it/s]
+[INFO][nleval.Compose][__call__] Number of labelsets: 53
+max: 501
+min: 50
+med: 155.00
+avg: 199.79
+std: 122.71
+
+[INFO][2023-02-14 12:50:11,727][base][_apply_transform] After transformation:
+Number of labelsets: 53
+max: 501
+min: 50
+med: 155.00
+avg: 199.79
+std: 122.71
+
+[INFO][2023-02-14 12:50:11,731][base][_apply_transform] Saved cache transformation to /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET_GWAS/processed/.cache/e1fc4537feb8e66aef1ad224e45c22d8/data.gmt
+[INFO][nleval][main] Start obtaining stats for DisGeNET_GWAS
+[INFO][nleval][print_label_stats] Total number of classes: 53
+[INFO][nleval][print_label_stats] Total number of effective classes: 1,047
+[INFO][nleval][print_label_stats]
+       Label rate  Number of examples per class (avg)  Number of examples per class (std)  Effective number of examples per class (avg)  Effective number of examples per class (std)
+train    0.114935                          134.377358                           82.834280                                      2.028653                                      5.901543
+val      0.038312                           35.113208                           22.973044                                      0.676218                                      2.495696
+test     0.038312                           30.301887                           19.736553                                      0.676218                                      2.920343
+[INFO][2023-02-14 12:50:11,831][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DISEASES/processed/data.gmt
+[INFO][2023-02-14 12:50:12,279][base][_apply_transform] Before transformation:
+Number of labelsets: 591
+max: 593
+min: 10
+med: 28.00
+avg: 62.82
+std: 93.88
+
+[INFO][2023-02-14 12:50:12,281][base][_apply_transform] Applying transformation:
+Composition of filters:
+	- EntityExistenceFilter(remove_specified=False)
+	- LabelsetRangeFilterSize(min_val=50, max_val=None)
+	- LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True)
+EntityExistenceFilter(remove_specified=False): 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 4891/4891 [00:00<00:00, 7356.94it/s]
+[INFO][nleval.Compose][__call__] Number of labelsets: 591
+max: 579
+min: 7
+med: 27.00
+avg: 61.37
+std: 91.70
+
+LabelsetRangeFilterSize(min_val=50, max_val=None): 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 591/591 [00:00<00:00, 5830.92it/s]
+[INFO][nleval.Compose][__call__] Number of labelsets: 177
+max: 579
+min: 50
+med: 101.00
+avg: 153.76
+std: 124.95
+
+LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True): 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 177/177 [00:08<00:00, 21.46it/s]
+[INFO][nleval.Compose][__call__] Number of labelsets: 95
+max: 579
+min: 51
+med: 148.00
+avg: 207.81
+std: 145.39
+
+[INFO][2023-02-14 12:50:21,300][base][_apply_transform] After transformation:
+Number of labelsets: 95
+max: 579
+min: 51
+med: 148.00
+avg: 207.81
+std: 145.39
+
+[INFO][2023-02-14 12:50:21,304][base][_apply_transform] Saved cache transformation to /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DISEASES/processed/.cache/e1fc4537feb8e66aef1ad224e45c22d8/data.gmt
+[INFO][nleval][main] Start obtaining stats for DISEASES
+[INFO][nleval][print_label_stats] Total number of classes: 95
+[INFO][nleval][print_label_stats] Total number of effective classes: 2,000
+[INFO][nleval][print_label_stats]
+       Label rate  Number of examples per class (avg)  Number of examples per class (std)  Effective number of examples per class (avg)  Effective number of examples per class (std)
+train    0.148431                          143.210526                          113.535888                                        1.3715                                      2.906456
+val      0.049513                           34.284211                           26.413977                                        0.4575                                      1.407549
+test     0.049513                           30.315789                           22.555318                                        0.4575                                      1.782749
+[INFO][2023-02-14 12:50:21,432][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DISEASES_ExperimentsFiltered/processed/data.gmt
+[INFO][2023-02-14 12:50:21,792][base][_apply_transform] Before transformation:
+Number of labelsets: 178
+max: 586
+min: 10
+med: 72.50
+avg: 139.41
+std: 154.49
+
+[INFO][2023-02-14 12:50:21,794][base][_apply_transform] Applying transformation:
+Composition of filters:
+	- EntityExistenceFilter(remove_specified=False)
+	- LabelsetRangeFilterSize(min_val=50, max_val=None)
+	- LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True)
+EntityExistenceFilter(remove_specified=False): 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 7241/7241 [00:00<00:00, 8345.09it/s]
+[INFO][nleval.Compose][__call__] Number of labelsets: 178
+max: 572
+min: 9
+med: 69.50
+avg: 134.76
+std: 149.57
+
+LabelsetRangeFilterSize(min_val=50, max_val=None): 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 178/178 [00:00<00:00, 6570.15it/s]
+[INFO][nleval.Compose][__call__] Number of labelsets: 107
+max: 572
+min: 50
+med: 147.00
+avg: 209.00
+std: 152.71
+
+LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True): 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 107/107 [00:03<00:00, 27.37it/s]
+[INFO][nleval.Compose][__call__] Number of labelsets: 94
+max: 572
+min: 53
+med: 175.00
+avg: 229.14
+std: 152.25
+
+[INFO][2023-02-14 12:50:26,601][base][_apply_transform] After transformation:
+Number of labelsets: 94
+max: 572
+min: 53
+med: 175.00
+avg: 229.14
+std: 152.25
+
+[INFO][2023-02-14 12:50:26,605][base][_apply_transform] Saved cache transformation to /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DISEASES_ExperimentsFiltered/processed/.cache/e1fc4537feb8e66aef1ad224e45c22d8/data.gmt
+[INFO][nleval][main] Start obtaining stats for DISEASES_ExperimentsFiltered
+[INFO][nleval][print_label_stats] Total number of classes: 94
+[INFO][nleval][print_label_stats] Total number of effective classes: 1,545
+[INFO][nleval][print_label_stats]
+       Label rate  Number of examples per class (avg)  Number of examples per class (std)  Effective number of examples per class (avg)  Effective number of examples per class (std)
+train    0.224729                          144.893617                           97.813051                                      2.688026                                      7.845005
+val      0.074946                           44.787234                           29.717776                                      0.896440                                      2.818505
+test     0.074946                           39.457447                           27.248527                                      0.896440                                      3.111668
+[INFO][2023-02-14 12:50:26,766][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DISEASES_KnowledgeFiltered/processed/data.gmt
+[INFO][2023-02-14 12:50:27,057][base][_apply_transform] Before transformation:
+Number of labelsets: 278
+max: 520
+min: 10
+med: 28.50
+avg: 60.42
+std: 83.28
+
+[INFO][2023-02-14 12:50:27,058][base][_apply_transform] Applying transformation:
+Composition of filters:
+	- EntityExistenceFilter(remove_specified=False)
+	- LabelsetRangeFilterSize(min_val=50, max_val=None)
+	- LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True)
+EntityExistenceFilter(remove_specified=False): 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 3382/3382 [00:00<00:00, 9415.22it/s]
+[INFO][nleval.Compose][__call__] Number of labelsets: 278
+max: 509
+min: 8
+med: 27.50
+avg: 59.43
+std: 82.02
+
+LabelsetRangeFilterSize(min_val=50, max_val=None): 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 278/278 [00:00<00:00, 6252.20it/s]
+[INFO][nleval.Compose][__call__] Number of labelsets: 88
+max: 509
+min: 50
+med: 96.00
+avg: 139.70
+std: 107.46
+
+LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True): 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 88/88 [00:02<00:00, 33.13it/s]
+[INFO][nleval.Compose][__call__] Number of labelsets: 52
+max: 509
+min: 63
+med: 143.50
+avg: 189.25
+std: 115.52
+
+[INFO][2023-02-14 12:50:30,122][base][_apply_transform] After transformation:
+Number of labelsets: 52
+max: 509
+min: 63
+med: 143.50
+avg: 189.25
+std: 115.52
+
+[INFO][2023-02-14 12:50:30,125][base][_apply_transform] Saved cache transformation to /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DISEASES_KnowledgeFiltered/processed/.cache/e1fc4537feb8e66aef1ad224e45c22d8/data.gmt
+[INFO][nleval][main] Start obtaining stats for DISEASES_KnowledgeFiltered
+[INFO][nleval][print_label_stats] Total number of classes: 52
+[INFO][nleval][print_label_stats] Total number of effective classes: 837
+[INFO][nleval][print_label_stats]
+       Label rate  Number of examples per class (avg)  Number of examples per class (std)  Effective number of examples per class (avg)  Effective number of examples per class (std)
+train    0.106277                          122.750000                           87.901360                                      2.346476                                      7.050045
+val      0.035444                           34.903846                           22.374659                                      0.782557                                      2.892421
+test     0.035444                           31.596154                           18.964805                                      0.782557                                      3.128553
+[INFO][2023-02-14 12:50:30,221][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DISEASES_TextminingFiltered/processed/data.gmt
+[INFO][2023-02-14 12:50:31,618][base][_apply_transform] Before transformation:
+Number of labelsets: 2066
+max: 595
+min: 10
+med: 33.00
+avg: 79.97
+std: 110.35
+
+[INFO][2023-02-14 12:50:31,619][base][_apply_transform] Applying transformation:
+Composition of filters:
+	- EntityExistenceFilter(remove_specified=False)
+	- LabelsetRangeFilterSize(min_val=50, max_val=None)
+	- LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True)
+EntityExistenceFilter(remove_specified=False): 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15287/15287 [00:09<00:00, 1562.47it/s]
+[INFO][nleval.Compose][__call__] Number of labelsets: 2066
+max: 582
+min: 0
+med: 31.00
+avg: 76.02
+std: 105.34
+
+LabelsetRangeFilterSize(min_val=50, max_val=None): 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 2066/2066 [00:00<00:00, 3877.80it/s]
+[INFO][nleval.Compose][__call__] Number of labelsets: 757
+max: 582
+min: 50
+med: 121.00
+avg: 169.42
+std: 127.75
+
+LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True): 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 757/757 [01:53<00:00,  6.68it/s]
+[INFO][nleval.Compose][__call__] Number of labelsets: 362
+max: 582
+min: 50
+med: 208.00
+avg: 237.35
+std: 141.65
+
+[INFO][2023-02-14 12:52:35,299][base][_apply_transform] After transformation:
+Number of labelsets: 362
+max: 582
+min: 50
+med: 208.00
+avg: 237.35
+std: 141.65
+
+[INFO][2023-02-14 12:52:35,314][base][_apply_transform] Saved cache transformation to /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DISEASES_TextminingFiltered/processed/.cache/e1fc4537feb8e66aef1ad224e45c22d8/data.gmt
+[INFO][nleval][main] Start obtaining stats for DISEASES_TextminingFiltered
+[INFO][nleval][print_label_stats] Total number of classes: 362
+[INFO][nleval][print_label_stats] Total number of effective classes: 8,964
+[INFO][nleval][print_label_stats]
+       Label rate  Number of examples per class (avg)  Number of examples per class (std)  Effective number of examples per class (avg)  Effective number of examples per class (std)
+train    0.417911                          178.994475                          121.266589                                      0.861557                                      1.411339
+val      0.139340                           33.033149                           20.614027                                      0.287260                                      0.755266
+test     0.139340                           25.325967                           15.204275                                      0.287260                                      0.881747
+[INFO][2023-02-14 12:52:35,728][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/HPO/processed/data.gmt
+[INFO][2023-02-14 12:52:36,149][base][_apply_transform] Before transformation:
+Number of labelsets: 319
+max: 580
+min: 10
+med: 45.00
+avg: 92.94
+std: 121.16
+
+[INFO][2023-02-14 12:52:36,151][base][_apply_transform] Applying transformation:
+Composition of filters:
+	- EntityExistenceFilter(remove_specified=False)
+	- LabelsetRangeFilterSize(min_val=50, max_val=None)
+	- LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True)
+EntityExistenceFilter(remove_specified=False): 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 3782/3782 [00:00<00:00, 7830.98it/s]
+[INFO][nleval.Compose][__call__] Number of labelsets: 319
+max: 562
+min: 9
+med: 44.00
+avg: 89.91
+std: 117.16
+
+LabelsetRangeFilterSize(min_val=50, max_val=None): 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 319/319 [00:00<00:00, 7076.47it/s]
+[INFO][nleval.Compose][__call__] Number of labelsets: 143
+max: 562
+min: 50
+med: 119.00
+avg: 170.28
+std: 136.92
+
+LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True): 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 143/143 [00:04<00:00, 31.81it/s]
+[INFO][nleval.Compose][__call__] Number of labelsets: 92
+max: 562
+min: 52
+med: 186.00
+avg: 226.41
+std: 141.78
+
+[INFO][2023-02-14 12:52:41,178][base][_apply_transform] After transformation:
+Number of labelsets: 92
+max: 562
+min: 52
+med: 186.00
+avg: 226.41
+std: 141.78
+
+[INFO][2023-02-14 12:52:41,182][base][_apply_transform] Saved cache transformation to /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/HPO/processed/.cache/e1fc4537feb8e66aef1ad224e45c22d8/data.gmt
+[INFO][nleval][main] Start obtaining stats for HPO
+[INFO][nleval][print_label_stats] Total number of classes: 92
+[INFO][nleval][print_label_stats] Total number of effective classes: 2,116
+[INFO][nleval][print_label_stats]
+       Label rate  Number of examples per class (avg)  Number of examples per class (std)  Effective number of examples per class (avg)  Effective number of examples per class (std)
+train    0.115584                          150.445652                           99.424908                                      1.009452                                      1.637782
+val      0.038528                           39.815217                           26.120094                                      0.336484                                      0.969386
+test     0.038582                           36.152174                           25.528728                                      0.336957                                      1.170032

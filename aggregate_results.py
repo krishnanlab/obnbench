@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import os.path as osp
+from datetime import datetime
 from glob import glob
 from pprint import pformat
 from typing import List, Tuple
@@ -10,22 +11,25 @@ import pandas as pd
 from tqdm import tqdm
 from nleval.util.logger import get_logger
 
-import config
+from main import ALL_METHODS
 
 
 def parse_args() -> Tuple[argparse.Namespace, logging.Logger]:
     global logger
 
     parser = argparse.ArgumentParser()
+    parser.add_argument("-b", "--basedir", default=".", help="Base directory")
     parser.add_argument("-m", "--mode", required=True, choices=["main", "hp_tune"],
                         help="'main' and 'hp' for main and hyperparameter tuning experiments.")
     parser.add_argument("-p", "--results_path", default="auto",
                         help="Path to the results directory, infer from 'mode' if set to 'auto'.")
     parser.add_argument("-n", "--dry_run", action="store_true",
-                        help="Agggregate and print results, but do not save to disk.")
+                        help="Aggregate and print results, but do not save to disk.")
     parser.add_argument("-o", "--output_path", default="aggregated_results/")
+    parser.add_argument("-d", "--suffix_date", action="store_true",
+                        help="Add date suffix to file name if set.")
     parser.add_argument("-v", "--log_level", type=str, default="INFO")
-    parser.add_argument("--methods", type=str, nargs="+", default=config.ALL_METHODS,
+    parser.add_argument("--methods", type=str, nargs="+", default=ALL_METHODS,
                         help="List of methods to consider when aggregating results.")
 
     # Parse arguments from command line and set up logger
@@ -44,6 +48,16 @@ def _agg_main_results(
     target_methods_lower = list(map(str.lower, target_methods))
     for path in tqdm(glob(osp.join(results_path, "*.json"))):
         terms = osp.splitext(osp.split(path)[1])[0].split("_")  # network, label, method, runid
+
+        # Some label names contains, e.g., disgenet_curated
+        # These would then become [network, labelpart1, labelpart2, method, runid]
+        # We want to combine the label parts into a single string again
+        terms = [
+            terms[0],
+            "_".join(terms[1:-2]),
+            *terms[-2:],
+        ]
+
         if terms[2] not in target_methods_lower:
             logger.warning(f"Skipping {terms[2]}: {path}")
 
@@ -76,6 +90,8 @@ def main():
     dry_run = args.dry_run
     methods = args.methods
     mode = args.mode
+    suffix_date = args.suffix_date
+    basedir = args.basedir
     output_path = args.output_path
     results_path = args.results_path
 
@@ -84,17 +100,24 @@ def main():
         results_path = "results" if mode == "main" else "hp_tune_results"
     logger.info(f"Raw results path to aggregate from: {results_path}")
 
-    # Get aggregation function
-    agg_func = _agg_main_results if mode == "main" else _agg_hp_results
+    # Attach base directory to paths
+    output_path = osp.join(basedir, output_path)
+    results_path = osp.join(basedir, results_path)
+    os.makedirs(output_path, exist_ok=True)
+    os.makedirs(results_path, exist_ok=True)
 
-    # Aggregate results
+    # Get aggregation function and aggregate results
+    agg_func = _agg_main_results if mode == "main" else _agg_hp_results
+    logger.info(f"Results will be aggregated from {results_path}")
     logger.info(f"Start aggregating results for methods: {methods}")
     results_df = agg_func(results_path, methods)
     logger.info(f"Aggregated results:\n{results_df}")
 
+    # Construct output path
+    suffix = f"_{datetime.now().strftime('%Y-%m-%d')}" if suffix_date else ""
+    path = osp.join(output_path, f"{mode}_results{suffix}.csv")
+
     # Save or print results
-    os.makedirs(output_path, exist_ok=True)
-    path = osp.join(output_path, f"{mode}_results.csv")
     if dry_run:
         logger.info(f"Results will be saved to {path}")
     else:
