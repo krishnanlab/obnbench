@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import os.path as osp
+from datetime import datetime
 from glob import glob
 from pprint import pformat
 from typing import List, Tuple
@@ -24,6 +25,8 @@ def parse_args() -> Tuple[argparse.Namespace, logging.Logger]:
     parser.add_argument("-n", "--dry_run", action="store_true",
                         help="Aggregate and print results, but do not save to disk.")
     parser.add_argument("-o", "--output_path", default="aggregated_results/")
+    parser.add_argument("-d", "--suffix_date", action="store_true",
+                        help="Add date suffix to file name if set.")
     parser.add_argument("-v", "--log_level", type=str, default="INFO")
     parser.add_argument("--methods", type=str, nargs="+", default=ALL_METHODS,
                         help="List of methods to consider when aggregating results.")
@@ -104,7 +107,10 @@ def main():
 
     # Save or print results
     os.makedirs(output_path, exist_ok=True)
-    path = osp.join(output_path, f"{mode}_results.csv")
+    suffix = ""
+    if args.suffix_date:
+        suffix = f"_{datetime.now().strftime('%Y-%m-%d')}"
+    path = osp.join(output_path, f"{mode}_results{suffix}.csv")
     if dry_run:
         logger.info(f"Results will be saved to {path}")
     else:
