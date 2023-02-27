@@ -25,6 +25,15 @@ python aggregate_results.py -d -m main -b experiments/disease_gsc_channels
 
 ## Notes
 
+- `[2023-02-17]` Add `ConsensusPathDB` network to the experiment.
+    - TODOs
+        - [x] Rerun the following due to time out (allocate 6hrs)
+            - `consensuspathdb-diseases_textminingfiltered-adj-logreg`
+            - `consensuspathdb-disgenet_befree-adj-logreg`
+            - `humannet-diseases_textminingfiltered-adj-logreg`
+        - [x] The following ran out of time again, might need to allocate 24hrs
+            - `consensuspathdb-diseases_textminingfiltered-adj-logreg`
+            - `consensuspathdb-disgenet_befree-adj-logreg`
 - `[2023-02-14]` Investigate the performance difference between different
   annotation sources, e.g., text-mining vs. curated vs. experiments, across
   all network based machine learning methods.
@@ -38,6 +47,19 @@ python aggregate_results.py -d -m main -b experiments/disease_gsc_channels
         performing GNN).
 
 ## Logs notes
+- [logs/aggregate_results_2023-02-27.txt](logs/aggregate_results_2023-02-27.txt)
+  Fix out-of-time runs again (need to allocate 24 hours)
+- [logs/aggregate_results_2023-02-21.txt](logs/aggregate_results_2023-02-21.txt)
+  Fix out-of-time runs (`consensuspathdb-diseases_textminingfiltered-adj-logreg`,
+  `consensuspathdb-disgenet_befree-adj-logreg`,
+  `humannet-diseases_textminingfiltered-adj-logreg`)
+- [logs/aggregate_results_2023-02-16.txt](logs/aggregate_results_2023-02-16.txt)
+  Update results after adding `ConsensusPathDB` network
+- [logs/get_data_2023-02-16.txt](logs/get_data_2023-02-16.txt)
+  Update experiment setting: add `ConsensusPathDB` network in addition to
+  `HumanNet`. The goal is to see when using `ConsensusPathDB` as the underlying
+  network data, if the network-based machine learning methods can better
+  capture `curated` annotations than the `text-mined` annotations.
 - [logs/aggregate_results_2023-02-16_2.txt](logs/aggregate_results_2023-02-16_1.txt)
   Aggregate results after the reran `DisGeNET_BEFREE` finished (~4.5 hours).
 - [logs/aggregate_results_2023-02-16_1.txt](logs/aggregate_results_2023-02-16_1.txt)

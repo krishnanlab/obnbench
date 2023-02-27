@@ -4,7 +4,7 @@
 TEMPLATE=job_template.sb
 PROJECT_SLURM_DIR=../../run
 
-NETWORKS=(HumanNet)
+NETWORKS=(HumanNet ConsensusPathDB)
 LABELS=(
     DisGeNET
     DisGeNET_Curated
@@ -17,8 +17,19 @@ LABELS=(
     DISEASES_TextminingFiltered
     HPO
 )
-GML_MODELS=(ADJ-LogReg ADJ-SVM N2V-LogReg N2V-SVM LabelProp)
-GNN_MODELS=(GCN GIN GAT GraphSAGE)
+GML_MODELS=(
+    ADJ-LogReg
+    # ADJ-SVM
+    N2V-LogReg
+    # N2V-SVM
+    LabelProp
+)
+GNN_MODELS=(
+    GCN
+    # GIN
+    # GAT
+    GraphSAGE
+)
 
 BASE_SCRIPT="/bin/time -v python main.py +experiment=disease_gsc_channels"
 # -------------------------
@@ -49,6 +60,7 @@ function submit_job {
     if (( gpu == 1 )); then
         full_script="sbatch -J ${job_name} -o ${slurm_out_path} --gres=gpu:v100:1 ${TEMPLATE} ${script}"
     else
+        # full_script="sbatch -J ${job_name} -o ${slurm_out_path} -C NOAUTO:amd20 -t 24:00:00 ${TEMPLATE} ${script}"
         full_script="sbatch -J ${job_name} -o ${slurm_out_path} -C NOAUTO:amd20 ${TEMPLATE} ${script}"
     fi
 

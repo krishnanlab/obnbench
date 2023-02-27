@@ -76,7 +76,7 @@ def print_label_stats(lsc, splitter, common_genes):
         },
         index={i: j for i, j in enumerate(mask_names)},
     )
-    nleval.logger.info(f"\n{stats_df}")
+    nleval.logger.info(f"\n{stats_df.to_markdown(index=False)}")
 
 
 def get_splitter_filter(homedir: Path, log_level: str = "INFO"):
