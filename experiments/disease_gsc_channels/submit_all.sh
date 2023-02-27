@@ -4,7 +4,7 @@
 TEMPLATE=job_template.sb
 PROJECT_SLURM_DIR=../../run
 
-NETWORKS=(HumanNet)
+NETWORKS=(HumanNet ConsensusPathDB)
 LABELS=(
     DisGeNET
     DisGeNET_Curated
@@ -17,8 +17,19 @@ LABELS=(
     DISEASES_TextminingFiltered
     HPO
 )
-GML_MODELS=(ADJ-LogReg ADJ-SVM N2V-LogReg N2V-SVM LabelProp)
-GNN_MODELS=(GCN GIN GAT GraphSAGE)
+GML_MODELS=(
+    ADJ-LogReg
+    # ADJ-SVM
+    N2V-LogReg
+    # N2V-SVM
+    LabelProp
+)
+GNN_MODELS=(
+    GCN
+    # GIN
+    # GAT
+    GraphSAGE
+)
 
 BASE_SCRIPT="/bin/time -v python main.py +experiment=disease_gsc_channels"
 # -------------------------

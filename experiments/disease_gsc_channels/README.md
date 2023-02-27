@@ -31,7 +31,7 @@ python aggregate_results.py -d -m main -b experiments/disease_gsc_channels
             - `consensuspathdb-diseases_textminingfiltered-adj-logreg`
             - `consensuspathdb-disgenet_befree-adj-logreg`
             - `humannet-diseases_textminingfiltered-adj-logreg`
-        - [ ] The following ran out of time again, might need to allocate 24hrs
+        - [x] The following ran out of time again, might need to allocate 24hrs
             - `consensuspathdb-diseases_textminingfiltered-adj-logreg`
             - `consensuspathdb-disgenet_befree-adj-logreg`
 - `[2023-02-14]` Investigate the performance difference between different
@@ -47,6 +47,8 @@ python aggregate_results.py -d -m main -b experiments/disease_gsc_channels
         performing GNN).
 
 ## Logs notes
+- [logs/aggregate_results_2023-02-27.txt](logs/aggregate_results_2023-02-27.txt)
+  Fix out-of-time runs again (need to allocate 24 hours)
 - [logs/aggregate_results_2023-02-21.txt](logs/aggregate_results_2023-02-21.txt)
   Fix out-of-time runs (`consensuspathdb-diseases_textminingfiltered-adj-logreg`,
   `consensuspathdb-disgenet_befree-adj-logreg`,
