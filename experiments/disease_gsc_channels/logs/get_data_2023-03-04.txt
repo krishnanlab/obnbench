@@ -1,0 +1,645 @@
+[INFO][nleval][main] Running with settings:
+homedir: experiments/disease_gsc_channels
+data_version: latest
+labels:
+- DisGeNET
+- DisGeNET_Curated
+- DisGeNET_BEFREE
+- DisGeNET_Animal
+- DisGeNET_GWAS
+- DISEASES
+- DISEASES_ExperimentsFiltered
+- DISEASES_KnowledgeFiltered
+- DISEASES_TextminingFiltered
+- HPO
+networks:
+- HumanNet
+- HumanNet-FN
+- HumanNet-CC
+- ConsensusPathDB
+
+[INFO][nleval][normalize_path] Normlized path: /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels
+[INFO][2023-03-04 10:02:25,347][base][_download] Start downloading HumanNet...
+[INFO][2023-03-04 10:02:25,348][download][download_unzip] Downloading zip archive from https://staging2.inetbio.org/humannetv3/networks/HumanNet-XC.tsv
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 30.3M/30.3M [00:07<00:00, 4.47MB/s]
+[INFO][2023-03-04 10:02:35,237][download][download_unzip] Download completed, start unpacking...
+[INFO][2023-03-04 10:02:35,246][download][download_unzip] File saved to '/mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/HumanNet/raw/data_xc.txt'
+[INFO][2023-03-04 10:02:35,246][download][download_unzip] Done extracting
+[INFO][2023-03-04 10:02:35,250][base][_process] Start processing HumanNet...
+Loading edges: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████| 1125494/1125494 [00:08<00:00, 129773.29it/s]
+[INFO][2023-03-04 10:02:44,072][base][process] Start converting gene IDs.
+[INFO][nleval.MyGeneInfoConverter][_load_cache] Loaded gene conversion cache /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/.cache/mygene_convert.json
+[INFO][nleval.MyGeneInfoConverter][query_bulk] Total number of genes: 18,593 (18,593 unique)
+[INFO][nleval.MyGeneInfoConverter][query_bulk] Number of genes to be queried: 37
+querying 1-37...done.
+Finished.
+[INFO][nleval.MyGeneInfoConverter][_save_cache] Gene conversion cache saved /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/.cache/mygene_convert.json
+[INFO][2023-03-04 10:02:55,630][base][largest_connected_subgraph] Components sizes = [18591]
+[INFO][2023-03-04 10:02:56,201][base][largest_connected_subgraph] Number of nodes = 18,591 (18,591 originally), number of edges = 2,250,780 (2,250,780 originally)
+[INFO][2023-03-04 10:02:57,325][base][process] Saved processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/HumanNet/processed/data_xc.npz
+[INFO][2023-03-04 10:02:57,446][base][_process] Config file saved to /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/HumanNet/info/config.yaml
+[INFO][2023-03-04 10:02:57,447][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/HumanNet/processed/data_xc.npz
+HumanNet       # nodes = 18,591, # edges = 2,250,780, edge density = 0.0065
+[INFO][2023-03-04 10:03:00,073][base][_download] Start downloading HumanNet...
+[INFO][2023-03-04 10:03:00,074][download][download_unzip] Downloading zip archive from https://staging2.inetbio.org/humannetv3/networks/HumanNet-FN.tsv
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 26.1M/26.1M [00:16<00:00, 1.64MB/s]
+[INFO][2023-03-04 10:03:17,524][download][download_unzip] Download completed, start unpacking...
+[INFO][2023-03-04 10:03:17,535][download][download_unzip] File saved to '/mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/HumanNet/raw/data_fn.txt'
+[INFO][2023-03-04 10:03:17,535][download][download_unzip] Done extracting
+[INFO][2023-03-04 10:03:17,535][base][_process] Start processing HumanNet...
+Loading edges: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████| 977495/977495 [00:07<00:00, 133320.29it/s]
+[INFO][2023-03-04 10:03:24,992][base][process] Start converting gene IDs.
+[INFO][nleval.MyGeneInfoConverter][_load_cache] Loaded gene conversion cache /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/.cache/mygene_convert.json
+[INFO][nleval.MyGeneInfoConverter][query_bulk] Total number of genes: 18,459 (18,459 unique)
+[INFO][nleval.MyGeneInfoConverter][query_bulk] No query needed.
+[INFO][2023-03-04 10:03:33,586][base][largest_connected_subgraph] Components sizes = [18452, 3, 2]
+[INFO][2023-03-04 10:03:34,076][base][largest_connected_subgraph] Number of nodes = 18,452 (18,457 originally), number of edges = 1,954,946 (1,954,954 originally)
+[INFO][2023-03-04 10:03:35,049][base][process] Saved processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/HumanNet/processed/data_fn.npz
+[INFO][2023-03-04 10:03:35,145][base][_process] Config file saved to /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/HumanNet/info/config.yaml
+[INFO][2023-03-04 10:03:35,146][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/HumanNet/processed/data_fn.npz
+HumanNet-FN    # nodes = 18,452, # edges = 1,954,946, edge density = 0.0057
+[INFO][2023-03-04 10:03:37,469][base][_download] Start downloading HumanNet...
+[INFO][2023-03-04 10:03:37,470][download][download_unzip] Downloading zip archive from https://staging2.inetbio.org/humannetv3/networks/HS-CC.tsv
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 29.4M/29.4M [00:06<00:00, 4.48MB/s]
+[INFO][2023-03-04 10:03:45,151][download][download_unzip] Download completed, start unpacking...
+[INFO][2023-03-04 10:03:45,161][download][download_unzip] File saved to '/mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/HumanNet/raw/data_cc.txt'
+[INFO][2023-03-04 10:03:45,161][download][download_unzip] Done extracting
+[INFO][2023-03-04 10:03:45,162][base][_process] Start processing HumanNet...
+Loading edges: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████| 1081518/1081518 [00:08<00:00, 130212.55it/s]
+[INFO][2023-03-04 10:03:53,611][base][process] Start converting gene IDs.
+[INFO][nleval.MyGeneInfoConverter][_load_cache] Loaded gene conversion cache /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/.cache/mygene_convert.json
+[INFO][nleval.MyGeneInfoConverter][query_bulk] Total number of genes: 18,300 (18,300 unique)
+[INFO][nleval.MyGeneInfoConverter][query_bulk] Number of genes to be queried: 1
+querying 1-1...done.
+Finished.
+[INFO][nleval.MyGeneInfoConverter][_save_cache] Gene conversion cache saved /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/.cache/mygene_convert.json
+[INFO][2023-03-04 10:04:04,156][base][largest_connected_subgraph] Components sizes = [18298]
+[INFO][2023-03-04 10:04:04,708][base][largest_connected_subgraph] Number of nodes = 18,298 (18,298 originally), number of edges = 2,162,620 (2,162,620 originally)
+[INFO][2023-03-04 10:04:05,804][base][process] Saved processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/HumanNet/processed/data_cc.npz
+[INFO][2023-03-04 10:04:05,914][base][_process] Config file saved to /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/HumanNet/info/config.yaml
+[INFO][2023-03-04 10:04:05,915][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/HumanNet/processed/data_cc.npz
+HumanNet-CC    # nodes = 18,298, # edges = 2,162,620, edge density = 0.0065
+[INFO][2023-03-04 10:04:08,488][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/ConsensusPathDB/processed/data.npz
+ConsensusPathDB# nodes = 17,735, # edges = 10,611,416, edge density = 0.0337
+[INFO][nleval][main] Exporting 17,055 common genes /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/genes.txt
+[INFO][nleval.GenePropertyConverter][_load_cache] Loaded gene conversion cache /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/.cache/geneprop_convert-PubMedCount.json
+[INFO][2023-03-04 10:04:25,866][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET/processed/data.gmt
+[INFO][2023-03-04 10:04:43,421][base][_apply_transform] Before transformation:
+Number of labelsets: 1043
+max: 590
+min: 10
+med: 36.00
+avg: 86.19
+std: 121.12
+
+[INFO][2023-03-04 10:04:43,423][base][_apply_transform] Applying transformation:
+Composition of filters:
+        - EntityExistenceFilter(remove_specified=False)
+                - LabelsetRangeFilterSize(min_val=50, max_val=None)
+                        - LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True)
+                        EntityExistenceFilter(remove_specified=False): 100%|████████████████████████████████████████████████████████████████████████████████| 9429/9429 [00:04<00:00, 2007.67it/s]
+                        [INFO][nleval.Compose][__call__] Number of labelsets: 1043
+                        max: 549
+                        min: 2
+                        med: 33.00
+                        avg: 78.81
+                        std: 110.03
+
+                        LabelsetRangeFilterSize(min_val=50, max_val=None): 100%|████████████████████████████████████████████████████████████████████████████| 1043/1043 [00:00<00:00, 5658.29it/s]
+                        [INFO][nleval.Compose][__call__] Number of labelsets: 399
+                        max: 549
+                        min: 50
+                        med: 118.00
+                        avg: 170.97
+                        std: 133.01
+
+                        LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count
+                        [INFO][nleval.Compose][__call__] Number of labelsets: 207
+                        max: 549
+                        min: 57
+                        med: 209.00
+                        avg: 251.10
+                        std: 139.50
+
+                        [INFO][2023-03-04 10:05:21,761][base][_apply_transform] After transformation:
+                        Number of labelsets: 207
+                        max: 549
+                        min: 57
+                        med: 209.00
+                        avg: 251.10
+                        std: 139.50
+
+                        [INFO][2023-03-04 10:05:21,772][base][_apply_transform] Saved cache transformation to /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET/processed/.cache/b2862c0e20792e489a38a95c09fb55b7/data.gmt
+                        [INFO][nleval][main] Start obtaining stats for DisGeNET
+                        [INFO][nleval][print_label_stats] Total number of classes: 207
+                        [INFO][nleval][print_label_stats] Total number of effective classes: 4,878
+                        [INFO][nleval][print_label_stats]
+                        |   Label rate |   Number of examples per class (avg) |   Number of examples per class (std) |   Effective number of examples per class (avg) |   Effective number of examples per class (std) |
+                        |-------------:|-------------------------------------:|-------------------------------------:|-----------------------------------------------:|-----------------------------------------------:|
+                        |    0.276165  |                             182.565  |                             107.502  |                                       0.96556  |                                        2.06725 |
+                        |    0.0920551 |                              41.3623 |                              26.8605 |                                       0.321853 |                                        1.03354 |
+                        |    0.0920551 |                              27.1739 |                              16.8829 |                                       0.321853 |                                        1.72664 |
+                        [INFO][2023-03-04 10:05:22,090][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET_Curated/processed/data.gmt
+                        [INFO][2023-03-04 10:05:22,710][base][_apply_transform] Before transformation:
+                        Number of labelsets: 800
+                        max: 590
+                        min: 10
+                        med: 28.00
+                        avg: 68.64
+                        std: 100.92
+
+                        [INFO][2023-03-04 10:05:22,712][base][_apply_transform] Applying transformation:
+                        Composition of filters:
+                                - EntityExistenceFilter(remove_specified=False)
+                                        - LabelsetRangeFilterSize(min_val=50, max_val=None)
+                                                - LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True)
+                                                EntityExistenceFilter(remove_specified=False): 100%|████████████████████████████████████████████████████████████████████████████████| 7272/7272 [00:02<00:00, 3402.46it/s]
+                                                [INFO][nleval.Compose][__call__] Number of labelsets: 800
+                                                max: 564
+                                                min: 2
+                                                med: 27.00
+                                                avg: 63.68
+                                                std: 93.49
+
+                                                LabelsetRangeFilterSize(min_val=50, max_val=None): 100%|██████████████████████████████████████████████████████████████████████████████| 800/800 [00:00<00:00, 5724.82it/s]
+                                                [INFO][nleval.Compose][__call__] Number of labelsets: 252
+                                                max: 564
+                                                min: 50
+                                                med: 105.00
+                                                avg: 156.94
+                                                std: 121.66
+
+                                                LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count
+                                                [INFO][nleval.Compose][__call__] Number of labelsets: 137
+                                                max: 564
+                                                min: 50
+                                                med: 177.00
+                                                avg: 217.09
+                                                std: 133.57
+
+                                                [INFO][2023-03-04 10:05:40,991][base][_apply_transform] After transformation:
+                                                Number of labelsets: 137
+                                                max: 564
+                                                min: 50
+                                                med: 177.00
+                                                avg: 217.09
+                                                std: 133.57
+
+                                                [INFO][2023-03-04 10:05:41,002][base][_apply_transform] Saved cache transformation to /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET_Curated/processed/.cache/b2862c0e20792e489a38a95c09fb55b7/data.gmt
+                                                [INFO][nleval][main] Start obtaining stats for DisGeNET_Curated
+                                                [INFO][nleval][print_label_stats] Total number of classes: 137
+                                                [INFO][nleval][print_label_stats] Total number of effective classes: 3,355
+                                                [INFO][nleval][print_label_stats]
+                                                |   Label rate |   Number of examples per class (avg) |   Number of examples per class (std) |   Effective number of examples per class (avg) |   Effective number of examples per class (std) |
+                                                |-------------:|-------------------------------------:|-------------------------------------:|-----------------------------------------------:|-----------------------------------------------:|
+                                                |    0.223512  |                             155.058  |                             107.909  |                                       1.13621  |                                        2.70534 |
+                                                |    0.0745236 |                              33.9489 |                              24.0766 |                                       0.378838 |                                        1.44667 |
+                                                |    0.0745236 |                              28.0876 |                              19.6979 |                                       0.378838 |                                        1.82788 |
+                                                [INFO][2023-03-04 10:05:41,165][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET_BEFREE/processed/data.gmt
+                                                [INFO][2023-03-04 10:05:50,051][base][_apply_transform] Before transformation:
+                                                Number of labelsets: 2256
+                                                max: 599
+                                                min: 10
+                                                med: 42.00
+                                                avg: 97.48
+                                                std: 128.05
+
+                                                [INFO][2023-03-04 10:05:50,053][base][_apply_transform] Applying transformation:
+                                                Composition of filters:
+                                                        - EntityExistenceFilter(remove_specified=False)
+                                                                - LabelsetRangeFilterSize(min_val=50, max_val=None)
+                                                                        - LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True)
+                                                                        EntityExistenceFilter(remove_specified=False): 100%|███████████████████████████████████████████████████████████████████████████████| 12918/12918 [00:14<00:00, 919.84it/s]
+                                                                        [INFO][nleval.Compose][__call__] Number of labelsets: 2256
+                                                                        max: 559
+                                                                        min: 5
+                                                                        med: 38.00
+                                                                        avg: 87.70
+                                                                        std: 114.37
+
+                                                                        LabelsetRangeFilterSize(min_val=50, max_val=None): 100%|████████████████████████████████████████████████████████████████████████████| 2256/2256 [00:00<00:00, 4882.09it/s]
+                                                                        [INFO][nleval.Compose][__call__] Number of labelsets: 956
+                                                                        max: 559
+                                                                        min: 50
+                                                                        med: 121.50
+                                                                        avg: 176.75
+                                                                        std: 130.11
+
+                                                                        LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count
+                                                                        [INFO][nleval.Compose][__call__] Number of labelsets: 353
+                                                                        max: 559
+                                                                        min: 54
+                                                                        med: 305.00
+                                                                        avg: 306.01
+                                                                        std: 125.51
+
+                                                                        [INFO][2023-03-04 10:08:26,905][base][_apply_transform] After transformation:
+                                                                        Number of labelsets: 353
+                                                                        max: 559
+                                                                        min: 54
+                                                                        med: 305.00
+                                                                        avg: 306.01
+                                                                        std: 125.51
+
+                                                                        [INFO][2023-03-04 10:08:26,920][base][_apply_transform] Saved cache transformation to /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET_BEFREE/processed/.cache/b2862c0e20792e489a38a95c09fb55b7/data.gmt
+                                                                        [INFO][nleval][main] Start obtaining stats for DisGeNET_BEFREE
+                                                                        [INFO][nleval][print_label_stats] Total number of classes: 353
+                                                                        [INFO][nleval][print_label_stats] Total number of effective classes: 7,617
+                                                                        [INFO][nleval][print_label_stats]
+                                                                        |   Label rate |   Number of examples per class (avg) |   Number of examples per class (std) |   Effective number of examples per class (avg) |   Effective number of examples per class (std) |
+                                                                        |-------------:|-------------------------------------:|-------------------------------------:|-----------------------------------------------:|-----------------------------------------------:|
+                                                                        |     0.355145 |                             257.986  |                            110.637   |                                       0.795195 |                                       0.758178 |
+                                                                        |     0.118382 |                              27.0198 |                             12.9059  |                                       0.265065 |                                       0.66237  |
+                                                                        |     0.11844  |                              21.0057 |                              9.06633 |                                       0.265196 |                                       0.8527   |
+                                                                        [INFO][2023-03-04 10:08:27,240][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET_Animal/processed/data.gmt
+                                                                        [INFO][2023-03-04 10:08:55,686][base][_apply_transform] Before transformation:
+                                                                        Number of labelsets: 318
+                                                                        max: 575
+                                                                        min: 10
+                                                                        med: 27.00
+                                                                        avg: 63.37
+                                                                        std: 99.27
+
+                                                                        [INFO][2023-03-04 10:08:55,687][base][_apply_transform] Applying transformation:
+                                                                        Composition of filters:
+                                                                                - EntityExistenceFilter(remove_specified=False)
+                                                                                        - LabelsetRangeFilterSize(min_val=50, max_val=None)
+                                                                                                - LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True)
+                                                                                                EntityExistenceFilter(remove_specified=False): 100%|███████████████████████████████████████████████████████████████████████████████| 2509/2509 [00:00<00:00, 10328.48it/s]
+                                                                                                [INFO][nleval.Compose][__call__] Number of labelsets: 318
+                                                                                                max: 556
+                                                                                                min: 9
+                                                                                                med: 26.00
+                                                                                                avg: 61.48
+                                                                                                std: 96.31
+
+                                                                                                LabelsetRangeFilterSize(min_val=50, max_val=None): 100%|██████████████████████████████████████████████████████████████████████████████| 318/318 [00:00<00:00, 5794.17it/s]
+                                                                                                [INFO][nleval.Compose][__call__] Number of labelsets: 87
+                                                                                                max: 556
+                                                                                                min: 50
+                                                                                                med: 108.00
+                                                                                                avg: 166.55
+                                                                                                std: 135.65
+
+                                                                                                LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count
+                                                                                                [INFO][nleval.Compose][__call__] Number of labelsets: 54
+                                                                                                max: 556
+                                                                                                min: 52
+                                                                                                med: 170.00
+                                                                                                avg: 213.94
+                                                                                                std: 151.71
+
+                                                                                                [INFO][2023-03-04 10:08:57,984][base][_apply_transform] After transformation:
+                                                                                                Number of labelsets: 54
+                                                                                                max: 556
+                                                                                                min: 52
+                                                                                                med: 170.00
+                                                                                                avg: 213.94
+                                                                                                std: 151.71
+
+                                                                                                [INFO][2023-03-04 10:08:57,988][base][_apply_transform] Saved cache transformation to /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET_Animal/processed/.cache/b2862c0e20792e489a38a95c09fb55b7/data.gmt
+                                                                                                [INFO][nleval][main] Start obtaining stats for DisGeNET_Animal
+                                                                                                [INFO][nleval][print_label_stats] Total number of classes: 54
+                                                                                                [INFO][nleval][print_label_stats] Total number of effective classes: 1,219
+                                                                                                [INFO][nleval][print_label_stats]
+                                                                                                |   Label rate |   Number of examples per class (avg) |   Number of examples per class (std) |   Effective number of examples per class (avg) |   Effective number of examples per class (std) |
+                                                                                                |-------------:|-------------------------------------:|-------------------------------------:|-----------------------------------------------:|-----------------------------------------------:|
+                                                                                                |    0.0840809 |                             145      |                             113.145  |                                       1.17637  |                                        2.00268 |
+                                                                                                |    0.028027  |                              35.8333 |                              25.1637 |                                       0.392125 |                                        1.12928 |
+                                                                                                |    0.028027  |                              33.1111 |                              26.6115 |                                       0.392125 |                                        1.27787 |
+                                                                                                [INFO][2023-03-04 10:08:58,074][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET_GWAS/processed/data.gmt
+                                                                                                [INFO][2023-03-04 10:08:58,391][base][_apply_transform] Before transformation:
+                                                                                                Number of labelsets: 162
+                                                                                                max: 573
+                                                                                                min: 10
+                                                                                                med: 43.00
+                                                                                                avg: 100.76
+                                                                                                std: 128.78
+
+                                                                                                [INFO][2023-03-04 10:08:58,392][base][_apply_transform] Applying transformation:
+                                                                                                Composition of filters:
+                                                                                                        - EntityExistenceFilter(remove_specified=False)
+                                                                                                                - LabelsetRangeFilterSize(min_val=50, max_val=None)
+                                                                                                                        - LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True)
+                                                                                                                        EntityExistenceFilter(remove_specified=False): 100%|████████████████████████████████████████████████████████████████████████████████| 4349/4349 [00:00<00:00, 4786.87it/s]
+                                                                                                                        [INFO][nleval.Compose][__call__] Number of labelsets: 162
+                                                                                                                        max: 481
+                                                                                                                        min: 5
+                                                                                                                        med: 35.00
+                                                                                                                        avg: 81.25
+                                                                                                                        std: 103.84
+
+                                                                                                                        LabelsetRangeFilterSize(min_val=50, max_val=None): 100%|██████████████████████████████████████████████████████████████████████████████| 162/162 [00:00<00:00, 5577.67it/s]
+                                                                                                                        [INFO][nleval.Compose][__call__] Number of labelsets: 67
+                                                                                                                        max: 481
+                                                                                                                        min: 52
+                                                                                                                        med: 104.00
+                                                                                                                        avg: 166.33
+                                                                                                                        std: 116.40
+
+                                                                                                                        LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count
+                                                                                                                        [INFO][nleval.Compose][__call__] Number of labelsets: 50
+                                                                                                                        max: 481
+                                                                                                                        min: 57
+                                                                                                                        med: 175.00
+                                                                                                                        avg: 198.40
+                                                                                                                        std: 118.41
+
+                                                                                                                        [INFO][2023-03-04 10:09:01,038][base][_apply_transform] After transformation:
+                                                                                                                        Number of labelsets: 50
+                                                                                                                        max: 481
+                                                                                                                        min: 57
+                                                                                                                        med: 175.00
+                                                                                                                        avg: 198.40
+                                                                                                                        std: 118.41
+
+                                                                                                                        [INFO][2023-03-04 10:09:01,041][base][_apply_transform] Saved cache transformation to /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DisGeNET_GWAS/processed/.cache/b2862c0e20792e489a38a95c09fb55b7/data.gmt
+                                                                                                                        [INFO][nleval][main] Start obtaining stats for DisGeNET_GWAS
+                                                                                                                        [INFO][nleval][print_label_stats] Total number of classes: 50
+                                                                                                                        [INFO][nleval][print_label_stats] Total number of effective classes: 980
+                                                                                                                        [INFO][nleval][print_label_stats]
+                                                                                                                        |   Label rate |   Number of examples per class (avg) |   Number of examples per class (std) |   Effective number of examples per class (avg) |   Effective number of examples per class (std) |
+                                                                                                                        |-------------:|-------------------------------------:|-------------------------------------:|-----------------------------------------------:|-----------------------------------------------:|
+                                                                                                                        |    0.11715   |                               133.64 |                              80.2189 |                                       2.03878  |                                        5.84096 |
+                                                                                                                        |    0.0390501 |                                35.6  |                              22.6813 |                                       0.679592 |                                        2.45103 |
+                                                                                                                        |    0.0391088 |                                29.16 |                              18.1343 |                                       0.680612 |                                        2.9903  |
+                                                                                                                        [INFO][2023-03-04 10:09:01,140][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DISEASES/processed/data.gmt
+                                                                                                                        [INFO][2023-03-04 10:09:01,605][base][_apply_transform] Before transformation:
+                                                                                                                        Number of labelsets: 591
+                                                                                                                        max: 593
+                                                                                                                        min: 10
+                                                                                                                        med: 28.00
+                                                                                                                        avg: 62.82
+                                                                                                                        std: 93.88
+
+                                                                                                                        [INFO][2023-03-04 10:09:01,606][base][_apply_transform] Applying transformation:
+                                                                                                                        Composition of filters:
+                                                                                                                                - EntityExistenceFilter(remove_specified=False)
+                                                                                                                                        - LabelsetRangeFilterSize(min_val=50, max_val=None)
+                                                                                                                                                - LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True)
+                                                                                                                                                EntityExistenceFilter(remove_specified=False): 100%|████████████████████████████████████████████████████████████████████████████████| 4891/4891 [00:00<00:00, 7243.62it/s]
+                                                                                                                                                [INFO][nleval.Compose][__call__] Number of labelsets: 591
+                                                                                                                                                max: 573
+                                                                                                                                                min: 6
+                                                                                                                                                med: 28.00
+                                                                                                                                                avg: 60.61
+                                                                                                                                                std: 90.59
+
+                                                                                                                                                LabelsetRangeFilterSize(min_val=50, max_val=None): 100%|██████████████████████████████████████████████████████████████████████████████| 591/591 [00:00<00:00, 5444.26it/s]
+                                                                                                                                                [INFO][nleval.Compose][__call__] Number of labelsets: 175
+                                                                                                                                                max: 573
+                                                                                                                                                min: 50
+                                                                                                                                                med: 103.00
+                                                                                                                                                avg: 153.07
+                                                                                                                                                std: 123.64
+
+                                                                                                                                                LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count
+                                                                                                                                                [INFO][nleval.Compose][__call__] Number of labelsets: 96
+                                                                                                                                                max: 573
+                                                                                                                                                min: 50
+                                                                                                                                                med: 144.50
+                                                                                                                                                avg: 204.70
+                                                                                                                                                std: 142.76
+
+                                                                                                                                                [INFO][2023-03-04 10:09:10,737][base][_apply_transform] After transformation:
+                                                                                                                                                Number of labelsets: 96
+                                                                                                                                                max: 573
+                                                                                                                                                min: 50
+                                                                                                                                                med: 144.50
+                                                                                                                                                avg: 204.70
+                                                                                                                                                std: 142.76
+
+                                                                                                                                                [INFO][2023-03-04 10:09:10,741][base][_apply_transform] Saved cache transformation to /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DISEASES/processed/.cache/b2862c0e20792e489a38a95c09fb55b7/data.gmt
+                                                                                                                                                [INFO][nleval][main] Start obtaining stats for DISEASES
+                                                                                                                                                [INFO][nleval][print_label_stats] Total number of classes: 96
+                                                                                                                                                [INFO][nleval][print_label_stats] Total number of effective classes: 2,007
+                                                                                                                                                [INFO][nleval][print_label_stats]
+                                                                                                                                                |   Label rate |   Number of examples per class (avg) |   Number of examples per class (std) |   Effective number of examples per class (avg) |   Effective number of examples per class (std) |
+                                                                                                                                                |-------------:|-------------------------------------:|-------------------------------------:|-----------------------------------------------:|-----------------------------------------------:|
+                                                                                                                                                |    0.158722  |                             141.844  |                             112.1    |                                       1.34878  |                                        2.80791 |
+                                                                                                                                                |    0.0529464 |                              33.2604 |                              25.8127 |                                       0.449925 |                                        1.38083 |
+                                                                                                                                                |    0.0529464 |                              29.5938 |                              22.2947 |                                       0.449925 |                                        1.75232 |
+                                                                                                                                                [INFO][2023-03-04 10:09:10,870][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DISEASES_ExperimentsFiltered/processed/data.gmt
+                                                                                                                                                [INFO][2023-03-04 10:09:11,248][base][_apply_transform] Before transformation:
+                                                                                                                                                Number of labelsets: 178
+                                                                                                                                                max: 586
+                                                                                                                                                min: 10
+                                                                                                                                                med: 72.50
+                                                                                                                                                avg: 139.41
+                                                                                                                                                std: 154.49
+
+                                                                                                                                                [INFO][2023-03-04 10:09:11,249][base][_apply_transform] Applying transformation:
+                                                                                                                                                Composition of filters:
+                                                                                                                                                        - EntityExistenceFilter(remove_specified=False)
+                                                                                                                                                                - LabelsetRangeFilterSize(min_val=50, max_val=None)
+                                                                                                                                                                        - LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True)
+                                                                                                                                                                        EntityExistenceFilter(remove_specified=False): 100%|████████████████████████████████████████████████████████████████████████████████| 7241/7241 [00:01<00:00, 7102.72it/s]
+                                                                                                                                                                        [INFO][nleval.Compose][__call__] Number of labelsets: 178
+                                                                                                                                                                        max: 551
+                                                                                                                                                                        min: 9
+                                                                                                                                                                        med: 67.00
+                                                                                                                                                                        avg: 129.45
+                                                                                                                                                                        std: 143.44
+
+                                                                                                                                                                        LabelsetRangeFilterSize(min_val=50, max_val=None): 100%|██████████████████████████████████████████████████████████████████████████████| 178/178 [00:00<00:00, 6332.64it/s]
+                                                                                                                                                                        [INFO][nleval.Compose][__call__] Number of labelsets: 104
+                                                                                                                                                                        max: 551
+                                                                                                                                                                        min: 50
+                                                                                                                                                                        med: 147.00
+                                                                                                                                                                        avg: 204.99
+                                                                                                                                                                        std: 146.28
+
+                                                                                                                                                                        LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count
+                                                                                                                                                                        [INFO][nleval.Compose][__call__] Number of labelsets: 88
+                                                                                                                                                                        max: 551
+                                                                                                                                                                        min: 53
+                                                                                                                                                                        med: 182.50
+                                                                                                                                                                        avg: 230.76
+                                                                                                                                                                        std: 144.72
+
+                                                                                                                                                                        [INFO][2023-03-04 10:09:16,257][base][_apply_transform] After transformation:
+                                                                                                                                                                        Number of labelsets: 88
+                                                                                                                                                                        max: 551
+                                                                                                                                                                        min: 53
+                                                                                                                                                                        med: 182.50
+                                                                                                                                                                        avg: 230.76
+                                                                                                                                                                        std: 144.72
+
+                                                                                                                                                                        [INFO][2023-03-04 10:09:16,261][base][_apply_transform] Saved cache transformation to /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DISEASES_ExperimentsFiltered/processed/.cache/b2862c0e20792e489a38a95c09fb55b7/data.gmt
+                                                                                                                                                                        [INFO][nleval][main] Start obtaining stats for DISEASES_ExperimentsFiltered
+                                                                                                                                                                        [INFO][nleval][print_label_stats] Total number of classes: 88
+                                                                                                                                                                        [INFO][nleval][print_label_stats] Total number of effective classes: 1,492
+                                                                                                                                                                        [INFO][nleval][print_label_stats]
+                                                                                                                                                                        |   Label rate |   Number of examples per class (avg) |   Number of examples per class (std) |   Effective number of examples per class (avg) |   Effective number of examples per class (std) |
+                                                                                                                                                                        |-------------:|-------------------------------------:|-------------------------------------:|-----------------------------------------------:|-----------------------------------------------:|
+                                                                                                                                                                        |    0.229727  |                             147.295  |                              93.7934 |                                       2.62601  |                                        7.64631 |
+                                                                                                                                                                        |    0.0765758 |                              43.9091 |                              27.8101 |                                       0.875335 |                                        2.72128 |
+                                                                                                                                                                        |    0.0765758 |                              39.5568 |                              25.6669 |                                       0.875335 |                                        2.96594 |
+                                                                                                                                                                        [INFO][2023-03-04 10:09:16,418][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DISEASES_KnowledgeFiltered/processed/data.gmt
+                                                                                                                                                                        [INFO][2023-03-04 10:09:16,735][base][_apply_transform] Before transformation:
+                                                                                                                                                                        Number of labelsets: 278
+                                                                                                                                                                        max: 520
+                                                                                                                                                                        min: 10
+                                                                                                                                                                        med: 28.50
+                                                                                                                                                                        avg: 60.42
+                                                                                                                                                                        std: 83.28
+
+                                                                                                                                                                        [INFO][2023-03-04 10:09:16,737][base][_apply_transform] Applying transformation:
+                                                                                                                                                                        Composition of filters:
+                                                                                                                                                                                - EntityExistenceFilter(remove_specified=False)
+                                                                                                                                                                                        - LabelsetRangeFilterSize(min_val=50, max_val=None)
+                                                                                                                                                                                                - LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True)
+                                                                                                                                                                                                EntityExistenceFilter(remove_specified=False): 100%|███████████████████████████████████████████████████████████████████████████████| 3382/3382 [00:00<00:00, 10124.74it/s]
+                                                                                                                                                                                                [INFO][nleval.Compose][__call__] Number of labelsets: 278
+                                                                                                                                                                                                max: 505
+                                                                                                                                                                                                min: 8
+                                                                                                                                                                                                med: 26.50
+                                                                                                                                                                                                avg: 58.34
+                                                                                                                                                                                                std: 80.61
+
+                                                                                                                                                                                                LabelsetRangeFilterSize(min_val=50, max_val=None): 100%|██████████████████████████████████████████████████████████████████████████████| 278/278 [00:00<00:00, 5647.55it/s]
+                                                                                                                                                                                                [INFO][nleval.Compose][__call__] Number of labelsets: 86
+                                                                                                                                                                                                max: 505
+                                                                                                                                                                                                min: 50
+                                                                                                                                                                                                med: 95.00
+                                                                                                                                                                                                avg: 139.16
+                                                                                                                                                                                                std: 106.10
+
+                                                                                                                                                                                                LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count
+                                                                                                                                                                                                [INFO][nleval.Compose][__call__] Number of labelsets: 52
+                                                                                                                                                                                                max: 505
+                                                                                                                                                                                                min: 58
+                                                                                                                                                                                                med: 142.50
+                                                                                                                                                                                                avg: 185.31
+                                                                                                                                                                                                std: 114.23
+
+                                                                                                                                                                                                [INFO][2023-03-04 10:09:19,739][base][_apply_transform] After transformation:
+                                                                                                                                                                                                Number of labelsets: 52
+                                                                                                                                                                                                max: 505
+                                                                                                                                                                                                min: 58
+                                                                                                                                                                                                med: 142.50
+                                                                                                                                                                                                avg: 185.31
+                                                                                                                                                                                                std: 114.23
+
+                                                                                                                                                                                                [INFO][2023-03-04 10:09:19,743][base][_apply_transform] Saved cache transformation to /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DISEASES_KnowledgeFiltered/processed/.cache/b2862c0e20792e489a38a95c09fb55b7/data.gmt
+                                                                                                                                                                                                [INFO][nleval][main] Start obtaining stats for DISEASES_KnowledgeFiltered
+                                                                                                                                                                                                [INFO][nleval][print_label_stats] Total number of classes: 52
+                                                                                                                                                                                                [INFO][nleval][print_label_stats] Total number of effective classes: 821
+                                                                                                                                                                                                [INFO][nleval][print_label_stats]
+                                                                                                                                                                                                |   Label rate |   Number of examples per class (avg) |   Number of examples per class (std) |   Effective number of examples per class (avg) |   Effective number of examples per class (std) |
+                                                                                                                                                                                                |-------------:|-------------------------------------:|-------------------------------------:|-----------------------------------------------:|-----------------------------------------------:|
+                                                                                                                                                                                                |    0.113222  |                             120.308  |                              87.0562 |                                       2.35201  |                                        6.9894  |
+                                                                                                                                                                                                |    0.0377602 |                              34.1538 |                              21.3617 |                                       0.784409 |                                        2.94175 |
+                                                                                                                                                                                                |    0.0377602 |                              30.8462 |                              18.683  |                                       0.784409 |                                        3.10609 |
+                                                                                                                                                                                                [INFO][2023-03-04 10:09:19,844][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DISEASES_TextminingFiltered/processed/data.gmt
+                                                                                                                                                                                                [INFO][2023-03-04 10:09:21,332][base][_apply_transform] Before transformation:
+                                                                                                                                                                                                Number of labelsets: 2066
+                                                                                                                                                                                                max: 595
+                                                                                                                                                                                                min: 10
+                                                                                                                                                                                                med: 33.00
+                                                                                                                                                                                                avg: 79.97
+                                                                                                                                                                                                std: 110.35
+
+                                                                                                                                                                                                [INFO][2023-03-04 10:09:21,333][base][_apply_transform] Applying transformation:
+                                                                                                                                                                                                Composition of filters:
+                                                                                                                                                                                                        - EntityExistenceFilter(remove_specified=False)
+                                                                                                                                                                                                                - LabelsetRangeFilterSize(min_val=50, max_val=None)
+                                                                                                                                                                                                                        - LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True)
+                                                                                                                                                                                                                        EntityExistenceFilter(remove_specified=False): 100%|██████████████████████████████████████████████████████████████████████████████| 15287/15287 [00:13<00:00, 1134.38it/s]
+                                                                                                                                                                                                                        [INFO][nleval.Compose][__call__] Number of labelsets: 2066
+                                                                                                                                                                                                                        max: 562
+                                                                                                                                                                                                                        min: 0
+                                                                                                                                                                                                                        med: 30.00
+                                                                                                                                                                                                                        avg: 73.86
+                                                                                                                                                                                                                        std: 102.91
+
+                                                                                                                                                                                                                        LabelsetRangeFilterSize(min_val=50, max_val=None): 100%|████████████████████████████████████████████████████████████████████████████| 2066/2066 [00:00<00:00, 4001.39it/s]
+                                                                                                                                                                                                                        [INFO][nleval.Compose][__call__] Number of labelsets: 739
+                                                                                                                                                                                                                        max: 562
+                                                                                                                                                                                                                        min: 50
+                                                                                                                                                                                                                        med: 122.00
+                                                                                                                                                                                                                        avg: 167.85
+                                                                                                                                                                                                                        std: 125.07
+
+                                                                                                                                                                                                                        LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count
+                                                                                                                                                                                                                        [INFO][nleval.Compose][__call__] Number of labelsets: 356
+                                                                                                                                                                                                                        max: 562
+                                                                                                                                                                                                                        min: 50
+                                                                                                                                                                                                                        med: 202.50
+                                                                                                                                                                                                                        avg: 233.30
+                                                                                                                                                                                                                        std: 138.21
+
+                                                                                                                                                                                                                        [INFO][2023-03-04 10:11:23,302][base][_apply_transform] After transformation:
+                                                                                                                                                                                                                        Number of labelsets: 356
+                                                                                                                                                                                                                        max: 562
+                                                                                                                                                                                                                        min: 50
+                                                                                                                                                                                                                        med: 202.50
+                                                                                                                                                                                                                        avg: 233.30
+                                                                                                                                                                                                                        std: 138.21
+
+                                                                                                                                                                                                                        [INFO][2023-03-04 10:11:23,317][base][_apply_transform] Saved cache transformation to /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/DISEASES_TextminingFiltered/processed/.cache/b2862c0e20792e489a38a95c09fb55b7/data.gmt
+                                                                                                                                                                                                                        [INFO][nleval][main] Start obtaining stats for DISEASES_TextminingFiltered
+                                                                                                                                                                                                                        [INFO][nleval][print_label_stats] Total number of classes: 356
+                                                                                                                                                                                                                        [INFO][nleval][print_label_stats] Total number of effective classes: 8,619
+                                                                                                                                                                                                                        [INFO][nleval][print_label_stats]
+                                                                                                                                                                                                                        |   Label rate |   Number of examples per class (avg) |   Number of examples per class (std) |   Effective number of examples per class (avg) |   Effective number of examples per class (std) |
+                                                                                                                                                                                                                        |-------------:|-------------------------------------:|-------------------------------------:|-----------------------------------------------:|-----------------------------------------------:|
+                                                                                                                                                                                                                        |     0.429727 |                             174.604  |                             117.715  |                                       0.850331 |                                       1.37203  |
+                                                                                                                                                                                                                        |     0.143242 |                              34.0421 |                              21.2602 |                                       0.283444 |                                       0.723092 |
+                                                                                                                                                                                                                        |     0.143242 |                              24.6545 |                              14.4532 |                                       0.283444 |                                       0.844888 |
+                                                                                                                                                                                                                        [INFO][2023-03-04 10:11:23,675][base][load_processed_data] Load processed file /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/HPO/processed/data.gmt
+                                                                                                                                                                                                                        [INFO][2023-03-04 10:11:31,426][base][_apply_transform] Before transformation:
+                                                                                                                                                                                                                        Number of labelsets: 319
+                                                                                                                                                                                                                        max: 580
+                                                                                                                                                                                                                        min: 10
+                                                                                                                                                                                                                        med: 45.00
+                                                                                                                                                                                                                        avg: 92.94
+                                                                                                                                                                                                                        std: 121.16
+
+                                                                                                                                                                                                                        [INFO][2023-03-04 10:11:31,431][base][_apply_transform] Applying transformation:
+                                                                                                                                                                                                                        Composition of filters:
+                                                                                                                                                                                                                                - EntityExistenceFilter(remove_specified=False)
+                                                                                                                                                                                                                                        - LabelsetRangeFilterSize(min_val=50, max_val=None)
+                                                                                                                                                                                                                                                - LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count_negatives=True)
+                                                                                                                                                                                                                                                EntityExistenceFilter(remove_specified=False): 100%|████████████████████████████████████████████████████████████████████████████████| 3782/3782 [00:00<00:00, 8437.33it/s]
+                                                                                                                                                                                                                                                [INFO][nleval.Compose][__call__] Number of labelsets: 319
+                                                                                                                                                                                                                                                max: 562
+                                                                                                                                                                                                                                                min: 9
+                                                                                                                                                                                                                                                med: 43.00
+                                                                                                                                                                                                                                                avg: 88.78
+                                                                                                                                                                                                                                                std: 115.78
+
+                                                                                                                                                                                                                                                LabelsetRangeFilterSize(min_val=50, max_val=None): 100%|██████████████████████████████████████████████████████████████████████████████| 319/319 [00:00<00:00, 5897.45it/s]
+                                                                                                                                                                                                                                                [INFO][nleval.Compose][__call__] Number of labelsets: 139
+                                                                                                                                                                                                                                                max: 562
+                                                                                                                                                                                                                                                min: 50
+                                                                                                                                                                                                                                                med: 120.00
+                                                                                                                                                                                                                                                avg: 171.54
+                                                                                                                                                                                                                                                std: 135.83
+
+                                                                                                                                                                                                                                                LabelsetRangeFilterSplit(splitter=RatioPartition(property_converter=GenePropertyConverter(name='PubMedCount'), ascending=False, ratios=(0.6, 0.2, 0.2)), min_val=10, count
+                                                                                                                                                                                                                                                [INFO][nleval.Compose][__call__] Number of labelsets: 91
+                                                                                                                                                                                                                                                max: 562
+                                                                                                                                                                                                                                                min: 55
+                                                                                                                                                                                                                                                med: 190.00
+                                                                                                                                                                                                                                                avg: 225.55
+                                                                                                                                                                                                                                                std: 139.78
+
+                                                                                                                                                                                                                                                [INFO][2023-03-04 10:11:36,401][base][_apply_transform] After transformation:
+                                                                                                                                                                                                                                                Number of labelsets: 91
+                                                                                                                                                                                                                                                max: 562
+                                                                                                                                                                                                                                                min: 55
+                                                                                                                                                                                                                                                med: 190.00
+                                                                                                                                                                                                                                                avg: 225.55
+                                                                                                                                                                                                                                                std: 139.78
+
+                                                                                                                                                                                                                                                [INFO][2023-03-04 10:11:36,405][base][_apply_transform] Saved cache transformation to /mnt/ufs18/home-026/liurenmi/repo/nleval-benchmark/experiments/disease_gsc_channels/datasets/HPO/processed/.cache/b2862c0e20792e489a38a95c09fb55b7/data.gmt
+                                                                                                                                                                                                                                                [INFO][nleval][main] Start obtaining stats for HPO
+                                                                                                                                                                                                                                                [INFO][nleval][print_label_stats] Total number of classes: 91
+                                                                                                                                                                                                                                                [INFO][nleval][print_label_stats] Total number of effective classes: 2,094
+                                                                                                                                                                                                                                                [INFO][nleval][print_label_stats]
+                                                                                                                                                                                                                                                |   Label rate |   Number of examples per class (avg) |   Number of examples per class (std) |   Effective number of examples per class (avg) |   Effective number of examples per class (std) |
+                                                                                                                                                                                                                                                |-------------:|-------------------------------------:|-------------------------------------:|-----------------------------------------------:|-----------------------------------------------:|
+                                                                                                                                                                                                                                                |    0.12319   |                             149.791  |                              97.9307 |                                       1.00334  |                                        1.62051 |
+                                                                                                                                                                                                                                                |    0.0411023 |                              39.022  |                              25.7093 |                                       0.334766 |                                        0.96805 |
+                                                                                                                                                                                                                                                |    0.0411023 |                              36.7363 |                              25.3194 |                                       0.334766 |                                        1.14271 |))))))))))
