@@ -4,7 +4,12 @@
 TEMPLATE=job_template.sb
 PROJECT_SLURM_DIR=../../run
 
-NETWORKS=(HumanNet ConsensusPathDB)
+NETWORKS=(
+    HumanNet
+    HumanNet-FN
+    HumanNet-CC
+    ConsensusPathDB
+)
 LABELS=(
     DisGeNET
     DisGeNET_Curated
@@ -59,8 +64,10 @@ function submit_job {
 
     if (( gpu == 1 )); then
         full_script="sbatch -J ${job_name} -o ${slurm_out_path} --gres=gpu:v100:1 ${TEMPLATE} ${script}"
+    elif [[ $model == "ADJ-LogReg" ]] && [[ $label == "DISEASES_TextminingFiltered" ]] || [[ $label == "DisGeNET_BEFREE" ]]; then
+        # Need to allocate extratime for Adj-LogReg for large gene set collections
+        full_script="sbatch -J ${job_name} -o ${slurm_out_path} -C NOAUTO:amd20 -t 24:00:00 ${TEMPLATE} ${script}"
     else
-        # full_script="sbatch -J ${job_name} -o ${slurm_out_path} -C NOAUTO:amd20 -t 24:00:00 ${TEMPLATE} ${script}"
         full_script="sbatch -J ${job_name} -o ${slurm_out_path} -C NOAUTO:amd20 ${TEMPLATE} ${script}"
     fi
 
