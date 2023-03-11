@@ -25,6 +25,20 @@ python aggregate_results.py -d -m main -b experiments/disease_gsc_channels
 
 ## Notes
 
+- `[2023-03-07]` Add `HumanNet-FN` and `HumanNet-CC` networks
+    - TODOs
+        - [ ] Rerun out-of-time runs (DisGeNET x Adj-LogReg). We can skip the
+          analysis for DisGeNET x Adj-LogReg.
+            - [ ] consensuspathdb-disgenet-adj-logreg
+            - [ ] humannet-cc-disgenet-adj-logreg
+            - [ ] humannet-cc-disgenet-adj-logreg
+            - [ ] humannet-disgenet-adj-logreg
+            - [ ] humannet-disgenet-adj-logreg
+            - [ ] humannet-disgenet-adj-logreg
+            - [ ] humannet-disgenet-adj-logreg
+            - [ ] humannet-fn-disgenet-adj-logreg
+            - [ ] humannet-fn-disgenet-adj-logreg
+
 - `[2023-02-17]` Add `ConsensusPathDB` network to the experiment.
     - TODOs
         - [x] Rerun the following due to time out (allocate 6hrs)
@@ -47,6 +61,10 @@ python aggregate_results.py -d -m main -b experiments/disease_gsc_channels
         performing GNN).
 
 ## Logs notes
+- [logs/get_data_2023-03-04.txt](logs/get_data_2023-03-04.txt)
+  Add `HumanNet-FN` and `HumanNet-CC` networks in addition to the fully
+  integrated `HumanNet-XC` (switched to `latest` version, but only updated
+  data related to `HumanNet`).
 - [logs/aggregate_results_2023-02-27.txt](logs/aggregate_results_2023-02-27.txt)
   Fix out-of-time runs again (need to allocate 24 hours)
 - [logs/aggregate_results_2023-02-21.txt](logs/aggregate_results_2023-02-21.txt)

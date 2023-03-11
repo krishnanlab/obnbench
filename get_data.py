@@ -12,6 +12,20 @@ from omegaconf import DictConfig, OmegaConf
 from utils import get_data_dir, get_gene_list_path, normalize_path
 
 
+def get_network_construct(network_name):
+    # Try to extract channel name {network}-{channel}
+    if len(terms := network_name.split("-")) == 1:
+        name = network_name
+        kwargs = {}
+    else:
+        name, channel = terms
+        kwargs = {"channel": channel}
+
+    gcls = getattr(data, name)
+
+    return gcls, kwargs
+
+
 def load_data(
     homedir: Path,
     network_name: str,
@@ -20,7 +34,8 @@ def load_data(
 ):
     datadir = get_data_dir(homedir)
 
-    g = getattr(data, network_name)(datadir)
+    gcls, kwargs = get_network_construct(network_name)
+    g = gcls(datadir, **kwargs)
 
     splitter, filter_ = get_splitter_filter(homedir)
     lsc = getattr(data, label_name)(datadir, transform=filter_)
@@ -111,7 +126,8 @@ def main(cfg: DictConfig):
 
     common_genes = None
     for network_name in cfg.networks:
-        g = getattr(data, network_name)(datadir, version=cfg.data_version)
+        gcls, kwargs = get_network_construct(network_name)
+        g = gcls(datadir, version=cfg.data_version, **kwargs)
         print(
             f"{network_name:<15}# nodes = {g.num_nodes:,}, # edges = {g.num_edges:,}, "
             f"edge density = {g.num_edges / g.num_nodes / (g.num_nodes - 1):.4f}",
