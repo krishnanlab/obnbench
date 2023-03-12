@@ -155,12 +155,26 @@ class GNN(nn.Module):
         super().__init__()
         dim_hid = conv_kwargs["hidden_channels"]
 
-        self.pre_mp = pygnn.MLP(in_channels=dim_in, hidden_channels=dim_hid, out_channels=dim_hid,
-                                num_layers=num_pre_mp_layers)
-        self.conv = getattr(pygnn, conv_name)(in_channels=dim_hid, out_channels=dim_hid, jk="last", dropout=0.5,
-                                              norm=pygnn.DiffGroupNorm(dim_hid, 5), **conv_kwargs)
-        self.post_mp = pygnn.MLP(in_channels=dim_hid, hidden_channels=dim_hid, out_channels=dim_out,
-                                 num_layers=num_post_mp_layers)
+        self.pre_mp = pygnn.MLP(
+            in_channels=dim_in,
+            hidden_channels=dim_hid,
+            out_channels=dim_hid,
+            num_layers=num_pre_mp_layers,
+        )
+        self.conv = getattr(pygnn, conv_name)(
+            in_channels=dim_hid,
+            out_channels=dim_hid,
+            jk="last",
+            dropout=0.5,
+            norm=pygnn.DiffGroupNorm(dim_hid, 5),
+            **conv_kwargs,
+        )
+        self.post_mp = pygnn.MLP(
+            in_channels=dim_hid,
+            hidden_channels=dim_hid,
+            out_channels=dim_out,
+            num_layers=num_post_mp_layers,
+        )
         nleval.logger.info(f"Model constructed:\n{self}")
 
     def forward(self, x, adj):
