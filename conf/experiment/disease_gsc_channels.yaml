@@ -15,6 +15,6 @@ labels:
   - HPO
 networks:
   - HumanNet  # same as HumanNet-XC
-  - HumanNet-FN
-  - HumanNet-CC
+  - HumanNet_FN
+  - HumanNet_CC
   - ConsensusPathDB

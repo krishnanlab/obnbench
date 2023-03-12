@@ -6,8 +6,8 @@ PROJECT_SLURM_DIR=../../run
 
 NETWORKS=(
     HumanNet
-    HumanNet-FN
-    HumanNet-CC
+    HumanNet_FN
+    HumanNet_CC
     ConsensusPathDB
 )
 LABELS=(
