@@ -6,6 +6,9 @@ import nleval
 import numpy as np
 import torch.nn as nn
 from nleval import Dataset
+from nleval.ext.pecanpy import pecanpy_embed
+from nleval.ext.grape import grape_embed
+from nleval.ext.sknetwork import sknetwork_embed
 from nleval.feature import FeatureVec
 from nleval.metric import auroc, log2_auprc_prior
 from nleval.model.label_propagation import RandomWalkRestart
@@ -13,7 +16,6 @@ from nleval.model_trainer.gnn import SimpleGNNTrainer
 from nleval.model_trainer import SupervisedLearningTrainer, LabelPropagationTrainer
 from nleval.util.logger import display_pbar
 from omegaconf import DictConfig, OmegaConf
-from pecanpy.pecanpy import PreCompFirstOrder
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import KBinsDiscretizer
 from sklearn.svm import LinearSVC
@@ -24,7 +26,19 @@ from get_data import load_data
 from utils import get_device, get_num_workers, normalize_path
 
 GNN_METHODS = ["GCN", "GAT", "GIN", "GraphSAGE"]
-GML_METHODS = ["ADJ-LogReg", "ADJ-SVM", "N2V-LogReg", "N2V-SVM"]
+GML_METHODS = [
+    "ADJ-LogReg",
+    "ADJ-SVM",
+    "N2V-LogReg",
+    "N2V-SVM",
+    "LINE-LogReg",
+    "HOPE-LogReg",
+    "LapEig-LogReg",
+    "Walklets-LogReg",
+    "SVD-LogReg",
+    "RandNE-LogReg",
+    "LouvainNE-LogReg",
+]
 ALL_METHODS = GNN_METHODS + GML_METHODS + ["LabelProp"]
 METRICS = {"log2pr": log2_auprc_prior, "auroc": auroc}
 
@@ -184,16 +198,28 @@ def set_up_mdl(cfg: DictConfig, g, lsc, log_level="INFO"):
                                        log_path=log_path, **trainer_opts)
 
     elif mdl_name in GML_METHODS:
-        feat = dense_g.mat
-
-        # Node2vec embedding
-        if mdl_name.startswith("N2V"):
-            pecanpy_verbose = display_pbar(log_level)
-            pecanpy_g = PreCompFirstOrder.from_mat(dense_g.mat, g.node_ids,
-                                                   workers=cfg.num_workers,
-                                                   verbose=pecanpy_verbose)
-            feat = pecanpy_g.embed(verbose=pecanpy_verbose, **mdl_opts)
-        feat = FeatureVec.from_mat(feat, g.idmap)
+        # Get network features
+        if mdl_name.startswith("ADJ"):
+            feat = FeatureVec.from_mat(dense_g.mat, g.idmap)
+        elif mdl_name.startswith("N2V"):
+            feat = pecanpy_embed(g, mode="PreCompFirstOrder", workers=cfg.num_workers,
+                                 verbose=display_pbar(log_level), **mdl_opts)
+        elif mdl_name.startswith("LINE"):
+            feat = grape_embed(g, "FirstOrderLINEEnsmallen", dim=128)
+        elif mdl_name.startswith("HOPE"):
+            feat = grape_embed(g, "HOPEEnsmallen", dim=128)
+        elif mdl_name.startswith("LapEig"):
+            feat = grape_embed(g, "LaplacianEigenmapsEnsmallen", dim=128)
+        elif mdl_name.startswith("Walklets"):
+            feat = grape_embed(g, "WalkletsSkipGramEnsmallen", dim=128)
+        elif mdl_name.startswith("SVD"):
+            feat = sknetwork_embed(g, "SVD", dim=128)
+        elif mdl_name.startswith("RandNE"):
+            feat = sknetwork_embed(g, "RandomProjection", dim=128)
+        elif mdl_name.startswith("LouvainNE"):
+            feat = sknetwork_embed(g, "LouvainNE", dim=128)
+        else:
+            raise ValueError(f"Unrecognized model {mdl_name!r}")
 
         # Initialize model
         if mdl_name.endswith("LogReg"):
