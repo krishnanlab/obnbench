@@ -31,7 +31,8 @@ GML_METHODS = [
     "ADJ-SVM",
     "N2V-LogReg",
     "N2V-SVM",
-    "LINE-LogReg",
+    "LINE1-LogReg",
+    "LINE2-LogReg",
     "HOPE-LogReg",
     "LapEig-LogReg",
     "Walklets-LogReg",
@@ -218,8 +219,10 @@ def set_up_mdl(cfg: DictConfig, g, lsc, log_level="INFO"):
         elif mdl_name.startswith("N2V"):
             feat = pecanpy_embed(g, mode="PreCompFirstOrder", workers=cfg.num_workers,
                                  verbose=display_pbar(log_level), **mdl_opts)
-        elif mdl_name.startswith("LINE"):
+        elif mdl_name.startswith("LINE1"):
             feat = grape_embed(g, "FirstOrderLINEEnsmallen", dim=128)
+        elif mdl_name.startswith("LINE2"):
+            feat = grape_embed(g, "SecondOrderLINEEnsmallen", dim=128)
         elif mdl_name.startswith("HOPE"):
             feat = grape_embed(g, "HOPEEnsmallen", dim=128)
         elif mdl_name.startswith("LapEig"):
