@@ -109,7 +109,7 @@ def get_splitter_filter(homedir: Path, log_level: str = "INFO"):
     filter_ = label.filters.Compose(
         label.filters.EntityExistenceFilter(common_genes, log_level=log_level),
         label.filters.LabelsetRangeFilterSize(min_val=50, log_level=log_level),
-        label.filters.LabelsetRangeFilterSplit(min_val=10, splitter=splitter),
+        label.filters.LabelsetRangeFilterSplit(min_val=5, splitter=splitter),
         log_level=log_level,
     )
 
