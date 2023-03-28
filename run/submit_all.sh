@@ -2,10 +2,30 @@
 
 mkdir -p ../slurm_history
 
-networks=(BioGRID HumanNet STRING)
-labels=(DisGeNET GOBP)
-gml_models=(ADJ-LogReg ADJ-SVM N2V-LogReg N2V-SVM LabelProp)
-gnn_models=(GCN GIN GAT GraphSAGE)
+networks=(
+    BioGRID
+    ConsensusPathDB
+    HumanNet
+    STRING
+)
+labels=(
+    DisGeNET
+    DISEASES
+    GOBP
+)
+gml_models=(
+    ADJ-LogReg
+    ADJ-SVM
+    N2V-LogReg
+    N2V-SVM
+    LabelProp
+)
+gnn_models=(
+    GCN
+    GIN
+    GAT
+    GraphSAGE
+)
 
 function submit_job {
     network=$1
@@ -30,7 +50,7 @@ function submit_job {
 for network in ${networks[@]}; do
     for label in ${labels[@]}; do
         for model in ${gnn_models[@]}; do
-            if [[ $network == STRING ]] && [[ $model == GAT ]]; then
+            if [[ $network == ConsensusPathDB ]] || [[ $network == STRING ]] && [[ $model == GAT ]]; then
                 continue  # OOM on V100
             elif [[ $network == STRING ]] && [[ $model == GCN ]]; then
                 submit_job $network $label $model 1  # 2
