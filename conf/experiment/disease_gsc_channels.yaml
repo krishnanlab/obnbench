@@ -1,7 +1,7 @@
 # @package _global_
 ---
 homedir: experiments/disease_gsc_channels
-data_version: latest
+data_version: nledata-v0.1.0-dev6
 labels:
   - DisGeNET
   - DisGeNET_Curated
@@ -15,6 +15,6 @@ labels:
   - HPO
 networks:
   - HumanNet  # same as HumanNet-XC
-  - HumanNet-FN
-  - HumanNet-CC
+  - HumanNet_FN
+  - HumanNet_CC
   - ConsensusPathDB

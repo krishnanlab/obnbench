@@ -1,10 +1,23 @@
 ---
 homedir: .
-data_version: nledata-v0.1.0-dev2
+data_version: nledata-v0.1.0-dev6
 labels:
-  - DisGeNET
   - GOBP
+  - DisGeNET
+  - DISEASES
+  - DisGeNET_Curated
+  - DisGeNET_BEFREE
+  - DisGeNET_Animal
+  - DisGeNET_GWAS
+  - DISEASES_ExperimentsFiltered
+  - DISEASES_KnowledgeFiltered
+  - DISEASES_TextminingFiltered
+  - HPO
 networks:
   - STRING
   - BioGRID
-  - HumanNet
+  - HumanBaseTopGlobal
+  - HumanNet  # same as HumanNet-XC
+  - HumanNet_FN
+  - HumanNet_CC
+  - ConsensusPathDB
