@@ -29,6 +29,9 @@ optim_params:
     lr: 0.001
     hid_dim: 128
     num_layers: 5
+    addopts:
+      v2: true
+      heads: 8
   GCN:
     lr: 0.001
     hid_dim: 128
@@ -41,6 +44,9 @@ optim_params:
     lr: 0.001
     hid_dim: 128
     num_layers: 5
+    addopts:
+      aggr: add
+      normalize: true
   LabelProp:
     beta: 0.9
   N2V-LogReg:

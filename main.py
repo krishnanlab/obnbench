@@ -15,7 +15,7 @@ from nleval.model.label_propagation import RandomWalkRestart
 from nleval.model_trainer.gnn import SimpleGNNTrainer
 from nleval.model_trainer import SupervisedLearningTrainer, LabelPropagationTrainer
 from nleval.util.logger import display_pbar
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig, OmegaConf, open_dict
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import KBinsDiscretizer
 from sklearn.svm import LinearSVC
@@ -66,7 +66,8 @@ def parse_params(cfg: DictConfig) -> Tuple[Dict[str, int], Dict[str, int], str, 
     if not cfg.hp_tune and not mdl_name.startswith("ADJ"):
         nleval.logger.info(f"{cfg.hp_tune=}, overwriting model parameters using optimal params")
         nleval.logger.info(f"  Before: {params=}")
-        params.update(optim_params or {})
+        with open_dict(params):
+            params.update(optim_params or {})
         nleval.logger.info(f"  After: {params=}")
 
     hp_opts, mdl_opts, trainer_opts = parser(params)
@@ -85,6 +86,8 @@ def _parse_gnn_params(gnn_params: DictConfig):
         "hidden_channels": gnn_params.hid_dim,
         "num_layers": gnn_params.num_layers,
     }
+    if "addopts" in gnn_params:
+        gnn_opts.update(gnn_params.addopts)
     trainer_opts = {
         "lr": gnn_params.lr,
         "epochs": gnn_params.epochs,
