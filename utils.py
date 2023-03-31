@@ -39,4 +39,5 @@ def get_num_workers(num_workers: int) -> int:
         )
     elif num_workers < 0:
         raise ValueError(f"num_workers should be a non-negative, got {num_workers}")
+    logger.info(f"Setting number of workers to: {default_num_workers}")
     return default_num_workers
