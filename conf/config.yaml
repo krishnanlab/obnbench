@@ -4,6 +4,7 @@ device: auto
 network: ???
 label: ???
 model: ???
+name_tag: null
 runid: 0
 num_workers: 0  # 0 uses all available threads
 out_dir: results

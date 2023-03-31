@@ -123,9 +123,13 @@ def _get_paths(cfg: DictConfig, opt: Optional[Dict[str, float]] = None) -> Tuple
 
     # Only results are saved directly under the out_dir as json, no logs
     # <out_dir>/{network}_{label}_{model}_{runid}.json
+    # If name_tag is specified, then
+    # <out_dir>/{network}_{label}_{model}_{name_tag}_{runid}.json
     if not cfg.hp_tune:
         log_path = None
         exp_name = "_".join([i.lower() for i in (cfg.network, cfg.label, cfg.model)])
+        if cfg.name_tag is not None:
+            exp_name = f"{exp_name}_{cfg.name_tag}"
         result_path = os.path.join(cfg.homedir, out_dir, f"{exp_name}_{cfg.runid}.json")
 
     # Nested dir struct for organizing different hyperparameter tuning exps
