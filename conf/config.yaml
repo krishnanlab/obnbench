@@ -18,6 +18,7 @@ gnn_params:
   epochs: 20000
   eval_steps: 100
   node_feat_dim: 32
+  node_feat_type: onehotlogdeg
 n2v_params:
   hid_dim: 128
   walk_length: 80
