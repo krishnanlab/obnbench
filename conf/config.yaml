@@ -42,6 +42,8 @@ optim_params:
     lr: 0.001
     hid_dim: 128
     num_layers: 5
+    addopts:
+      aggr: mean
   GraphSAGE:
     lr: 0.001
     hid_dim: 128

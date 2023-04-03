@@ -14,6 +14,7 @@ python aggregate_results.py
 
 ## Notes
 
+- `[2023-03-31]` Fixed GIN in PyG 2.3 (use mean aggr)
 - `[2023-03-29]` First run
     - Tested node features
         - `onehotlogdeg` [32, 64, 128]
