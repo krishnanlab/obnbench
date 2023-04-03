@@ -4,8 +4,10 @@ import os
 import hydra
 import nleval
 import numpy as np
+import scipy.sparse as sp
 import torch.nn as nn
 from nleval import Dataset
+from nleval.graph import DenseGraph
 from nleval.ext.pecanpy import pecanpy_embed
 from nleval.ext.grape import grape_embed
 from nleval.ext.sknetwork import sknetwork_embed
@@ -15,9 +17,10 @@ from nleval.model.label_propagation import RandomWalkRestart
 from nleval.model_trainer.gnn import SimpleGNNTrainer
 from nleval.model_trainer import SupervisedLearningTrainer, LabelPropagationTrainer
 from nleval.util.logger import display_pbar
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig, OmegaConf, open_dict
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import KBinsDiscretizer
+from sklearn.random_projection import GaussianRandomProjection, SparseRandomProjection
 from sklearn.svm import LinearSVC
 from torch_geometric import nn as pygnn
 from typing import Dict, List, Optional, Tuple, Union
@@ -66,7 +69,8 @@ def parse_params(cfg: DictConfig) -> Tuple[Dict[str, int], Dict[str, int], str, 
     if not cfg.hp_tune and not mdl_name.startswith("ADJ"):
         nleval.logger.info(f"{cfg.hp_tune=}, overwriting model parameters using optimal params")
         nleval.logger.info(f"  Before: {params=}")
-        params.update(optim_params or {})
+        with open_dict(params):
+            params.update(optim_params or {})
         nleval.logger.info(f"  After: {params=}")
 
     hp_opts, mdl_opts, trainer_opts = parser(params)
@@ -85,6 +89,8 @@ def _parse_gnn_params(gnn_params: DictConfig):
         "hidden_channels": gnn_params.hid_dim,
         "num_layers": gnn_params.num_layers,
     }
+    if "addopts" in gnn_params:
+        gnn_opts.update(gnn_params.addopts)
     trainer_opts = {
         "lr": gnn_params.lr,
         "epochs": gnn_params.epochs,
@@ -120,9 +126,13 @@ def _get_paths(cfg: DictConfig, opt: Optional[Dict[str, float]] = None) -> Tuple
 
     # Only results are saved directly under the out_dir as json, no logs
     # <out_dir>/{network}_{label}_{model}_{runid}.json
+    # If name_tag is specified, then
+    # <out_dir>/{network}_{label}_{model}_{name_tag}_{runid}.json
     if not cfg.hp_tune:
         log_path = None
         exp_name = "_".join([i.lower() for i in (cfg.network, cfg.label, cfg.model)])
+        if cfg.name_tag is not None:
+            exp_name = f"{exp_name}_{cfg.name_tag}"
         result_path = os.path.join(cfg.homedir, out_dir, f"{exp_name}_{cfg.runid}.json")
 
     # Nested dir struct for organizing different hyperparameter tuning exps
@@ -184,30 +194,68 @@ class GNN(nn.Module):
         return x
 
 
+def construct_features(cfg: DictConfig, g: DenseGraph) -> nleval.feature.FeatureVec:
+    feat_type = cfg.gnn_params.node_feat_type
+    feat_dim = cfg.gnn_params.node_feat_dim
+
+    if feat_type == "onehotlogdeg":
+        log_deg = np.log(g.mat.sum(axis=1, keepdims=True))
+        feat_ary = KBinsDiscretizer(
+            n_bins=feat_dim,
+            encode="onehot-dense",
+            strategy="uniform",
+        ).fit_transform(log_deg)
+        nleval.logger.info(f"Bins stats: {feat_ary.sum(0)}")
+    elif feat_type in "const":
+        if feat_dim != 1:
+            raise ValueError(f"Constant feature only allows dimension of 1, got {feat_dim!r}")
+        feat_ary = np.ones((g.size, 1))
+    elif feat_type in "logdeg":
+        if feat_dim != 1:
+            raise ValueError(f"Degree feature only allows dimension of 1, got {feat_dim!r}")
+        feat_ary = np.log(g.mat.sum(axis=1, keepdims=True))
+    elif feat_type == "random":
+        feat_ary = np.random.default_rng(0).random((g.size, feat_dim))
+    elif feat_type == "node2vec":
+        feat_ary = pecanpy_embed(g, mode="DenseOTF", workers=cfg.num_workers,
+                                 verbose=display_pbar(cfg.log_level), dim=feat_dim, as_array=True)
+    elif feat_type == "lappe":
+        L = sp.csr_matrix(np.diag(g.mat.sum(1)) - g.mat)
+        assert (L != L.T).size == 0, "The input network must be undirected."
+        eigvals, eigvecs = sp.linalg.eigsh(L, which="SM", k=feat_dim + 1)
+        assert (eigvals[1:] > 1e-8).all(), f"Network appears to be disconnected.\n{eigvals=}"
+        feat_ary = eigvecs[:, 1:] / np.sqrt((eigvecs[:, 1:] ** 2).sum(0))
+    elif feat_type == "rwse":
+        P = g.mat / g.mat.sum(0)
+        feat_ary = np.zeros((g.size, feat_dim))
+        vec = np.ones(g.size)
+        for i in range(feat_dim):
+            vec = P @ vec
+            feat_ary[:, i] = vec
+    elif feat_type == "randprojg":
+        feat_ary = GaussianRandomProjection(n_components=feat_dim).fit_transform(g.mat)
+    elif feat_type == "randprojs":
+        feat_ary = SparseRandomProjection(n_components=feat_dim, dense_output=True).fit_transform(g.mat)
+        nleval.logger.info(f"Zero rate: {(feat_ary == 0).sum() / feat_ary.size:.2%}")
+        nleval.logger.info(f"All zero rate: {(feat_ary == 0).all(1).sum() / feat_ary.shape[0]:.2%}")
+    else:
+        raise ValueError(f"Unknown feature type {feat_type!r}")
+
+    return nleval.feature.FeatureVec.from_mat(feat_ary, g.idmap)
+
+
 def set_up_mdl(cfg: DictConfig, g, lsc, log_level="INFO"):
     """Set up model, trainer, graph, and features."""
     mdl_name = cfg.model
-    feat_dim = cfg.gnn_params.node_feat_dim
+    num_tasks = lsc.size
 
     feat = None
     dense_g = g.to_dense_graph()
     mdl_opts, trainer_opts, result_path, log_path = parse_params(cfg)
 
     if mdl_name in GNN_METHODS:
-        num_tasks = lsc.size
-        if mdl_name == "GraphSAGE":
-            mdl_opts.update({"aggr": "add", "normalize": True})
-
-        one_hot_disc_deg = KBinsDiscretizer(
-            n_bins=feat_dim,
-            encode="onehot-dense",
-            strategy="uniform",
-        ).fit_transform(np.log(dense_g.mat.sum(axis=1, keepdims=True)))
-        nleval.logger.info(f"Bins stats: {one_hot_disc_deg.sum(0)}")
-        feat = nleval.feature.FeatureVec.from_mat(one_hot_disc_deg, g.idmap)
-
-        mdl = GNN(dim_in=feat_dim, dim_out=num_tasks, conv_name=mdl_name, conv_kwargs=mdl_opts)
-
+        feat = construct_features(cfg, dense_g)
+        mdl = GNN(dim_in=feat.dim, dim_out=num_tasks, conv_name=mdl_name, conv_kwargs=mdl_opts)
         mdl_trainer = SimpleGNNTrainer(METRICS, metric_best=cfg.metric_best,
                                        device=cfg.device, log_level=log_level,
                                        log_path=log_path, **trainer_opts)
@@ -290,7 +338,6 @@ def get_gnn_results(mdl, dataset, device) -> Dict[str, List[float]]:
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg: DictConfig):
     nleval.logger.info(f"Running with settings:\n{OmegaConf.to_yaml(cfg)}")
-
     cfg.homedir = normalize_path(cfg.homedir)
     cfg.device = get_device(cfg.device)
     cfg.num_workers = get_num_workers(cfg.num_workers)

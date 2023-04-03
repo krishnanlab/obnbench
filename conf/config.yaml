@@ -4,6 +4,7 @@ device: auto
 network: ???
 label: ???
 model: ???
+name_tag: null
 runid: 0
 num_workers: 0  # 0 uses all available threads
 out_dir: results
@@ -17,6 +18,7 @@ gnn_params:
   epochs: 20000
   eval_steps: 100
   node_feat_dim: 32
+  node_feat_type: onehotlogdeg
 n2v_params:
   hid_dim: 128
   walk_length: 80
@@ -29,6 +31,9 @@ optim_params:
     lr: 0.001
     hid_dim: 128
     num_layers: 5
+    addopts:
+      v2: true
+      heads: 8
   GCN:
     lr: 0.001
     hid_dim: 128
@@ -37,10 +42,15 @@ optim_params:
     lr: 0.001
     hid_dim: 128
     num_layers: 5
+    addopts:
+      aggr: mean
   GraphSAGE:
     lr: 0.001
     hid_dim: 128
     num_layers: 5
+    addopts:
+      aggr: add
+      normalize: true
   LabelProp:
     beta: 0.9
   N2V-LogReg:
