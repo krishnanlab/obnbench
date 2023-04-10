@@ -257,6 +257,7 @@ def set_up_mdl(cfg: DictConfig, g, lsc, log_level="INFO"):
         feat = construct_features(cfg, dense_g)
         mdl = GNN(dim_in=feat.dim, dim_out=num_tasks, conv_name=mdl_name, conv_kwargs=mdl_opts)
         mdl_trainer = SimpleGNNTrainer(METRICS, metric_best=cfg.metric_best,
+                                       use_negative=cfg.gnn_params.use_negative,
                                        device=cfg.device, log_level=log_level,
                                        log_path=log_path, **trainer_opts)
 
@@ -324,14 +325,19 @@ def get_gnn_results(mdl, dataset, device) -> Dict[str, List[float]]:
     """Generate final results for the GNN model."""
     results = {}
     data = dataset.to_pyg_data(device=device)
+
+    mdl.eval()
+    y_pred = mdl(data.x, data.edge_index).detach().cpu().numpy()
+    y_true = dataset.y
+    y_mask = dataset.y_mask
+
     for metric_name, metric_func in METRICS.items():
-        mdl.eval()
-        y_pred = mdl(data.x, data.edge_index).detach().cpu().numpy()
-        y_true = dataset.y
         for mask_name in dataset.masks:
             mask = dataset.masks[mask_name][:, 0]
-            scores = metric_func(y_true[mask], y_pred[mask], reduce="none")
+            scores = metric_func(y_true[mask], y_pred[mask], reduce="none",
+                                 y_mask=y_mask[mask])
             results[f"{mask_name}_{metric_name}"] = scores
+
     return results
 
 
@@ -353,7 +359,7 @@ def main(cfg: DictConfig):
         mdl_trainer.train(mdl, dataset)
         results = get_gnn_results(mdl, dataset, cfg.device)
     else:
-        results = mdl_trainer.eval_multi_ovr(mdl, dataset)
+        results = mdl_trainer.eval_multi_ovr(mdl, dataset, consider_negative=True)
 
     # Save results as JSON
     results_json = results_to_json(lsc.label_ids, results)
