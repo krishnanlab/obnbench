@@ -19,6 +19,7 @@ gnn_params:
   eval_steps: 100
   node_feat_dim: 32
   node_feat_type: onehotlogdeg
+  use_negative: true
 n2v_params:
   hid_dim: 128
   walk_length: 80

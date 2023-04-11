@@ -19,8 +19,8 @@ def parse_args() -> Tuple[argparse.Namespace, logging.Logger]:
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-b", "--basedir", default=".", help="Base directory")
-    parser.add_argument("-m", "--mode", required=True, choices=["main", "hp_tune"],
-                        help="'main' and 'hp' for main and hyperparameter tuning experiments.")
+    parser.add_argument("-m", "--mode", required=True, choices=["main", "hp_tune", "tag"],
+                        help="'main' and 'hp_tune' for main and hyperparameter tuning experiments.")
     parser.add_argument("-p", "--results_path", default="auto",
                         help="Path to the results directory, infer from 'mode' if set to 'auto'.")
     parser.add_argument("-n", "--dry_run", action="store_true",
@@ -85,6 +85,24 @@ def _agg_hp_results(
     return pd.concat(df_lst)
 
 
+def _agg_tag_results(
+    results_path: str,
+    target_methods: List[str],
+) -> pd.DataFrame:
+    id_terms = ["network", "label", "method", "tag", "runid"]
+
+    dfs = []
+    pbar = tqdm(glob(osp.join(results_path, "*.json")))
+    for path in pbar:
+        pbar.set_description(f"Loading results from {path:<80}")
+        res = pd.read_json(path)
+        terms = path.split("/")[-1].split(".json")[0].split("_")
+        for i, j in zip(id_terms, terms):
+            res[i] = j
+        dfs.append(res)
+    return pd.concat(dfs)
+
+
 def main():
     args = parse_args()
     dry_run = args.dry_run
@@ -95,10 +113,19 @@ def main():
     output_path = args.output_path
     results_path = args.results_path
 
-    # Get results path
-    if results_path == "auto":
-        results_path = "results" if mode == "main" else "hp_tune_results"
-    logger.info(f"Raw results path to aggregate from: {results_path}")
+    # Get aggregation function and results_path
+    if mode == "main":
+        agg_func = _agg_main_results
+        inferred_path = "results"
+    elif mode == "hp_tune":
+        agg_func = _agg_hp_results
+        inferred_path = "hp_tune_results"
+    elif mode == "tag":
+        agg_func = _agg_tag_results
+        inferred_path = "results"
+    else:
+        raise ValueError(f"Unknown mode {mode!r}")
+    results_path = inferred_path if results_path == "auto" else results_path
 
     # Attach base directory to paths
     output_path = osp.join(basedir, output_path)
@@ -106,8 +133,7 @@ def main():
     os.makedirs(output_path, exist_ok=True)
     os.makedirs(results_path, exist_ok=True)
 
-    # Get aggregation function and aggregate results
-    agg_func = _agg_main_results if mode == "main" else _agg_hp_results
+    # Aggregate results
     logger.info(f"Results will be aggregated from {results_path}")
     logger.info(f"Start aggregating results for methods: {methods}")
     results_df = agg_func(results_path, methods)
