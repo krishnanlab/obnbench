@@ -5,11 +5,10 @@ for evaluating the methods.
 sh submit_all.sh
 ```
 
-Run the following script in the current experiment directory to aggregate
-results.
+Run the following script in the project root directory to aggregate results.
 
 ```bash
-python aggregate_results.py
+python aggregate_results.py -m tag -b experiments/node_feats -d
 ```
 
 ## Notes
