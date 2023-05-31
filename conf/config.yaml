@@ -4,8 +4,10 @@ device: auto
 network: ???
 label: ???
 model: _DEPRECATED_
-eval_interval: 100
+eval_interval: 50
 fast_dev_run: false
+watch_grad_norm: true
+gradient_clip_val: 0.1  # set to null to disable
 seed: 0
 wandb:
   use: false
@@ -29,7 +31,11 @@ model_params:
   hid_dim: 128
   mp_type: GATv2Conv
   mp_layers: 3
-  mp_residual_type: skipsum
+  residual_type: skipsum
+  dropout: 0.5
+  norm_type: BatchNorm
+  act: relu
+  act_first: false
   pred_head_layers: 1
 # ------------
 gnn_params:
