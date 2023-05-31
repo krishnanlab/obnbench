@@ -219,11 +219,6 @@ class MPModule(nn.Module):
                 [self.dim * (i + 1) for i in range(self.num_layers)]
                 + [self.dim]
             )
-        elif val == "catcompact":
-            self._forward = self._catcompact_forward
-            self._layer_dims = (
-                [self.dim] + [2 * self.dim] * (self.num_layers - 1) + [self.dim]
-            )
         else:
             raise ValueError(
                 f"Unknown residual type {val!r}, available options are:\n"
@@ -254,14 +249,6 @@ class MPModule(nn.Module):
         return batch
 
     def _catall_forward(self, batch):
-        for i, layer in enumerate(self.layers):
-            x_prev = batch.x
-            batch = layer(batch)
-            if i < self.layers - 1:
-                batch.x = torch.cat([batch.x, x_prev], dim=1)
-        return batch
-
-    def _catcompact_forward(self, batch):
         for i, layer in enumerate(self.layers):
             x_prev = batch.x
             batch = layer(batch)
