@@ -1,21 +1,26 @@
 import json
 import os
+import warnings
 
 import hydra
+import lightning.pytorch as pl
 import nleval
 import numpy as np
 import scipy.sparse as sp
 import torch.nn as nn
+import wandb
+from lightning.pytorch.loggers import WandbLogger
 from nleval import Dataset
-from nleval.graph import DenseGraph
-from nleval.ext.pecanpy import pecanpy_embed
+from nleval.dataset_pyg import OpenBiomedNetBench
 from nleval.ext.grape import grape_embed
+from nleval.ext.pecanpy import pecanpy_embed
 from nleval.ext.sknetwork import sknetwork_embed
 from nleval.feature import FeatureVec
+from nleval.graph import DenseGraph
 from nleval.metric import auroc, log2_auprc_prior
 from nleval.model.label_propagation import RandomWalkRestart
-from nleval.model_trainer.gnn import SimpleGNNTrainer
 from nleval.model_trainer import SupervisedLearningTrainer, LabelPropagationTrainer
+from nleval.model_trainer.gnn import SimpleGNNTrainer
 from nleval.util.logger import display_pbar
 from omegaconf import DictConfig, OmegaConf, open_dict
 from sklearn.linear_model import LogisticRegression
@@ -23,10 +28,20 @@ from sklearn.preprocessing import KBinsDiscretizer
 from sklearn.random_projection import GaussianRandomProjection, SparseRandomProjection
 from sklearn.svm import LinearSVC
 from torch_geometric import nn as pygnn
+from torch_geometric.seed import seed_everything
 from typing import Dict, List, Optional, Tuple, Union
 
+from data_module import DataModule
 from get_data import load_data
-from utils import get_device, get_num_workers, normalize_path
+from models import ModelModule
+from preprocess import precompute_features, infer_dimensions
+from utils import (
+    get_device,
+    get_num_workers,
+    normalize_path,
+    get_data_dir,
+    get_gene_list_path,
+)
 
 GNN_METHODS = ["GCN", "GAT", "GIN", "GraphSAGE"]
 GML_METHODS = [
@@ -151,47 +166,47 @@ def _get_paths(cfg: DictConfig, opt: Optional[Dict[str, float]] = None) -> Tuple
     return result_path, log_path
 
 
-class GNN(nn.Module):
-
-    def __init__(
-        self,
-        dim_in: int,
-        dim_out: int,
-        conv_name: str,
-        conv_kwargs,
-        *,
-        num_pre_mp_layers: int = 1,
-        num_post_mp_layers: int = 1,
-    ):
-        super().__init__()
-        dim_hid = conv_kwargs["hidden_channels"]
-
-        self.pre_mp = pygnn.MLP(
-            in_channels=dim_in,
-            hidden_channels=dim_hid,
-            out_channels=dim_hid,
-            num_layers=num_pre_mp_layers,
-        )
-        self.conv = getattr(pygnn, conv_name)(
-            in_channels=dim_hid,
-            out_channels=dim_hid,
-            jk="last",
-            dropout=0.5,
-            norm=pygnn.DiffGroupNorm(dim_hid, 5),
-            **conv_kwargs,
-        )
-        self.post_mp = pygnn.MLP(
-            in_channels=dim_hid,
-            hidden_channels=dim_hid,
-            out_channels=dim_out,
-            num_layers=num_post_mp_layers,
-        )
-        nleval.logger.info(f"Model constructed:\n{self}")
-
-    def forward(self, x, adj):
-        for m in self.children():
-            x = m(x, adj) if isinstance(m, pygnn.models.basic_gnn.BasicGNN) else m(x)
-        return x
+# class GNN(nn.Module):
+# 
+#     def __init__(
+#         self,
+#         dim_in: int,
+#         dim_out: int,
+#         conv_name: str,
+#         conv_kwargs,
+#         *,
+#         num_pre_mp_layers: int = 1,
+#         num_post_mp_layers: int = 1,
+#     ):
+#         super().__init__()
+#         dim_hid = conv_kwargs["hidden_channels"]
+# 
+#         self.pre_mp = pygnn.MLP(
+#             in_channels=dim_in,
+#             hidden_channels=dim_hid,
+#             out_channels=dim_hid,
+#             num_layers=num_pre_mp_layers,
+#         )
+#         self.conv = getattr(pygnn, conv_name)(
+#             in_channels=dim_hid,
+#             out_channels=dim_hid,
+#             jk="last",
+#             dropout=0.5,
+#             norm=pygnn.DiffGroupNorm(dim_hid, 5),
+#             **conv_kwargs,
+#         )
+#         self.post_mp = pygnn.MLP(
+#             in_channels=dim_hid,
+#             hidden_channels=dim_hid,
+#             out_channels=dim_out,
+#             num_layers=num_post_mp_layers,
+#         )
+#         nleval.logger.info(f"Model constructed:\n{self}")
+# 
+#     def forward(self, x, adj):
+#         for m in self.children():
+#             x = m(x, adj) if isinstance(m, pygnn.models.basic_gnn.BasicGNN) else m(x)
+#         return x
 
 
 def construct_features(cfg: DictConfig, g: DenseGraph) -> nleval.feature.FeatureVec:
@@ -347,24 +362,58 @@ def main(cfg: DictConfig):
     cfg.homedir = normalize_path(cfg.homedir)
     cfg.device = get_device(cfg.device)
     cfg.num_workers = get_num_workers(cfg.num_workers)
+    seed_everything(cfg.seed)
 
     # Load data
-    g, lsc, splitter = load_data(cfg.homedir, cfg.network, cfg.label, cfg.log_level)
-    mdl, mdl_trainer, g, feat, result_path = set_up_mdl(cfg, g, lsc, cfg.log_level)
-    dataset = Dataset(graph=g, feature=feat, label=lsc, splitter=splitter)
-    nleval.logger.info(lsc.stats())
+    gene_list_path = get_gene_list_path(cfg.homedir)
+    data_dir = get_data_dir(cfg.homedir)
+    gene_list = np.loadtxt(gene_list_path, dtype=str).tolist()
+    dataset = OpenBiomedNetBench(data_dir, cfg.network, cfg.label, selected_genes=gene_list)
 
-    # Train and evaluat model
-    if cfg.model in GNN_METHODS:
-        mdl_trainer.train(mdl, dataset)
-        results = get_gnn_results(mdl, dataset, cfg.device)
-    else:
-        results = mdl_trainer.eval_multi_ovr(mdl, dataset, consider_negative=True)
+    # Preprocessing
+    g = getattr(nleval.data, cfg.network)(data_dir, log_level="WARNING")
+    precompute_features(cfg, dataset, g)
+    infer_dimensions(cfg, dataset)
 
-    # Save results as JSON
-    results_json = results_to_json(lsc.label_ids, results)
-    with open(result_path, "w") as f:
-        json.dump(results_json, f, indent=4)
+    # g, lsc, splitter = load_data(cfg.homedir, cfg.network, cfg.label, cfg.log_level)
+    # mdl, mdl_trainer, g, feat, result_path = set_up_mdl(cfg, g, lsc, cfg.log_level)
+    # dataset = Dataset(graph=g, feature=feat, label=lsc, splitter=splitter)
+    # nleval.logger.info(lsc.stats())
+
+    # model = GNN(cfg)
+    model = ModelModule(cfg)
+    nleval.logger.info(f"Model constructed:\n{model}")
+
+    data = DataModule(dataset, num_workers=cfg.num_workers, pin_memory=True)
+    wandb_logger = WandbLogger(project=cfg.wandb.project, entity=cfg.wandb.entity)
+    trainer = pl.Trainer(
+        # accelerator=cfg.accelerator,
+        accelerator="auto",
+        # accelerator="cpu",
+        devices=1,
+        max_epochs=30_000,
+        check_val_every_n_epoch=cfg.eval_interval,
+        fast_dev_run=cfg.fast_dev_run,
+        logger=wandb_logger,
+        enable_progress_bar=True,
+        log_every_n_steps=1,  # full-batch training
+    )
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("once")
+        trainer.fit(model, datamodule=data)
+
+    # # Train and evaluat model
+    # if cfg.model in GNN_METHODS:
+    #     mdl_trainer.train(mdl, dataset)
+    #     results = get_gnn_results(mdl, dataset, cfg.device)
+    # else:
+    #     results = mdl_trainer.eval_multi_ovr(mdl, dataset, consider_negative=True)
+
+    # # Save results as JSON
+    # results_json = results_to_json(lsc.label_ids, results)
+    # with open(result_path, "w") as f:
+    #     json.dump(results_json, f, indent=4)
 
 
 if __name__ == "__main__":

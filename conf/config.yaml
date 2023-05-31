@@ -3,14 +3,35 @@ homedir: .
 device: auto
 network: ???
 label: ???
-model: ???
+model: _DEPRECATED_
+eval_interval: 100
+fast_dev_run: false
+seed: 0
+wandb:
+  use: false
+  entity: RemyLiu
+  project: OBNB-dev
+metrics:
+  - APOP
+  - AP
+  - AUROC
+metric_best: APOP
+node_encoders: OneHotLogDeg
+use_edge_feature: false
 name_tag: null
 runid: 0
 num_workers: 0  # 0 uses all available threads
 out_dir: results
 hp_tune: false
 log_level: INFO
-metric_best: log2pr
+# ------------
+model_params:
+  hid_dim: 128
+  mp_type: GATv2Conv
+  mp_layers: 3
+  mp_residual_type: skipsum
+  pred_head_layers: 1
+# ------------
 gnn_params:
   lr: 0.001
   hid_dim: 128
@@ -62,3 +83,91 @@ optim_params:
     hid_dim: 128
     walk_length: 160
     window_size: 12
+node_encoder_params:
+  OneHotLogDeg:
+    raw_dim: 32
+    enc_dim: 128
+    raw_bn: true
+    raw_dropout: 0.3
+    layers: 1
+  Constant:
+    raw_dim: 1
+    enc_dim: 128
+    raw_bn: false
+    raw_dropout: 0.3
+    layers: 1
+  RandomNormal:
+    raw_dim: 32
+    enc_dim: 128
+    raw_bn: true
+    raw_dropout: 0.3
+    layers: 1
+  Orbital:
+    enc_dim: 128
+    graphlet_size: 3
+    raw_bn: true
+    raw_dropout: 0.3
+    layers: 1
+  SVD:
+    raw_dim: 128
+    enc_dim: 128
+    raw_bn: true
+    raw_dropout: 0.3
+    layers: 1
+  LapEigMap:
+    raw_dim: 128
+    enc_dim: 128
+    raw_bn: true
+    raw_dropout: 0.3
+    layers: 1
+  RandomWalkDiag:
+    raw_dim: 128
+    enc_dim: 128
+    raw_bn: true
+    raw_dropout: 0.3
+    layers: 1
+  RandProjGaussian:
+    raw_dim: 128
+    enc_dim: 128
+    raw_bn: true
+    raw_dropout: 0.3
+    layers: 1
+  RandProjSparse:
+    raw_dim: 128
+    enc_dim: 128
+    raw_bn: true
+    raw_dropout: 0.3
+    layers: 1
+  EmbLINE1:
+    raw_dim: 128
+    enc_dim: 128
+    raw_bn: true
+    raw_dropout: 0.3
+    layers: 1
+  EmbLINE2:
+    raw_dim: 128
+    enc_dim: 128
+    raw_bn: true
+    raw_dropout: 0.3
+    layers: 1
+  EmbNode2vec:
+    raw_dim: 128
+    enc_dim: 128
+    raw_bn: true
+    raw_dropout: 0.3
+    layers: 1
+  EmbWalklets:
+    raw_dim: 128
+    enc_dim: 128
+    raw_bn: true
+    raw_dropout: 0.3
+    layers: 1
+  LabelReuse:
+    raw_bn: true
+    raw_dropout: 0.5
+    layers: 1
+  Composed:
+    enc_dim: 128
+    raw_bn: false
+    raw_dropout: 0.2
+    layers: 2
