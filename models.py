@@ -1,4 +1,5 @@
 import time
+from collections import OrderedDict
 from typing import Any, Dict, Optional, Tuple
 
 import lightning.pytorch as pl
@@ -12,6 +13,22 @@ from torch.optim import AdamW
 
 import metrics
 from model_layers import feature_encoders, mp_layers
+
+act_register = {
+    "relu": nn.ReLU,
+    "prelu": nn.PReLU,
+    "gelu": nn.GELU,
+    "selu": nn.SELU,
+    "elu": nn.ELU,
+}
+
+norm_register = {
+    "BatchNorm": pygnn.BatchNorm,
+    "LayerNorm": pygnn.LayerNorm,
+    "PairNorm": pygnn.PairNorm,
+    "DiffGroupNorm": pygnn.DiffGroupNorm,
+    "none": nn.Identity,
+}
 
 
 class ModelModule(pl.LightningModule):
@@ -162,20 +179,44 @@ class ModelModule(pl.LightningModule):
 
 class MPModule(nn.Module):
 
-    _residual_opts = ["none", "skipsum", "catlast", "catall", "catcompact"]
+    _residual_opts = [
+        "none",
+        "skipsum",
+        "skipsumbnorm",
+        "skipsumlnorm",
+        "catlast",
+        "catall",
+        "catcompact",
+    ]
 
     def __init__(
         self,
         mp_cls: nn.Module,
         dim: int,
         num_layers: int,
+        dropout: float = 0.0,
+        norm_type: str = "BatchNorm",
+        act: str = "relu",
+        act_first: bool = False,
         residual_type: str = "none",
         mp_kwargs: Optional[Dict[str, Any]] = None,
+        norm_kwargs: Optional[Dict[str, Any]] = None,
     ):
         super().__init__()
         self.dim = dim
         self.num_layers = num_layers
-        # TODO: residual norm?
+        self.dropout = dropout
+        self.norm_type = norm_type
+        self.act = act
+        self.act_first = act_first
+
+        self.norm_type = norm_type
+        self.norm_kwargs = norm_kwargs or {}
+        if norm_type == "LayerNorm":
+            self.norm_kwargs.setdefault("mode", "node")
+        if norm_type != "PairNorm":
+            # Need to pass feature dimension except for PairNorm
+            self.norm_kwargs["in_channels"] = None
 
         # Set residual_type last to make sure we have registered all params
         # Setting residual_type will automatically set up the forward function
@@ -184,16 +225,50 @@ class MPModule(nn.Module):
 
         # Set up the message passing layers using the dimensions prepared
         self.layers = nn.ModuleList()
+        self.res_norms = nn.ModuleList()
         mp_kwargs = mp_kwargs or {}
         for dim_in, dim_out in zip(self._layer_dims[:-1], self._layer_dims[1:]):
-            self.layers.append(mp_cls(dim_in, dim_out, **mp_kwargs))
+            self._build_layer(mp_cls, dim_in, dim_out, mp_kwargs=mp_kwargs)
+
+    def _build_layer(
+        self,
+        mp_cls: nn.Module,
+        dim_in: int,
+        dim_out: int,
+        mp_kwargs: Dict[str, Any],
+    ) -> nn.Module:
+        conv_layer = mp_cls(dim_in, dim_out, **mp_kwargs)
+        activation = act_register.get(self.act)()
+        dropout = nn.Dropout(self.dropout)
+
+        # Check if 'in_channels' is set to determine whether we need to pass
+        # the feature dimension to initialize the normalization layer
+        if "in_channels" in self.norm_kwargs:
+            self.norm_kwargs["in_channels"] = dim_out
+        norm_layer = norm_register.get(self.norm_type)(**self.norm_kwargs)
+
+        # Graph convolution layer
+        new_layer = nn.ModuleDict()
+        new_layer["conv"] = conv_layer
+
+        # Post convolution layers
+        post_conv = []
+        if self.act_first:
+            post_conv.extend([("act", activation), "norm", norm_layer])
+        else:
+            post_conv.extend([("norm", norm_layer), ("act", activation)])
+        post_conv.append(("dropout", dropout))
+        new_layer["post_conv"] = nn.Sequential(OrderedDict(post_conv))
+        self.layers.append(new_layer)
+
+        # Residual normalizations
+        if self.residual_type == "skipsumbnorm":
+            self.res_norms.append(norm_register["BatchNorm"](dim_out))
+        elif self.residual_type == "skipsumlnorm":
+            self.res_norms.append(norm_register["LayerNorm"](dim_out, mode="node"))
 
     def extra_repr(self) -> str:
-        extra_param_dict = {
-            "residual_type": self.residual_type,
-            # "residual_norm": self.residual_norm,
-        }
-        return "\n".join(f"{i}: {j}" for i, j in extra_param_dict.items())
+        return f"residual_type: {self.residual_type}"
 
     @property
     def residual_type(self) -> str:
@@ -204,7 +279,7 @@ class MPModule(nn.Module):
         if val == "none":
             self._forward = self._stack_forward
             self._layer_dims = [self.dim] * (self.num_layers + 1)
-        elif val == "skipsum":
+        elif val in ["skipsum", "skipsumbnorm", "skipsumlnorm"]:
             self._forward = self._skipsum_forward
             self._layer_dims = [self.dim] * (self.num_layers + 1)
         elif val == "catlast":
@@ -226,16 +301,24 @@ class MPModule(nn.Module):
             )
         self._residual_type = val
 
+    @staticmethod
+    def _layer_forward(layer, batch):
+        batch = layer["conv"](batch)
+        batch.x = layer["post_conv"](batch.x)
+        return batch
+
     def _stack_forward(self, batch):
         for layer in self.layers:
-            batch = layer(batch)
+            batch = self._layer_forward(layer, batch)
         return batch
 
     def _skipsum_forward(self, batch):
-        for layer in self.layers:
+        for i, layer in enumerate(self.layers):
             x_prev = batch.x
-            batch = layer(batch)
-            batch.x += x_prev
+            batch = self._layer_forward(layer, batch)
+            if self.res_norms:
+                batch.x = self.res_norms[i](batch.x)
+            batch.x = batch.x + x_prev
         return batch
 
     def _catlast_forward(self, batch):
@@ -243,7 +326,7 @@ class MPModule(nn.Module):
         for i, layer in enumerate(self.layers):
             if i == self.num_layers - 1:
                 batch.x = torch.cat([batch.x] + xs, dim=1)
-            batch = layer(batch)
+            batch = self._layer_forward(layer, batch)
             if i < self.layers - 1:
                 xs.append(batch.x)
         return batch
@@ -324,13 +407,17 @@ def build_feature_encoder(cfg: DictConfig):
 
 def build_mp_module(cfg: DictConfig):
     mp_cls = getattr(mp_layers, cfg.model_params.mp_type)
-    mp_kwargs = cfg.model_params.get("mp_kwargs", None)
     return MPModule(
         mp_cls,
         dim=cfg.model_params.hid_dim,
         num_layers=cfg.model_params.mp_layers,
-        residual_type=cfg.model_params.mp_residual_type,
-        mp_kwargs=mp_kwargs,
+        dropout=cfg.model_params.dropout,
+        norm_type=cfg.model_params.norm_type,
+        act=cfg.model_params.act,
+        act_first=cfg.model_params.act_first,
+        residual_type=cfg.model_params.residual_type,
+        mp_kwargs=cfg.model_params.get("mp_kwargs", None),
+        norm_kwargs=cfg.model_params.get("norm_kwargs", None),
     )
 
 
