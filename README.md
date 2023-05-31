@@ -14,10 +14,14 @@ source install.sh cu102  # other options are [cpu,cu113]
 pip install -e .[ext]  # install extension modules (PecanPy, GRAPE, ...)
 ```
 
-Install an additional library [`Hydra`](https://github.com/facebookresearch/hydra) for managing experiments.
+Install additional dependencies, e.g.,
+
+- [`Hydra`](https://github.com/facebookresearch/hydra) for managing experiments.
+- [`Lightning`](https://lightning.ai/docs/pytorch/latest/) for organizing model training framework.
+- [`WandB`](https://docs.wandb.ai/) for logging metrics.
 
 ```bash
-pip install hydra-core==1.3.2
+pip install -r requirements_extra.txt
 ```
 
 ### Set up data
