@@ -78,6 +78,7 @@ class ModelModule(pl.LightningModule):
         if split == "train":
             loss = F.binary_cross_entropy(pred, true)
             self.log(f"{split}/loss", loss.item(), **logger_opts)
+            self._maybe_log_grad_norm(logger_opts)
         else:
             loss = None
 
@@ -89,6 +90,17 @@ class ModelModule(pl.LightningModule):
         return loss
 
     # TODO: reset_parameters
+
+    def _maybe_log_grad_norm(self, logger_opts):
+        if not self.hparams.watch_grad_norm:
+            return
+
+        grad_norms = [
+            p.grad.detach().norm(2)
+            for p in self.parameters() if p.grad is not None
+        ]
+        grad_norm = torch.stack(grad_norms).norm(2).item() if grad_norms else 0
+        self.log("train/grad_norm", grad_norm, **logger_opts)
 
     @torch.no_grad()
     def _maybe_log_metrics(self, pred, true, split, logger_opts):

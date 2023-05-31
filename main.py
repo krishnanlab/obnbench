@@ -397,6 +397,7 @@ def main(cfg: DictConfig):
         logger=wandb_logger,
         enable_progress_bar=True,
         log_every_n_steps=1,  # full-batch training
+        gradient_clip_val=cfg.gradient_clip_val,
     )
 
     with warnings.catch_warnings():
