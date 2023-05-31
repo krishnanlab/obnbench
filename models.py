@@ -138,6 +138,11 @@ class ModelModule(pl.LightningModule):
         self._shared_step(batch, split="val")
         # HACK: Enable early testing that was deliberaly disabled by Lightning
         # https://github.com/Lightning-AI/lightning/issues/5245
+        # Note that the early access to testing performance is **not** used for
+        # model selection and hyperparameter tuning by any means. Instead, it is
+        # only used to see if the trend of the testing and validation curves
+        # differ significantly, which indicates there is some problem witht the
+        # data split.
         self._shared_step(batch, split="test")
 
     def test_step(self, batch, *args, **kwargs):
