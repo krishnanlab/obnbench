@@ -227,8 +227,8 @@ class MPModule(nn.Module):
         self.layers = nn.ModuleList()
         self.res_norms = nn.ModuleList()
         mp_kwargs = mp_kwargs or {}
-        for dim_in, dim_out in zip(self._layer_dims[:-1], self._layer_dims[1:]):
-            self._build_layer(mp_cls, dim_in, dim_out, mp_kwargs=mp_kwargs)
+        for dim_in in self._layer_dims:
+            self._build_layer(mp_cls, dim_in, dim, mp_kwargs=mp_kwargs)
 
     def _build_layer(
         self,
@@ -278,22 +278,19 @@ class MPModule(nn.Module):
     def residual_type(self, val: str):
         if val == "none":
             self._forward = self._stack_forward
-            self._layer_dims = [self.dim] * (self.num_layers + 1)
+            self._layer_dims = [self.dim] * self.num_layers
         elif val in ["skipsum", "skipsumbnorm", "skipsumlnorm"]:
             self._forward = self._skipsum_forward
-            self._layer_dims = [self.dim] * (self.num_layers + 1)
+            self._layer_dims = [self.dim] * self.num_layers
         elif val == "catlast":
             self._forward = self._catlast_forward
             self._layer_dims = (
                 [self.dim] * (self.num_layers - 1)
-                + [self.dim * self.num_layers, self.dim]
+                + [self.dim * self.num_layers]
             )
         elif val == "catall":
             self._forward = self._catall_forward
-            self._layer_dims = (
-                [self.dim * (i + 1) for i in range(self.num_layers)]
-                + [self.dim]
-            )
+            self._layer_dims = [self.dim * (i + 1) for i in range(self.num_layers)]
         else:
             raise ValueError(
                 f"Unknown residual type {val!r}, available options are:\n"
@@ -327,15 +324,15 @@ class MPModule(nn.Module):
             if i == self.num_layers - 1:
                 batch.x = torch.cat([batch.x] + xs, dim=1)
             batch = self._layer_forward(layer, batch)
-            if i < self.layers - 1:
+            if i < self.num_layers - 1:
                 xs.append(batch.x)
         return batch
 
     def _catall_forward(self, batch):
         for i, layer in enumerate(self.layers):
             x_prev = batch.x
-            batch = layer(batch)
-            if i < self.layers - 1:
+            batch = self._layer_forward(layer, batch)
+            if i < self.num_layers - 1:
                 batch.x = torch.cat([batch.x, x_prev], dim=1)
         return batch
 
