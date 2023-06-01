@@ -14,3 +14,7 @@ act: relu
 act_first: false
 skip_pred_act: false
 pred_head_layers: 1
+post_prop:
+  enable: false
+post_cands:
+  enable: false
