@@ -14,6 +14,7 @@ from torch import Tensor
 import obnbench.metrics
 from obnbench import optimizers, schedulers
 from obnbench.model_layers import feature_encoders, mp_layers
+from obnbench.model_layers.post_proc import CorrectAndSmooth, FeaturePropagation
 
 act_register = {
     "relu": nn.ReLU,
@@ -43,17 +44,9 @@ class ModelModule(pl.LightningModule):
         self.feature_encoder = build_feature_encoder(cfg)
         self.mp_layers = build_mp_module(cfg)
         self.pred_head = build_pred_head(cfg)
-
-        # FIX: post prop and corr
-
-        self.post_propagation = None
-        self.post_correction = None
-
-        self.pred_act = nn.Identity() if cfg.model.skip_pred_act else nn.Sigmoid()
+        self.post_prop, self.pred_act, self.post_cands = build_post_proc(cfg)
 
         self.setup_metrics()
-
-        # self.reset_parameters()
 
     def setup_metrics(self):
         self.metrics = nn.ModuleDict()
@@ -71,8 +64,8 @@ class ModelModule(pl.LightningModule):
     def forward(self, batch):
         batch = self.feature_encoder(batch)
         batch = self.mp_layers(batch)
-        pred, true = self.pred_head(batch)
-        pred = self._post_processing(pred, batch)  # FIX: move to end of steps
+        batch = self.pred_head(batch)
+        pred, true = self._post_processing(batch)  # FIX: move to end of steps?
         return pred, true
 
     def _shared_step(self, batch, split):
@@ -125,7 +118,10 @@ class ModelModule(pl.LightningModule):
 
     @torch.no_grad()
     def _maybe_log_metrics(self, pred, true, split, logger_opts):
-        if (self.current_epoch + 1) % self.hparams.trainer.eval_interval != 0:
+        if (
+            (self.current_epoch + 1) % self.hparams.trainer.eval_interval != 0
+            and split == "train"
+        ):
             return
 
         for metric_name, metric_obj in self.metrics.items():
@@ -133,24 +129,33 @@ class ModelModule(pl.LightningModule):
                 metric_obj(pred, true)
                 self.log(metric_name, metric_obj, **logger_opts)
 
-    def _post_processing(self, pred, batch):
-        if self.post_propagation is not None:
-            pred = self.post_propagation(pred, batch.edge_index)
+    def _post_processing(self, batch):
+        pred, true = batch.x, batch.y
+
+        if self.post_prop is not None:
+            pred = self.post_prop(
+                pred,
+                batch.edge_index,
+                batch.edge_weight,
+            )
 
         pred = self.pred_act(pred)
 
-        if self.post_correction is not None and batch.split != "train":
-            # pred = self.post_correction.correct(pred, batch.y, batch.trian_mask, DAD)
-            # pred = self.post_correction.smooth(pred, batch.y, batch.trian_mask, DA)
-            pred = self.post_correction(
+        if not self.training and self.post_cands is not None:
+            pred = self.post_cands(
                 pred,
-                batch.y,
+                true,
                 batch.train_mask,
                 batch.edge_index,
                 batch.edge_weight,
             )
 
-        return pred
+        # Apply split masking
+        if batch.split is not None:
+            mask = batch[f"{batch.split}_mask"].squeeze(-1)
+            pred, true = pred[mask], true[mask]
+
+        return pred, true
 
     def training_step(self, batch, *args, **kwargs):
         return self._shared_step(batch, split="train")
@@ -377,26 +382,23 @@ class PredictionHeadModule(nn.Module):
         dim_inner: int = 128,
     ):
         super().__init__()
-        self.layers = pygnn.MLP(
-            in_channels=dim_in,
-            out_channels=dim_out,
-            hidden_channels=dim_inner,
-            num_layers=num_layers,
-            act="relu",
-            norm="batch_norm",
-            bias=True,
-            plain_last=True,
-        )
-
-    def _apply_mask(self, batch, pred, true) -> Tuple[Tensor, Tensor]:
-        if batch.split is not None:
-            mask = batch[f"{batch.split}_mask"].squeeze(-1)
-            pred, true = pred[mask], true[mask]
-        return pred, true
+        if num_layers > 0:
+            self.layers = pygnn.MLP(
+                in_channels=dim_in,
+                out_channels=dim_out,
+                hidden_channels=dim_inner,
+                num_layers=num_layers,
+                act="relu",
+                norm="batch_norm",
+                bias=True,
+                plain_last=True,
+            )
+        else:
+            self.layers = nn.Identity()
 
     def forward(self, batch):
-        pred = self.layers(batch.x)
-        return self._apply_mask(batch, pred, batch.y)
+        batch.x = self.layers(batch.x)
+        return batch
 
 
 def build_feature_encoder(cfg: DictConfig):
@@ -453,3 +455,32 @@ def build_pred_head(cfg: DictConfig):
         num_layers=cfg.model.pred_head_layers,
         dim_inner=cfg.model.hid_dim,
     )
+
+
+def build_post_proc(cfg: DictConfig):
+    post_prop = None
+    if cfg.model.post_prop.enable:
+        post_prop = FeaturePropagation(
+            num_layers=cfg.model.post_prop.num_layers,
+            alpha=cfg.model.post_prop.alpha,
+            norm=cfg.model.post_prop.norm,
+            cached=cfg.model.post_prop.cached,
+        )
+
+    pred_act = nn.Identity() if cfg.model.skip_pred_act else nn.Sigmoid()
+
+    post_cands = None
+    if cfg.model.post_cands.enable:
+        post_cands = CorrectAndSmooth(
+            num_correction_layers=cfg.model.post_cands.num_correction_layers,
+            num_smoothing_layers=cfg.model.post_cands.num_smoothing_layers,
+            correction_alpha=cfg.model.post_cands.correction_alpha,
+            smoothing_alpha=cfg.model.post_cands.smoothing_alpha,
+            correction_norm=cfg.model.post_cands.correction_norm,
+            smoothing_norm=cfg.model.post_cands.smoothing_norm,
+            autoscale=cfg.model.post_cands.autoscale,
+            scale=cfg.model.post_cands.scale,
+            cached=cfg.model.post_cands.cached,
+        )
+
+    return post_prop, pred_act, post_cands
