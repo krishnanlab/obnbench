@@ -29,7 +29,6 @@ from sklearn.preprocessing import KBinsDiscretizer
 from sklearn.random_projection import GaussianRandomProjection, SparseRandomProjection
 from sklearn.svm import LinearSVC
 from torch_geometric import nn as pygnn
-from torch_geometric.seed import seed_everything
 from typing import Dict, List, Optional, Tuple, Union
 
 from get_data import load_data
@@ -387,7 +386,7 @@ def main(cfg: DictConfig):
     cfg.homedir = normalize_path(cfg.homedir)
     cfg.device = get_device(cfg.device)
     cfg.num_workers = get_num_workers(cfg.num_workers)
-    seed_everything(cfg.seed)
+    pl.seed_everything(cfg.seed)
 
     # Load data
     gene_list_path = get_gene_list_path(cfg.homedir)
@@ -413,23 +412,25 @@ def main(cfg: DictConfig):
     wandb_logger = WandbLogger(project=cfg.wandb.project, entity=cfg.wandb.entity)
     callbacks = setup_callbacks(cfg)
     trainer = pl.Trainer(
-        # accelerator=cfg.accelerator,
-        accelerator="auto",
-        # accelerator="cpu",
-        devices=1,
-        max_epochs=30_000,
+        accelerator=cfg.trainer.accelerator,
+        devices=cfg.trainer.devices,
+        max_epochs=cfg.trainer.max_epochs,
         check_val_every_n_epoch=cfg.trainer.eval_interval,
         fast_dev_run=cfg.trainer.fast_dev_run,
+        gradient_clip_val=cfg.trainer.gradient_clip_val,
         logger=wandb_logger,
+        callbacks=callbacks,
         enable_progress_bar=True,
         log_every_n_steps=1,  # full-batch training
-        gradient_clip_val=cfg.trainer.gradient_clip_val,
-        callbacks=callbacks,
     )
 
     with warnings.catch_warnings():
         warnings.simplefilter("once")
-        trainer.fit(model, datamodule=data)
+
+        if not cfg.trainer.inference_only:
+            trainer.fit(model, datamodule=data)
+
+        trainer.validate(model, datamodule=data, verbose=True)
 
     # # Train and evaluat model
     # if cfg.model in GNN_METHODS:
