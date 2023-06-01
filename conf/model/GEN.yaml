@@ -21,4 +21,5 @@ norm_type: BatchNorm
 norm_kwargs: null
 act: relu
 act_first: false
+skip_pred_act: false
 pred_head_layers: 1

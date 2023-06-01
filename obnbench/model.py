@@ -49,6 +49,8 @@ class ModelModule(pl.LightningModule):
         self.post_propagation = None
         self.post_correction = None
 
+        self.pred_act = nn.Identity() if cfg.model.skip_pred_act else nn.Sigmoid()
+
         self.setup_metrics()
 
         # self.reset_parameters()
@@ -135,7 +137,7 @@ class ModelModule(pl.LightningModule):
         if self.post_propagation is not None:
             pred = self.post_propagation(pred, batch.edge_index)
 
-        pred = F.sigmoid(pred)
+        pred = self.pred_act(pred)
 
         if self.post_correction is not None and batch.split != "train":
             # pred = self.post_correction.correct(pred, batch.y, batch.trian_mask, DAD)
