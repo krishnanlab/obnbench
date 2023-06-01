@@ -34,7 +34,7 @@ class PreCompFeatureWrapper:
         @wraps(func)
         def wrapped_func(dataset: Dataset, *args, **kwargs) -> Dataset:
             nleval.logger.info(f"Precomputing raw features for {self.fe_name}")
-            feat = func(*args, **kwargs)
+            feat = func(*args, dataset=dataset, **kwargs)
             if not isinstance(feat, torch.Tensor):
                 feat = torch.from_numpy(feat.astype(np.float32))
 
@@ -179,7 +179,9 @@ def get_walklets_emb(feat_dim: int, g: SparseGraph, **kwargs) -> np.ndarray:
 @PreCompFeatureWrapper("LabelReuse")
 def get_label_resuse(dataset: Dataset, **kwargs) -> torch.Tensor:
     feat = torch.zeros_like(dataset.data.y, dtype=torch.float)
-    feat[dataset.data.train_mask] = dataset.data.y[dataset.data.train_mask]
+    train_mask = dataset.data.train_mask[:, 0]
+    feat[train_mask] = dataset.data.y[train_mask]
+    feat /= feat.sum(0)  # normalize
     return feat
 
 
