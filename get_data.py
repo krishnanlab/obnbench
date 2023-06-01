@@ -9,7 +9,7 @@ from nleval import data, label
 from nleval.util.converter import GenePropertyConverter
 from omegaconf import DictConfig, OmegaConf
 
-from utils import get_data_dir, get_gene_list_path, normalize_path
+from obnbench.utils import get_data_dir, get_gene_list_path, normalize_path
 
 
 def get_network_construct(network_name):
