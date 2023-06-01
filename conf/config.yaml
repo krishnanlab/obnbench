@@ -24,6 +24,9 @@ metric:
   best: APOP
   obj: max
 trainer:
+  accelerator: auto
+  devices: 1
+  inference_only: false  # turn on for LabelPropagation
   max_epochs: 50_000
   eval_interval: 50
   early_stopping_patience: 2000
@@ -32,7 +35,7 @@ trainer:
   watch_grad_norm: true
 model:
   hid_dim: 128
-  mp_type: ???
+  mp_type: GCNConv
   mp_layers: 3
   mp_kwargs: null
   residual_type: skipsum
@@ -43,6 +46,24 @@ model:
   act_first: false
   skip_pred_act: false
   pred_head_layers: 1
+  post_prop:
+    enable: false
+    num_layers: 10
+    alpha: 0.9  # the "not restart" (the converse of teleporting) probability
+    norm: left
+    dropout: 0.0
+    cached: true
+  post_cands:
+    enable: false
+    num_correction_layers: 100
+    num_smothing_layers: 100
+    correction_alpha: 0.9
+    smoothing_alpha: 0.8
+    correction_norm: sym
+    smoothing_norm: left
+    autoscale: false
+    scale: 10
+    cached: true
 node_encoders: OneHotLogDeg
 use_edge_feature: true
 optim:
@@ -135,8 +156,9 @@ node_encoder_params:
     raw_bn: true
     raw_dropout: 0.5
     layers: 1
-  LabelReuse:
+  LabelReuse:  # turn off dropout and remove enc for LabelPropagation
     raw_bn: true
+    enc_dim: 128
     raw_dropout: 0.5
     layers: 1
   Composed:
