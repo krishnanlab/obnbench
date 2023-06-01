@@ -16,7 +16,7 @@ from sklearn.preprocessing import KBinsDiscretizer
 from sklearn.random_projection import GaussianRandomProjection, SparseRandomProjection
 from torch_geometric.data import Dataset
 
-from model_layers import feature_encoders
+from obnbench.model_layers import feature_encoders
 
 precomp_func_register = {}
 

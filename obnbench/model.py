@@ -11,8 +11,8 @@ from omegaconf import DictConfig
 from torch import Tensor
 from torch.optim import AdamW
 
-import metrics
-from model_layers import feature_encoders, mp_layers
+import obnbench.metrics
+from obnbench.model_layers import feature_encoders, mp_layers
 
 act_register = {
     "relu": nn.ReLU,
@@ -61,7 +61,7 @@ class ModelModule(pl.LightningModule):
         }
         for split in ["train", "val", "test"]:
             for metric_name in cfg.metrics:
-                metric_cls = getattr(metrics, metric_name)
+                metric_cls = getattr(obnbench.metrics, metric_name)
                 self.metrics[f"{split}/{metric_name}"] = metric_cls(**metric_kwargs)
 
     def forward(self, batch):

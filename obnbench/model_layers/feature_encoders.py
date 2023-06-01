@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch_geometric.nn as pygnn
 
-from model_layers.misc import RawFeatNorm
+from obnbench.model_layers.misc import RawFeatNorm
 
 
 class BaseFeatureEncoder(nn.Module):

@@ -31,11 +31,11 @@ from torch_geometric import nn as pygnn
 from torch_geometric.seed import seed_everything
 from typing import Dict, List, Optional, Tuple, Union
 
-from data_module import DataModule
 from get_data import load_data
-from models import ModelModule
-from preprocess import precompute_features, infer_dimensions
-from utils import (
+from obnbench.data_module import DataModule
+from obnbench.model import ModelModule
+from obnbench.preprocess import precompute_features, infer_dimensions
+from obnbench.utils import (
     get_device,
     get_num_workers,
     normalize_path,
