@@ -1,0 +1,11 @@
+mp_layers: 0
+pred_head_layers: 0
+post_prop:
+  enable: true
+  num_layers: null  # run till converged
+  alpha: 0.1
+  norm: left
+  dropout: 0.0
+  cached: true
+post_cands:
+  enable: false
