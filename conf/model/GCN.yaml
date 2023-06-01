@@ -1,0 +1,17 @@
+---
+hid_dim: 128
+mp_type: GCNConv
+mp_layers: 3
+mp_kwargs:
+  improved: false
+  cached: true
+  add_self_loops: true
+  normalize: true
+  bias: true
+residual_type: skipsum
+dropout: 0.5
+norm_type: BatchNorm
+norm_kwargs: null
+act: relu
+act_first: false
+pred_head_layers: 1
