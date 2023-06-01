@@ -1,0 +1,15 @@
+---
+hid_dim: 128
+mp_type: GATv2Conv
+mp_layers: 3
+mp_kwargs:
+  heads: 3
+  concat: false
+  dropout: 0.05
+residual_type: skipsum
+dropout: 0.5
+norm_type: BatchNorm
+norm_kwargs: null
+act: relu
+act_first: false
+pred_head_layers: 1

@@ -1,4 +1,6 @@
 ---
+defaults:
+  - model: GATv2
 homedir: .
 device: auto
 network: ???
@@ -29,19 +31,7 @@ trainer:
   fast_dev_run: false
   watch_grad_norm: true
 node_encoders: OneHotLogDeg
-model:
-  use_edge_feature: false
-  hid_dim: 128
-  mp_type: GATv2Conv
-  mp_layers: 3
-  mp_kwargs: null
-  residual_type: skipsum
-  dropout: 0.5
-  norm_type: BatchNorm
-  norm_kwargs: null
-  act: relu
-  act_first: false
-  pred_head_layers: 1
+use_edge_feature: true
 optim:
   lr: 0.01
   weight_decay: 1e-6

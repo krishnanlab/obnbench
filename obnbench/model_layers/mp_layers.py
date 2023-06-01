@@ -10,7 +10,13 @@ class BaseConvMixin:
 
     _edge_usage = "none"
 
-    def __init__(self, *args, use_edge_feature: bool = True, **kwargs):
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        use_edge_feature: bool = True,
+        **kwargs,
+    ):
         # Set up forward function dependending on the edge usage capabilities
         # of the wrapped convolution module
         if self._edge_usage == "none" or use_edge_feature:
@@ -25,7 +31,7 @@ class BaseConvMixin:
                 "available options are: 'none', 'edge_weight', 'edge_attr'",
             )
 
-        super().__init__(*args, **kwargs)
+        super().__init__(in_channels, out_channels, **kwargs)
 
     def _forward_simple(self, batch):
         return super().forward(batch.x, batch.edge_index)
@@ -69,9 +75,7 @@ class GENConv(BaseConvMixin, pygnn.GENConv):
     _edge_usage = "edge_weight"
 
 
-class GINConv(BaseConvMixin, pygnn.GINConv):
-
-    _edge_usage = "none"
+class PatchedGINConv(pygnn.GINConv):
 
     def __init__(
         self,
@@ -96,14 +100,18 @@ class GINConv(BaseConvMixin, pygnn.GINConv):
         super().__init__(mlp, eps=eps, train_eps=train_eps, **kwargs)
 
 
-class GINEConv(BaseConvMixin, pygnn.GINEConv):
+class GINConv(BaseConvMixin, PatchedGINConv):
 
-    _edge_usage = "edge_attr"
+    _edge_usage = "none"
+
+
+class PatchedGINEConv(pygnn.GINEConv):
 
     def __init__(
         self,
         in_channels: int,
         out_channels: int,
+        use_edge_feature: bool = True,
         *,
         num_layers: int = 2,
         hidden_channels: Optional[int] = None,
@@ -122,6 +130,11 @@ class GINEConv(BaseConvMixin, pygnn.GINEConv):
             norm="batch_norm",
         )
         super().__init__(mlp, eps=eps, train_eps=train_eps, edge_dim=edge_dim, **kwargs)
+
+
+class GINEConv(BaseConvMixin, PatchedGINEConv):
+
+    _edge_usage = "edge_attr"
 
 
 class SAGEConv(BaseConvMixin, pygnn.SAGEConv):
