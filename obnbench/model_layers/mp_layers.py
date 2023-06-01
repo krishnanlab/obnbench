@@ -142,6 +142,11 @@ class SAGEConv(BaseConvMixin, pygnn.SAGEConv):
     _edge_usage = "none"
 
 
+class GatedGCNConv(BaseConvMixin, pygnn.ResGatedGraphConv):
+
+    _edge_usage = "none"
+
+
 __all__ = [
     "GATConv",
     "GATv2Conv",
@@ -150,6 +155,7 @@ __all__ = [
     "GINConv",
     "GINEConv",
     "SAGEConv",
+    "GatedGCNConv",
 ]
 
 
