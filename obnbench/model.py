@@ -37,6 +37,9 @@ class ModelModule(pl.LightningModule):
     def __init__(self, cfg: DictConfig):
         super().__init__()
 
+        # Register cfg as self.hparams
+        self.save_hyperparameters(cfg)
+
         self.feature_encoder = build_feature_encoder(cfg)
         self.mp_layers = build_mp_module(cfg)
         self.pred_head = build_pred_head(cfg)
@@ -46,23 +49,20 @@ class ModelModule(pl.LightningModule):
         self.post_propagation = None
         self.post_correction = None
 
-        self.setup_metrics(cfg)
+        self.setup_metrics()
 
         # self.reset_parameters()
 
-        # Register cfg as self.hparams
-        self.save_hyperparameters(cfg)
-
-    def setup_metrics(self, cfg):
+    def setup_metrics(self):
         self.metrics = nn.ModuleDict()
         metric_kwargs = {
             "task": "multilabel",
-            "num_labels": cfg._shared.dim_out,
+            "num_labels": self.hparams._shared.dim_out,
             "validate_args": False,
             "average": "macro",
         }
         for split in ["train", "val", "test"]:
-            for metric_name in cfg.metrics:
+            for metric_name in self.hparams.metric.options:
                 metric_cls = getattr(obnbench.metrics, metric_name)
                 self.metrics[f"{split}/{metric_name}"] = metric_cls(**metric_kwargs)
 
@@ -111,7 +111,7 @@ class ModelModule(pl.LightningModule):
     # TODO: reset_parameters
 
     def _maybe_log_grad_norm(self, logger_opts):
-        if not self.hparams.watch_grad_norm:
+        if not self.hparams.trainer.watch_grad_norm:
             return
 
         grad_norms = [
@@ -123,7 +123,7 @@ class ModelModule(pl.LightningModule):
 
     @torch.no_grad()
     def _maybe_log_metrics(self, pred, true, split, logger_opts):
-        if (self.current_epoch + 1) % self.hparams.eval_interval != 0:
+        if (self.current_epoch + 1) % self.hparams.trainer.eval_interval != 0:
             return
 
         for metric_name, metric_obj in self.metrics.items():
@@ -183,7 +183,7 @@ class ModelModule(pl.LightningModule):
             scheduler_cls = getattr(schedulers, self.hparams.optim.scheduler)
             scheduler_kwargs = self.hparams.optim.scheduler_kwargs or {}
 
-            eval_interval = self.hparams.eval_interval
+            eval_interval = self.hparams.trainer.eval_interval
             if (patience := scheduler_kwargs.get("patience", None)):
                 # Rescale the scheduler patience for ReduceLROnPlateau to the
                 # factor w.r.t. the evaluation interval
@@ -193,7 +193,7 @@ class ModelModule(pl.LightningModule):
 
             lr_scheduler_config["lr_scheduler"] = {
                 "scheduler": scheduler,
-                "monitor": f"val/{self.hparams.metric_best}",
+                "monitor": f"val/{self.hparams.metric.best}",
                 "frequency": eval_interval,
             }
 
@@ -404,7 +404,7 @@ def build_feature_encoder(cfg: DictConfig):
         fe_cls = getattr(feature_encoders, f"{feat_name}FeatureEncoder")
         fe = fe_cls(
             dim_feat=cfg._shared.fe_raw_dims[0],
-            dim_encoder=cfg.model_params.hid_dim,
+            dim_encoder=cfg.model.hid_dim,
             layers=fe_cfg.layers,
             raw_dropout=fe_cfg.raw_dropout,
             raw_bn=fe_cfg.raw_bn,
@@ -417,7 +417,7 @@ def build_feature_encoder(cfg: DictConfig):
         fe_cfg = cfg.node_encoder_params.Compoased
         return feature_encoders.CompoasedFeatureEncoder(
             dim_feat=cfg._shared.composed_fe_dim_in,
-            dim_encoder=cfg.model_params.hid_dim,
+            dim_encoder=cfg.model.hid_dim,
             layers=fe_cfg.layers,
             raw_dropout=fe_cfg.raw_dropout,
             raw_bn=fe_cfg.raw_bn,
@@ -426,18 +426,18 @@ def build_feature_encoder(cfg: DictConfig):
 
 
 def build_mp_module(cfg: DictConfig):
-    mp_cls = getattr(mp_layers, cfg.model_params.mp_type)
+    mp_cls = getattr(mp_layers, cfg.model.mp_type)
     return MPModule(
         mp_cls,
-        dim=cfg.model_params.hid_dim,
-        num_layers=cfg.model_params.mp_layers,
-        dropout=cfg.model_params.dropout,
-        norm_type=cfg.model_params.norm_type,
-        act=cfg.model_params.act,
-        act_first=cfg.model_params.act_first,
-        residual_type=cfg.model_params.residual_type,
-        mp_kwargs=cfg.model_params.mp_kwargs,
-        norm_kwargs=cfg.model_params.norm_kwargs,
+        dim=cfg.model.hid_dim,
+        num_layers=cfg.model.mp_layers,
+        dropout=cfg.model.dropout,
+        norm_type=cfg.model.norm_type,
+        act=cfg.model.act,
+        act_first=cfg.model.act_first,
+        residual_type=cfg.model.residual_type,
+        mp_kwargs=cfg.model.mp_kwargs,
+        norm_kwargs=cfg.model.norm_kwargs,
     )
 
 
@@ -445,6 +445,6 @@ def build_pred_head(cfg: DictConfig):
     return PredictionHeadModule(
         dim_in=cfg._shared.pred_head_dim_in,
         dim_out=cfg._shared.dim_out,
-        num_layers=cfg.model_params.pred_head_layers,
-        dim_inner=cfg.model_params.hid_dim,
+        num_layers=cfg.model.pred_head_layers,
+        dim_inner=cfg.model.hid_dim,
     )

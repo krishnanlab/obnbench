@@ -238,8 +238,8 @@ def infer_dimensions(cfg: DictConfig, dataset: Dataset):
 
     # Infer prediction head input dimension
     pred_head_dim_in = (
-        mp_dim_in if cfg.model_params.mp_layers == 0
-        else cfg.model_params.hid_dim
+        mp_dim_in if cfg.model.mp_layers == 0
+        else cfg.model.hid_dim
     )
 
     inferred_dims_dict = {

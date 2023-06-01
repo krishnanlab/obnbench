@@ -3,33 +3,34 @@ homedir: .
 device: auto
 network: ???
 label: ???
-model: _DEPRECATED_
-eval_interval: 50
-early_stopping_patience: 2000
-fast_dev_run: false
-watch_grad_norm: true
-gradient_clip_val: 0.02  # set to null to disable
 seed: 0
-wandb:
-  use: false
-  entity: RemyLiu
-  project: OBNB-dev
-metrics:
-  - APOP
-  - AP
-  - AUROC
-metric_best: APOP
-metric_obj: max
-node_encoders: OneHotLogDeg
-use_edge_feature: false
 name_tag: null
 runid: 0
 num_workers: 0  # 0 uses all available threads
 out_dir: results
 hp_tune: false
 log_level: INFO
-# ------------
-model_params:
+wandb:
+  use: false
+  entity: RemyLiu
+  project: OBNB-dev
+metric:
+  options:
+    - APOP
+    - AP
+    - AUROC
+  best: APOP
+  obj: max
+trainer:
+  max_epochs: 50_000
+  eval_interval: 50
+  early_stopping_patience: 2000
+  gradient_clip_val: 0.02  # set to null to disable
+  fast_dev_run: false
+  watch_grad_norm: true
+node_encoders: OneHotLogDeg
+model:
+  use_edge_feature: false
   hid_dim: 128
   mp_type: GATv2Conv
   mp_layers: 3
@@ -48,62 +49,10 @@ optim:
   optimizer_kwargs: null
   scheduler: ReduceLROnPlateau
   scheduler_kwargs:
-    mode: ${metric_obj}
+    mode: ${metric.obj}
     patience: 100
     min_lr: 1e-5
     factor: 0.5
-# ------------
-gnn_params:
-  lr: 0.001
-  hid_dim: 128
-  num_layers: 5
-  epochs: 20000
-  eval_steps: 100
-  node_feat_dim: 32
-  node_feat_type: onehotlogdeg
-  use_negative: true
-n2v_params:
-  hid_dim: 128
-  walk_length: 80
-  window_size: 10
-  num_walks: 10
-lp_params:
-  beta: 0.85
-optim_params:
-  GAT:
-    lr: 0.001
-    hid_dim: 128
-    num_layers: 5
-    addopts:
-      v2: true
-      heads: 8
-  GCN:
-    lr: 0.001
-    hid_dim: 128
-    num_layers: 5
-  GIN:
-    lr: 0.001
-    hid_dim: 128
-    num_layers: 5
-    addopts:
-      aggr: mean
-  GraphSAGE:
-    lr: 0.001
-    hid_dim: 128
-    num_layers: 5
-    addopts:
-      aggr: add
-      normalize: true
-  LabelProp:
-    beta: 0.9
-  N2V-LogReg:
-    hid_dim: 128
-    walk_length: 160
-    window_size: 12
-  N2V-SVM:
-    hid_dim: 128
-    walk_length: 160
-    window_size: 12
 node_encoder_params:
   OneHotLogDeg:
     raw_dim: 32

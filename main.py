@@ -364,18 +364,18 @@ def setup_callbacks(cfg: DictConfig):
     )
     ckpt = pl.callbacks.ModelCheckpoint(
         dirpath=None,  # use default set by Trainer's default_root_dir
-        monitor=f"val/{cfg.metric_best}",
+        monitor=f"val/{cfg.metric.best}",
         verbose=True,
         save_last=True,
         save_top_k=5,
-        mode=cfg.metric_obj,
-        every_n_epochs=cfg.eval_interval,
+        mode=cfg.metric.obj,
+        every_n_epochs=cfg.trainer.eval_interval,
     )
     early_stopping = pl.callbacks.EarlyStopping(
-        monitor=f"val/{cfg.metric_best}",
+        monitor=f"val/{cfg.metric.best}",
         verbose=False,
-        patience=ceil(cfg.early_stopping_patience / cfg.eval_interval),
-        mode=cfg.metric_obj,
+        patience=ceil(cfg.trainer.early_stopping_patience / cfg.trainer.eval_interval),
+        mode=cfg.metric.obj,
         check_finite=True,
     )
     return [lr_monitor, ckpt, early_stopping]
@@ -418,12 +418,12 @@ def main(cfg: DictConfig):
         # accelerator="cpu",
         devices=1,
         max_epochs=30_000,
-        check_val_every_n_epoch=cfg.eval_interval,
-        fast_dev_run=cfg.fast_dev_run,
+        check_val_every_n_epoch=cfg.trainer.eval_interval,
+        fast_dev_run=cfg.trainer.fast_dev_run,
         logger=wandb_logger,
         enable_progress_bar=True,
         log_every_n_steps=1,  # full-batch training
-        gradient_clip_val=cfg.gradient_clip_val,
+        gradient_clip_val=cfg.trainer.gradient_clip_val,
         callbacks=callbacks,
     )
 
