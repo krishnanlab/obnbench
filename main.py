@@ -1,6 +1,7 @@
 import json
 import os
 import warnings
+from math import ceil
 
 import hydra
 import lightning.pytorch as pl
@@ -356,6 +357,30 @@ def get_gnn_results(mdl, dataset, device) -> Dict[str, List[float]]:
     return results
 
 
+def setup_callbacks(cfg: DictConfig):
+    lr_monitor = pl.callbacks.LearningRateMonitor(
+        logging_interval="epoch",
+        log_momentum=True,
+    )
+    ckpt = pl.callbacks.ModelCheckpoint(
+        dirpath=None,  # use default set by Trainer's default_root_dir
+        monitor=f"val/{cfg.metric_best}",
+        verbose=True,
+        save_last=True,
+        save_top_k=5,
+        mode=cfg.metric_obj,
+        every_n_epochs=cfg.eval_interval,
+    )
+    early_stopping = pl.callbacks.EarlyStopping(
+        monitor=f"val/{cfg.metric_best}",
+        verbose=False,
+        patience=ceil(cfg.early_stopping_patience / cfg.eval_interval),
+        mode=cfg.metric_obj,
+        check_finite=True,
+    )
+    return [lr_monitor, ckpt, early_stopping]
+
+
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg: DictConfig):
     nleval.logger.info(f"Running with settings:\n{OmegaConf.to_yaml(cfg)}")
@@ -386,6 +411,7 @@ def main(cfg: DictConfig):
 
     data = DataModule(dataset, num_workers=cfg.num_workers, pin_memory=True)
     wandb_logger = WandbLogger(project=cfg.wandb.project, entity=cfg.wandb.entity)
+    callbacks = setup_callbacks(cfg)
     trainer = pl.Trainer(
         # accelerator=cfg.accelerator,
         accelerator="auto",
@@ -398,6 +424,7 @@ def main(cfg: DictConfig):
         enable_progress_bar=True,
         log_every_n_steps=1,  # full-batch training
         gradient_clip_val=cfg.gradient_clip_val,
+        callbacks=callbacks,
     )
 
     with warnings.catch_warnings():
