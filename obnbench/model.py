@@ -1,5 +1,6 @@
 import time
 from collections import OrderedDict
+from math import ceil
 from typing import Any, Dict, Optional, Tuple
 
 import lightning.pytorch as pl
@@ -9,9 +10,9 @@ import torch.nn.functional as F
 import torch_geometric.nn as pygnn
 from omegaconf import DictConfig
 from torch import Tensor
-from torch.optim import AdamW
 
 import obnbench.metrics
+from obnbench import optimizers, schedulers
 from obnbench.model_layers import feature_encoders, mp_layers
 
 act_register = {
@@ -49,6 +50,7 @@ class ModelModule(pl.LightningModule):
 
         # self.reset_parameters()
 
+        # Register cfg as self.hparams
         self.save_hyperparameters(cfg)
 
     def setup_metrics(self, cfg):
@@ -166,15 +168,36 @@ class ModelModule(pl.LightningModule):
         self._shared_step(batch, split="test")
 
     def configure_optimizers(self):
-        # FIX: parse from config
-        optimizer = AdamW(
+        optimizer_cls = getattr(optimizers, self.hparams.optim.optimizer)
+        optimizer_kwargs = self.hparams.optim.optimizer_kwargs or {}
+        optimizer = optimizer_cls(
             self.parameters(),
-            lr=0.001,
-            weight_decay=1e-6,
+            lr=self.hparams.optim.lr,
+            weight_decay=self.hparams.optim.weight_decay,
+            **optimizer_kwargs,
         )
-        return optimizer
-        # scheduler = ???
-        # return [optimizer], [scheduler]
+
+        lr_scheduler_config = {"optimizer": optimizer}
+
+        if self.hparams.optim.scheduler != "none":
+            scheduler_cls = getattr(schedulers, self.hparams.optim.scheduler)
+            scheduler_kwargs = self.hparams.optim.scheduler_kwargs or {}
+
+            eval_interval = self.hparams.eval_interval
+            if (patience := scheduler_kwargs.get("patience", None)):
+                # Rescale the scheduler patience for ReduceLROnPlateau to the
+                # factor w.r.t. the evaluation interval
+                scheduler_kwargs["patience"] = ceil(patience / eval_interval)
+
+            scheduler = scheduler_cls(optimizer, **scheduler_kwargs)
+
+            lr_scheduler_config["lr_scheduler"] = {
+                "scheduler": scheduler,
+                "monitor": f"val/{self.hparams.metric_best}",
+                "frequency": eval_interval,
+            }
+
+        return lr_scheduler_config
 
 
 class MPModule(nn.Module):
@@ -413,8 +436,8 @@ def build_mp_module(cfg: DictConfig):
         act=cfg.model_params.act,
         act_first=cfg.model_params.act_first,
         residual_type=cfg.model_params.residual_type,
-        mp_kwargs=cfg.model_params.get("mp_kwargs", None),
-        norm_kwargs=cfg.model_params.get("norm_kwargs", None),
+        mp_kwargs=cfg.model_params.mp_kwargs,
+        norm_kwargs=cfg.model_params.norm_kwargs,
     )
 
 
