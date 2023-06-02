@@ -163,8 +163,9 @@ class CorrectAndSmooth(pygnn.CorrectAndSmooth):
             edge_index,
             edge_weight,
         )
-        y_soft = self.correct(y_soft, y_true, mask, edge_index, correct_edge_weight)
-        y_soft = self.smooth(y_soft, y_true, mask, edge_index, smooth_edge_weight)
+        y_true_masked = y_true[mask]
+        y_soft = self.correct(y_soft, y_true_masked, mask, edge_index, correct_edge_weight)
+        y_soft = self.smooth(y_soft, y_true_masked, mask, edge_index, smooth_edge_weight)
         return y_soft
 
     def _get_adjs(
@@ -175,8 +176,8 @@ class CorrectAndSmooth(pygnn.CorrectAndSmooth):
     ) -> Tuple[Tensor, Tensor]:
         # Try to load from cache first
         # WARNING: Caching assumes full-batch training with no shuffling.
-        correct_edge_weight = self._cached_correct_edge_weight
-        smooth_edge_weight = self._cached_smooth_edge_weight
+        correct_edge_weight = self.cached_correct_edge_weight
+        smooth_edge_weight = self.cached_smooth_edge_weight
 
         # Compute if cache not available
         if correct_edge_weight is None or smooth_edge_weight is None:

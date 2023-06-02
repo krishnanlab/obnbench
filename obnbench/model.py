@@ -145,7 +145,7 @@ class ModelModule(pl.LightningModule):
             pred = self.post_cands(
                 pred,
                 true,
-                batch.train_mask,
+                batch.train_mask.squeeze(-1),
                 batch.edge_index,
                 batch.edge_weight,
             )
