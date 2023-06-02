@@ -5,7 +5,6 @@ defaults:
 model:
   hid_dim: 128  # only used when post_head_layers > 1
   mp_layers: 0
-  mp_head_layers: 1
   skip_pred_act: false
   pred_head_layers: 1
   post_prop:
