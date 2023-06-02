@@ -1,0 +1,14 @@
+# @package _global_
+---
+optim:
+  lr: 1.0
+  weight_decay: null
+  optimizer: LBFGS
+  optimizer_kwargs:
+    max_iter: 50
+  scheduler: none
+trainer:
+  eval_interval: 1
+  max_epochs: 100
+  early_stopping_patience: 10
+  gradient_clip_val: null

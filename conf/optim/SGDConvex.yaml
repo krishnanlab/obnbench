@@ -1,0 +1,12 @@
+# @package _global_
+---
+optim:
+  lr: 200.0
+  weight_decay: 1e-5
+  optimizer: SGD
+  optimizer_kwargs:
+    momentum: 0.9
+  scheduler: none
+trainer:
+  early_stopping_patience: 500
+  gradient_clip_val: null
