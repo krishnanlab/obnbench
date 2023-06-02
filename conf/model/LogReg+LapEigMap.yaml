@@ -16,4 +16,5 @@ node_encoder_params:
   LapEigMap:
     raw_dim: 128
     raw_bn: false
+    raw_dropout: 0.0
     layers: 0
