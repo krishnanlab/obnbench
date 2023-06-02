@@ -9,7 +9,7 @@ model:
     hidden_channels: 256
     eps: 0.0
     train_eps: false
-  residual_type: skipsum
+  residual_type: skipsumlnorm
   dropout: 0.5
   norm_type: BatchNorm
   norm_kwargs: null

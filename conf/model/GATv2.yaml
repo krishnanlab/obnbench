@@ -8,7 +8,7 @@ model:
     heads: 3
     concat: false
     dropout: 0.05
-  residual_type: skipsum
+  residual_type: skipsumlnorm
   dropout: 0.5
   norm_type: BatchNorm
   norm_kwargs: null
