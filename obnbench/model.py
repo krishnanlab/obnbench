@@ -78,7 +78,7 @@ class ModelModule(pl.LightningModule):
         tic = time.perf_counter()
         batch.split = split
 
-        # NOTE: split masking is done inside the prediction head
+        # NOTE: split masking is done in _post_processing
         pred, true = self(batch)
 
         logger_opts = {
