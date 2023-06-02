@@ -139,19 +139,19 @@ def get_rand_proj_sparse(feat_dim: int, adj: np.ndarray, **kwargs) -> np.ndarray
     return feat
 
 
-@PreCompFeatureWrapper("EmbLINE1")
+@PreCompFeatureWrapper("LINE1")
 def get_line1_emb(feat_dim: int, g: SparseGraph, **kwargs) -> np.ndarray:
     feat = grape_embed(g, "FirstOrderLINEEnsmallen", dim=feat_dim)
     return feat
 
 
-@PreCompFeatureWrapper("EmbLINE2")
+@PreCompFeatureWrapper("LINE2")
 def get_line2_emb(feat_dim: int, g: SparseGraph, **kwargs) -> np.ndarray:
     feat = grape_embed(g, "SecondOrderLINEEnsmallen", dim=feat_dim)
     return feat
 
 
-@PreCompFeatureWrapper("EmbNode2vec")
+@PreCompFeatureWrapper("Node2vec")
 def get_n2v_emb(feat_dim: int, g: SparseGraph, n_jobs=1, **kwargs) -> np.ndarray:
     feat = pecanpy_embed(
         g,
@@ -164,7 +164,7 @@ def get_n2v_emb(feat_dim: int, g: SparseGraph, n_jobs=1, **kwargs) -> np.ndarray
     return feat
 
 
-@PreCompFeatureWrapper("EmbWalklets")
+@PreCompFeatureWrapper("Walklets")
 def get_walklets_emb(feat_dim: int, g: SparseGraph, **kwargs) -> np.ndarray:
     feat = grape_embed(
         g,

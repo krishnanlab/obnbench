@@ -105,21 +105,39 @@ class RandProjSparseFeatureEncoder(BaseFeatureEncoder):
     ...
 
 
-class EmbLINE1FeatureEncoder(BaseFeatureEncoder):
+class LINE1FeatureEncoder(BaseFeatureEncoder):
     ...
 
 
-class EmbLINE2FeatureEncoder(BaseFeatureEncoder):
+class LINE2FeatureEncoder(BaseFeatureEncoder):
     ...
 
 
-class EmbNode2vecFeatureEncoder(BaseFeatureEncoder):
+class Node2vecFeatureEncoder(BaseFeatureEncoder):
     ...
 
 
-class EmbWalkletsFeatureEncoder(BaseFeatureEncoder):
+class WalkletsFeatureEncoder(BaseFeatureEncoder):
     ...
 
 
 class LabelReuseFeatureEncoder(BaseFeatureEncoder):
     ...
+
+
+__all__ = [
+    "CompoasedFeatureEncoder",
+    "ConstantFeatureEncoder",
+    "LINE1FeatureEncoder",
+    "LINE2FeatureEncoder",
+    "LabelReuseFeatureEncoder",
+    "LapEigMapFeatureEncoder",
+    "Node2vecFeatureEncoder",
+    "OrbitalFeatureEncoder",
+    "RandProjGaussianFeatureEncoder",
+    "RandProjSparseFeatureEncoder",
+    "RandomNormalFeatureEncoder",
+    "RandomWalkDiagFeatureEncoder",
+    "SVDFeatureEncoder",
+    "WalkletsFeatureEncoder",
+]
