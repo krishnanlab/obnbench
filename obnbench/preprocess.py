@@ -110,7 +110,7 @@ def get_lap_eig_map(feat_dim: int, adj: np.ndarray, **kwargs) -> np.ndarray:
     assert (L != L.T).size == 0, "The input network must be undirected."
     eigvals, eigvecs = sp.linalg.eigsh(L, which="SM", k=feat_dim + 1)
     assert (eigvals[1:] > 1e-8).all(), f"Network appears to be disconnected.\n{eigvals=}"
-    feat = eigvecs[:, 1:] / np.sqrt((eigvecs[:, 1:] ** 2).sum(0))
+    feat = eigvecs[:, 1:] / np.sqrt((eigvecs[:, 1:] ** 2).sum(0))  # l2 normalize
     return feat
 
 
@@ -141,13 +141,13 @@ def get_rand_proj_sparse(feat_dim: int, adj: np.ndarray, **kwargs) -> np.ndarray
 
 @PreCompFeatureWrapper("LINE1")
 def get_line1_emb(feat_dim: int, g: SparseGraph, **kwargs) -> np.ndarray:
-    feat = grape_embed(g, "FirstOrderLINEEnsmallen", dim=feat_dim)
+    feat = grape_embed(g, "FirstOrderLINEEnsmallen", dim=feat_dim, as_array=True)
     return feat
 
 
 @PreCompFeatureWrapper("LINE2")
 def get_line2_emb(feat_dim: int, g: SparseGraph, **kwargs) -> np.ndarray:
-    feat = grape_embed(g, "SecondOrderLINEEnsmallen", dim=feat_dim)
+    feat = grape_embed(g, "SecondOrderLINEEnsmallen", dim=feat_dim, as_array=True)
     return feat
 
 
