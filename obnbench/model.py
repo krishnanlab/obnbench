@@ -78,7 +78,7 @@ class ModelModule(pl.LightningModule):
         tic = time.perf_counter()
         batch.split = split
 
-        # NOTE: split masking is done inside the prediction head
+        # NOTE: split masking is done in _post_processing
         pred, true = self(batch)
 
         logger_opts = {
@@ -176,11 +176,12 @@ class ModelModule(pl.LightningModule):
 
     def configure_optimizers(self):
         optimizer_cls = getattr(optimizers, self.hparams.optim.optimizer)
-        optimizer_kwargs = self.hparams.optim.optimizer_kwargs or {}
+        optimizer_kwargs = dict(self.hparams.optim.optimizer_kwargs or {})
+        if (weight_decay := self.hparams.optim.weight_decay) is not None:
+            optimizer_kwargs["weight_decay"] = weight_decay
         optimizer = optimizer_cls(
             self.parameters(),
             lr=self.hparams.optim.lr,
-            weight_decay=self.hparams.optim.weight_decay,
             **optimizer_kwargs,
         )
 
@@ -188,7 +189,7 @@ class ModelModule(pl.LightningModule):
 
         if self.hparams.optim.scheduler != "none":
             scheduler_cls = getattr(schedulers, self.hparams.optim.scheduler)
-            scheduler_kwargs = self.hparams.optim.scheduler_kwargs or {}
+            scheduler_kwargs = dict(self.hparams.optim.scheduler_kwargs or {})
 
             eval_interval = self.hparams.trainer.eval_interval
             if (patience := scheduler_kwargs.get("patience", None)):
@@ -415,6 +416,7 @@ def build_feature_encoder(cfg: DictConfig):
             dropout=fe_cfg.dropout,
             raw_dropout=fe_cfg.raw_dropout,
             raw_bn=fe_cfg.raw_bn,
+            num_nodes=cfg._shared.num_nodes,
         )
         fe_list.append(fe)
 

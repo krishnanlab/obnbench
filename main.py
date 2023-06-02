@@ -429,8 +429,11 @@ def main(cfg: DictConfig):
 
         if not cfg.trainer.inference_only:
             trainer.fit(model, datamodule=data)
+            ckpt = "best"
+        else:
+            ckpt = None
 
-        trainer.validate(model, datamodule=data, verbose=True)
+        trainer.validate(model, datamodule=data, verbose=True, ckpt_path=ckpt)
 
     # # Train and evaluat model
     # if cfg.model in GNN_METHODS:

@@ -35,8 +35,16 @@ class PreCompFeatureWrapper:
         def wrapped_func(dataset: Dataset, *args, **kwargs) -> Dataset:
             nleval.logger.info(f"Precomputing raw features for {self.fe_name}")
             feat = func(*args, dataset=dataset, **kwargs)
-            if not isinstance(feat, torch.Tensor):
+
+            if isinstance(feat, np.ndarray):
                 feat = torch.from_numpy(feat.astype(np.float32))
+            elif feat is None:
+                return dataset
+            elif not isinstance(feat, torch.Tensor):
+                raise TypeError(
+                    f"Unknown feature type {type(feat)} returned from the "
+                    f"preprocessing function {func}",
+                )
 
             # Handle dataset attr
             dataset._data_list = None
@@ -107,10 +115,20 @@ def get_svd_emb(feat_dim: int, adj: np.ndarray, **kwargs) -> np.ndarray:
 @PreCompFeatureWrapper("LapEigMap")
 def get_lap_eig_map(feat_dim: int, adj: np.ndarray, **kwargs) -> np.ndarray:
     L = sp.csr_matrix(np.diag(adj.sum(1)) - adj)
-    assert (L != L.T).size == 0, "The input network must be undirected."
+    assert (L != L.T).sum() == 0, "The input network must be undirected."
+
+    # Symmetric normalized graph Laplacian
+    D_inv_sqrt = sp.diags(1 / np.sqrt(adj.sum(1)))
+    L = D_inv_sqrt @ L @ D_inv_sqrt
+
     eigvals, eigvecs = sp.linalg.eigsh(L, which="SM", k=feat_dim + 1)
+    sorted_idx = eigvals.argsort()
+    eigvals = eigvals[sorted_idx]
+    eigvecs = eigvecs[:, sorted_idx]
+
     assert (eigvals[1:] > 1e-8).all(), f"Network appears to be disconnected.\n{eigvals=}"
-    feat = eigvecs[:, 1:] / np.sqrt((eigvecs[:, 1:] ** 2).sum(0))
+    feat = eigvecs[:, 1:] / np.sqrt((eigvecs[:, 1:] ** 2).sum(0))  # l2 normalize
+
     return feat
 
 
@@ -141,13 +159,13 @@ def get_rand_proj_sparse(feat_dim: int, adj: np.ndarray, **kwargs) -> np.ndarray
 
 @PreCompFeatureWrapper("LINE1")
 def get_line1_emb(feat_dim: int, g: SparseGraph, **kwargs) -> np.ndarray:
-    feat = grape_embed(g, "FirstOrderLINEEnsmallen", dim=feat_dim)
+    feat = grape_embed(g, "FirstOrderLINEEnsmallen", dim=feat_dim, as_array=True)
     return feat
 
 
 @PreCompFeatureWrapper("LINE2")
 def get_line2_emb(feat_dim: int, g: SparseGraph, **kwargs) -> np.ndarray:
-    feat = grape_embed(g, "SecondOrderLINEEnsmallen", dim=feat_dim)
+    feat = grape_embed(g, "SecondOrderLINEEnsmallen", dim=feat_dim, as_array=True)
     return feat
 
 
@@ -174,6 +192,23 @@ def get_walklets_emb(feat_dim: int, g: SparseGraph, **kwargs) -> np.ndarray:
         grape_enable=True,
     )
     return feat
+
+
+@PreCompFeatureWrapper("Adj")
+def get_adj(adj: np.ndarray, **kwargs) -> np.ndarray:
+    return adj.copy()
+
+
+@PreCompFeatureWrapper("AdjEmbBag")
+def get_adj_emb_bag(**kwargs) -> None:
+    # No need to compute new features
+    ...
+
+
+@PreCompFeatureWrapper("Embedding")
+def get_embedding(**kwargs) -> None:
+    # No need to compute new features
+    ...
 
 
 @PreCompFeatureWrapper("LabelReuse")
@@ -216,21 +251,26 @@ def infer_dimensions(cfg: DictConfig, dataset: Dataset):
     # to check the validity of the node_encoders setting again.
     node_encoders = cfg.node_encoders.split("+")
 
-    # Infer number of tasks
-    dim_out = dataset.data.y.shape[1]
+    # Infer number of nodes and tasks
+    num_nodes, dim_out = dataset.data.y.shape
 
     # Infer feature encoder dimensions
     fe_raw_dims, fe_processed_dims = [], []
     for feat_name in node_encoders:
         fe_cfg = cfg.node_encoder_params.get(feat_name)
-        raw_dim = dataset._data[f"rawfeat_{feat_name}"].shape[1]
+
+        # Handel special cases, otherwise get raw dim from precomputed features
+        if feat_name in ["AdjEmbBag", "Embedding"]:
+            raw_dim = fe_cfg.raw_dim
+        else:
+            raw_dim = dataset._data[f"rawfeat_{feat_name}"].shape[1]
         encoded_dim = raw_dim if fe_cfg.layers == 0 else fe_cfg.enc_dim
 
         fe_raw_dims.append(raw_dim)
         fe_processed_dims.append(encoded_dim)
 
     # Infer composed feature dimension and message passing input dimension
-    if len(node_encoders) > 1:  # single feature encoder
+    if len(node_encoders) == 1:  # single feature encoder
         composed_fe_dim_in = None
         mp_dim_in = fe_processed_dims[0]
     else:  # composed feature encoder
@@ -239,10 +279,7 @@ def infer_dimensions(cfg: DictConfig, dataset: Dataset):
         mp_dim_in = composed_fe_dim_in if fe_cfg.layers == 0 else fe_cfg.enc_dim
 
     # Infer prediction head input dimension
-    pred_head_dim_in = (
-        mp_dim_in if cfg.model.mp_layers == 0
-        else cfg.model.hid_dim
-    )
+    pred_head_dim_in = mp_dim_in if cfg.model.mp_layers == 0 else cfg.model.hid_dim
 
     inferred_dims_dict = {
         "fe_raw_dims": fe_raw_dims,
@@ -251,6 +288,7 @@ def infer_dimensions(cfg: DictConfig, dataset: Dataset):
         "mp_dim_in": mp_dim_in,
         "pred_head_dim_in": pred_head_dim_in,
         "dim_out": dim_out,
+        "num_nodes": num_nodes,
     }
     nleval.logger.info(f"Node encoders: {node_encoders}")
     nleval.logger.info(f"Inferred module dimensions:\n{pformat(inferred_dims_dict)}")
