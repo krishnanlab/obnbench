@@ -347,10 +347,12 @@ class MPModule(nn.Module):
     def _skipsum_forward(self, batch):
         for i, layer in enumerate(self.layers):
             x_prev = batch.x
-            batch = self._layer_forward(layer, batch)
+            batch = layer["conv"](batch)
+            # batch = self._layer_forward(layer, batch)
             if self.res_norms:
                 batch.x = self.res_norms[i](batch.x)
             batch.x = batch.x + x_prev
+            batch.x = layer["post_conv"](batch.x)
         return batch
 
     def _catlast_forward(self, batch):
