@@ -406,11 +406,11 @@ def build_feature_encoder(cfg: DictConfig):
     feat_names = cfg.node_encoders.split("+")
 
     fe_list = []
-    for feat_name in feat_names:
+    for i, feat_name in enumerate(feat_names):
         fe_cfg = cfg.node_encoder_params.get(feat_name)
         fe_cls = getattr(feature_encoders, f"{feat_name}FeatureEncoder")
         fe = fe_cls(
-            dim_feat=cfg._shared.fe_raw_dims[0],
+            dim_feat=cfg._shared.fe_raw_dims[i],
             dim_encoder=cfg.model.hid_dim,
             layers=fe_cfg.layers,
             dropout=fe_cfg.dropout,
@@ -423,8 +423,8 @@ def build_feature_encoder(cfg: DictConfig):
     if len(fe_list) == 1:
         return fe_list[0]
     else:
-        fe_cfg = cfg.node_encoder_params.Compoased
-        return feature_encoders.CompoasedFeatureEncoder(
+        fe_cfg = cfg.node_encoder_params.Composed
+        return feature_encoders.ComposedFeatureEncoder(
             dim_feat=cfg._shared.composed_fe_dim_in,
             dim_encoder=cfg.model.hid_dim,
             layers=fe_cfg.layers,
