@@ -44,8 +44,8 @@ model:
   norm_kwargs: null
   act: relu
   act_first: false
-  skip_pred_act: false
   pred_head_layers: 1
+  skip_pred_act: false
   post_prop:
     enable: false
     num_layers: 10
@@ -56,13 +56,13 @@ model:
   post_cands:
     enable: false
     num_correction_layers: 100
-    num_smothing_layers: 100
-    correction_alpha: 0.9
+    num_smoothing_layers: 100
+    correction_alpha: 1.0
     smoothing_alpha: 0.8
     correction_norm: sym
     smoothing_norm: left
     autoscale: false
-    scale: 10
+    scale: 1.0
     cached: true
 node_encoders: OneHotLogDeg
 use_edge_feature: true
@@ -82,87 +82,102 @@ node_encoder_params:
     raw_dim: 32
     enc_dim: 128
     raw_bn: true
-    raw_dropout: 0.5
+    raw_dropout: 0.0
+    dropout: 0.2
     layers: 1
   Constant:
     raw_dim: 1
     enc_dim: 128
     raw_bn: false
-    raw_dropout: 0.5
+    raw_dropout: 0.0
+    dropout: 0.2
     layers: 1
   RandomNormal:
     raw_dim: 32
     enc_dim: 128
     raw_bn: true
-    raw_dropout: 0.5
+    raw_dropout: 0.0
+    dropout: 0.2
     layers: 1
   Orbital:
     enc_dim: 128
     graphlet_size: 3
     raw_bn: true
-    raw_dropout: 0.5
+    raw_dropout: 0.0
+    dropout: 0.2
     layers: 1
   SVD:
     raw_dim: 128
     enc_dim: 128
     raw_bn: true
     raw_dropout: 0.5
+    dropout: 0.2
     layers: 1
   LapEigMap:
     raw_dim: 128
     enc_dim: 128
     raw_bn: true
-    raw_dropout: 0.5
+    raw_dropout: 0.0
+    dropout: 0.2
     layers: 1
   RandomWalkDiag:
     raw_dim: 128
     enc_dim: 128
     raw_bn: true
-    raw_dropout: 0.5
+    raw_dropout: 0.0
+    dropout: 0.2
     layers: 1
   RandProjGaussian:
     raw_dim: 128
     enc_dim: 128
     raw_bn: true
-    raw_dropout: 0.5
+    raw_dropout: 0.2
+    dropout: 0.2
     layers: 1
   RandProjSparse:
     raw_dim: 128
     enc_dim: 128
     raw_bn: true
-    raw_dropout: 0.5
+    raw_dropout: 0.2
+    dropout: 0.2
     layers: 1
   EmbLINE1:
     raw_dim: 128
     enc_dim: 128
     raw_bn: true
     raw_dropout: 0.5
+    dropout: 0.2
     layers: 1
   EmbLINE2:
     raw_dim: 128
     enc_dim: 128
     raw_bn: true
     raw_dropout: 0.5
+    dropout: 0.2
     layers: 1
   EmbNode2vec:
     raw_dim: 128
     enc_dim: 128
     raw_bn: true
     raw_dropout: 0.5
+    dropout: 0.2
     layers: 1
   EmbWalklets:
     raw_dim: 128
     enc_dim: 128
     raw_bn: true
     raw_dropout: 0.5
+    dropout: 0.2
     layers: 1
   LabelReuse:  # turn off dropout and remove enc for LabelPropagation
     raw_bn: true
     enc_dim: 128
     raw_dropout: 0.5
+    dropout: 0.2
     layers: 1
   Composed:
     enc_dim: 128
     raw_bn: false
-    raw_dropout: 0.5
+    raw_dropout: 0.0
+    dropout: 0.2
     layers: 2

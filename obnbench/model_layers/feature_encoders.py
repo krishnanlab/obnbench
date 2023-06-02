@@ -14,6 +14,7 @@ class BaseFeatureEncoder(nn.Module):
         dim_feat: int,
         dim_encoder: int = 128,
         layers: int = 1,
+        dropout: float = 0.0,
         raw_dropout: float = 0.0,
         raw_bn: bool = True,
         raw_bn_affine: bool = True
@@ -32,6 +33,7 @@ class BaseFeatureEncoder(nn.Module):
                 out_channels=dim_encoder,
                 hidden_channels=dim_encoder,
                 num_layers=layers,
+                dropout=dropout,
                 norm=None,
                 act="relu",
                 plain_last=True,
@@ -44,9 +46,6 @@ class BaseFeatureEncoder(nn.Module):
 
     def get_raw_features(self, batch) -> torch.Tensor:
         return getattr(batch, self._raw_feat_name)
-
-    # def preprocess(self, *args, **kwargs):
-    #     pass
 
     def forward(self, batch):
         x = self.get_raw_features(batch)

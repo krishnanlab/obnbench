@@ -1,5 +1,6 @@
 mp_layers: 0
 pred_head_layers: 0
+skip_pred_act: true
 post_prop:
   enable: true
   num_layers: null  # run till converged

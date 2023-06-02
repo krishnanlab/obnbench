@@ -412,6 +412,7 @@ def build_feature_encoder(cfg: DictConfig):
             dim_feat=cfg._shared.fe_raw_dims[0],
             dim_encoder=cfg.model.hid_dim,
             layers=fe_cfg.layers,
+            dropout=fe_cfg.dropout,
             raw_dropout=fe_cfg.raw_dropout,
             raw_bn=fe_cfg.raw_bn,
         )
@@ -425,6 +426,7 @@ def build_feature_encoder(cfg: DictConfig):
             dim_feat=cfg._shared.composed_fe_dim_in,
             dim_encoder=cfg.model.hid_dim,
             layers=fe_cfg.layers,
+            dropout=fe_cfg.dropout,
             raw_dropout=fe_cfg.raw_dropout,
             raw_bn=fe_cfg.raw_bn,
             fe_list=fe_list,
