@@ -1,22 +1,24 @@
+# @package _global_
 ---
-hid_dim: 128
-mp_type: SAGEConv
-mp_layers: 3
-mp_kwargs:
-  aggr: add
-  normalize: true
-  root_weight: true
-  project: true
-  bias: true
-residual_type: skipsum
-dropout: 0.5
-norm_type: BatchNorm
-norm_kwargs: null
-act: relu
-act_first: false
-skip_pred_act: false
-pred_head_layers: 1
-post_prop:
-  enable: false
-post_cands:
-  enable: false
+model:
+  hid_dim: 128
+  mp_type: SAGEConv
+  mp_layers: 3
+  mp_kwargs:
+    aggr: add
+    normalize: true
+    root_weight: true
+    project: true
+    bias: true
+  residual_type: skipsum
+  dropout: 0.5
+  norm_type: BatchNorm
+  norm_kwargs: null
+  act: relu
+  act_first: false
+  skip_pred_act: false
+  pred_head_layers: 1
+  post_prop:
+    enable: false
+  post_cands:
+    enable: false

@@ -1,6 +1,4 @@
 ---
-defaults:
-  - model: GATv2
 homedir: .
 device: auto
 network: ???

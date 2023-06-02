@@ -35,7 +35,7 @@ class FeaturePropagation(pygnn.MessagePassing):
         dropout: float = 0.0,
         cached: bool = False,
         max_iter: int = 100,
-        tol: float = 1e-8,
+        tol: float = 1e-5,
     ):
         super().__init__(aggr="add", flow="source_to_target")
 
