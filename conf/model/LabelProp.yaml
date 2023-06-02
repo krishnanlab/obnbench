@@ -1,0 +1,23 @@
+# @package _global_
+---
+trainer:
+  inference_only: true  # no training
+model:
+  mp_layers: 0
+  pred_head_layers: 0
+  skip_pred_act: true
+  post_prop:
+    enable: true
+    num_layers: null  # run till converged
+    alpha: 0.1
+    norm: left
+    dropout: 0.0
+    cached: true
+  post_cands:
+    enable: false
+node_encoders: LabelReuse
+node_encoder_params:
+  LabelReuse:
+    raw_bn: false
+    raw_dropout: 0.0
+    layers: 0

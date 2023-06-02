@@ -1,14 +1,21 @@
+# @package _global_
 ---
-hid_dim: 128
-mp_type: GatedGCNConv
-mp_layers: 3
-mp_kwargs:
-  bias: true
-  root_weight: true
-residual_type: skipsum
-dropout: 0.5
-norm_type: BatchNorm
-norm_kwargs: null
-act: relu
-act_first: false
-pred_head_layers: 1
+model:
+  hid_dim: 128
+  mp_type: GatedGCNConv
+  mp_layers: 3
+  mp_kwargs:
+    bias: true
+    root_weight: true
+  residual_type: skipsum
+  dropout: 0.5
+  norm_type: BatchNorm
+  norm_kwargs: null
+  act: relu
+  act_first: false
+  skip_pred_act: false
+  pred_head_layers: 1
+  post_prop:
+    enable: false
+  post_cands:
+    enable: false

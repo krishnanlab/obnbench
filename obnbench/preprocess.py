@@ -34,7 +34,7 @@ class PreCompFeatureWrapper:
         @wraps(func)
         def wrapped_func(dataset: Dataset, *args, **kwargs) -> Dataset:
             nleval.logger.info(f"Precomputing raw features for {self.fe_name}")
-            feat = func(*args, **kwargs)
+            feat = func(*args, dataset=dataset, **kwargs)
             if not isinstance(feat, torch.Tensor):
                 feat = torch.from_numpy(feat.astype(np.float32))
 
@@ -139,19 +139,19 @@ def get_rand_proj_sparse(feat_dim: int, adj: np.ndarray, **kwargs) -> np.ndarray
     return feat
 
 
-@PreCompFeatureWrapper("EmbLINE1")
+@PreCompFeatureWrapper("LINE1")
 def get_line1_emb(feat_dim: int, g: SparseGraph, **kwargs) -> np.ndarray:
     feat = grape_embed(g, "FirstOrderLINEEnsmallen", dim=feat_dim)
     return feat
 
 
-@PreCompFeatureWrapper("EmbLINE2")
+@PreCompFeatureWrapper("LINE2")
 def get_line2_emb(feat_dim: int, g: SparseGraph, **kwargs) -> np.ndarray:
     feat = grape_embed(g, "SecondOrderLINEEnsmallen", dim=feat_dim)
     return feat
 
 
-@PreCompFeatureWrapper("EmbNode2vec")
+@PreCompFeatureWrapper("Node2vec")
 def get_n2v_emb(feat_dim: int, g: SparseGraph, n_jobs=1, **kwargs) -> np.ndarray:
     feat = pecanpy_embed(
         g,
@@ -164,7 +164,7 @@ def get_n2v_emb(feat_dim: int, g: SparseGraph, n_jobs=1, **kwargs) -> np.ndarray
     return feat
 
 
-@PreCompFeatureWrapper("EmbWalklets")
+@PreCompFeatureWrapper("Walklets")
 def get_walklets_emb(feat_dim: int, g: SparseGraph, **kwargs) -> np.ndarray:
     feat = grape_embed(
         g,
@@ -179,7 +179,9 @@ def get_walklets_emb(feat_dim: int, g: SparseGraph, **kwargs) -> np.ndarray:
 @PreCompFeatureWrapper("LabelReuse")
 def get_label_resuse(dataset: Dataset, **kwargs) -> torch.Tensor:
     feat = torch.zeros_like(dataset.data.y, dtype=torch.float)
-    feat[dataset.data.train_mask] = dataset.data.y[dataset.data.train_mask]
+    train_mask = dataset.data.train_mask[:, 0]
+    feat[train_mask] = dataset.data.y[train_mask]
+    feat /= feat.sum(0)  # normalize
     return feat
 
 
