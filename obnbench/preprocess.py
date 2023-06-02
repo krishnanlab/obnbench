@@ -35,8 +35,16 @@ class PreCompFeatureWrapper:
         def wrapped_func(dataset: Dataset, *args, **kwargs) -> Dataset:
             nleval.logger.info(f"Precomputing raw features for {self.fe_name}")
             feat = func(*args, dataset=dataset, **kwargs)
-            if not isinstance(feat, torch.Tensor):
+
+            if isinstance(feat, np.ndarray):
                 feat = torch.from_numpy(feat.astype(np.float32))
+            elif feat is None:
+                return dataset
+            elif not isinstance(feat, torch.Tensor):
+                raise TypeError(
+                    f"Unknown feature type {type(feat)} returned from the "
+                    f"preprocessing function {func}",
+                )
 
             # Handle dataset attr
             dataset._data_list = None
@@ -191,6 +199,18 @@ def get_adj(adj: np.ndarray, **kwargs) -> np.ndarray:
     return adj.copy()
 
 
+@PreCompFeatureWrapper("AdjEmbBag")
+def get_adj_emb_bag(**kwargs) -> None:
+    # No need to compute new features
+    ...
+
+
+@PreCompFeatureWrapper("Embedding")
+def get_embedding(**kwargs) -> None:
+    # No need to compute new features
+    ...
+
+
 @PreCompFeatureWrapper("LabelReuse")
 def get_label_resuse(dataset: Dataset, **kwargs) -> torch.Tensor:
     feat = torch.zeros_like(dataset.data.y, dtype=torch.float)
@@ -231,14 +251,19 @@ def infer_dimensions(cfg: DictConfig, dataset: Dataset):
     # to check the validity of the node_encoders setting again.
     node_encoders = cfg.node_encoders.split("+")
 
-    # Infer number of tasks
-    dim_out = dataset.data.y.shape[1]
+    # Infer number of nodes and tasks
+    num_nodes, dim_out = dataset.data.y.shape
 
     # Infer feature encoder dimensions
     fe_raw_dims, fe_processed_dims = [], []
     for feat_name in node_encoders:
         fe_cfg = cfg.node_encoder_params.get(feat_name)
-        raw_dim = dataset._data[f"rawfeat_{feat_name}"].shape[1]
+
+        # Handel special cases, otherwise get raw dim from precomputed features
+        if feat_name in ["AdjEmbBag", "Embedding"]:
+            raw_dim = fe_cfg.raw_dim
+        else:
+            raw_dim = dataset._data[f"rawfeat_{feat_name}"].shape[1]
         encoded_dim = raw_dim if fe_cfg.layers == 0 else fe_cfg.enc_dim
 
         fe_raw_dims.append(raw_dim)
@@ -263,6 +288,7 @@ def infer_dimensions(cfg: DictConfig, dataset: Dataset):
         "mp_dim_in": mp_dim_in,
         "pred_head_dim_in": pred_head_dim_in,
         "dim_out": dim_out,
+        "num_nodes": num_nodes,
     }
     nleval.logger.info(f"Node encoders: {node_encoders}")
     nleval.logger.info(f"Inferred module dimensions:\n{pformat(inferred_dims_dict)}")

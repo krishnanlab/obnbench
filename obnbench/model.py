@@ -416,6 +416,7 @@ def build_feature_encoder(cfg: DictConfig):
             dropout=fe_cfg.dropout,
             raw_dropout=fe_cfg.raw_dropout,
             raw_bn=fe_cfg.raw_bn,
+            num_nodes=cfg._shared.num_nodes,
         )
         fe_list.append(fe)
 
