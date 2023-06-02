@@ -186,6 +186,11 @@ def get_walklets_emb(feat_dim: int, g: SparseGraph, **kwargs) -> np.ndarray:
     return feat
 
 
+@PreCompFeatureWrapper("Adj")
+def get_adj(adj: np.ndarray, **kwargs) -> np.ndarray:
+    return adj.copy()
+
+
 @PreCompFeatureWrapper("LabelReuse")
 def get_label_resuse(dataset: Dataset, **kwargs) -> torch.Tensor:
     feat = torch.zeros_like(dataset.data.y, dtype=torch.float)

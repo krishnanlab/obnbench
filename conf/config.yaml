@@ -167,6 +167,12 @@ node_encoder_params:
     raw_dropout: 0.5
     dropout: 0.2
     layers: 1
+  Adj:
+    enc_dim: 128
+    raw_bn: true
+    raw_dropout: 0.5
+    dropout: 0.2
+    layers: 1
   LabelReuse:  # turn off dropout and remove enc for LabelPropagation
     raw_bn: true
     enc_dim: 128

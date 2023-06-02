@@ -121,11 +121,16 @@ class WalkletsFeatureEncoder(BaseFeatureEncoder):
     ...
 
 
+class AdjFeatureEncoder(BaseFeatureEncoder):
+    ...
+
+
 class LabelReuseFeatureEncoder(BaseFeatureEncoder):
     ...
 
 
 __all__ = [
+    "AdjFeatureEncoder",
     "CompoasedFeatureEncoder",
     "ConstantFeatureEncoder",
     "LINE1FeatureEncoder",
