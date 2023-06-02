@@ -240,7 +240,7 @@ def infer_dimensions(cfg: DictConfig, dataset: Dataset):
         fe_processed_dims.append(encoded_dim)
 
     # Infer composed feature dimension and message passing input dimension
-    if len(node_encoders) > 1:  # single feature encoder
+    if len(node_encoders) == 1:  # single feature encoder
         composed_fe_dim_in = None
         mp_dim_in = fe_processed_dims[0]
     else:  # composed feature encoder
@@ -249,10 +249,7 @@ def infer_dimensions(cfg: DictConfig, dataset: Dataset):
         mp_dim_in = composed_fe_dim_in if fe_cfg.layers == 0 else fe_cfg.enc_dim
 
     # Infer prediction head input dimension
-    pred_head_dim_in = (
-        mp_dim_in if cfg.model.mp_layers == 0
-        else cfg.model.hid_dim
-    )
+    pred_head_dim_in = mp_dim_in if cfg.model.mp_layers == 0 else cfg.model.hid_dim
 
     inferred_dims_dict = {
         "fe_raw_dims": fe_raw_dims,
