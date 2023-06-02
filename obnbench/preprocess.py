@@ -107,10 +107,20 @@ def get_svd_emb(feat_dim: int, adj: np.ndarray, **kwargs) -> np.ndarray:
 @PreCompFeatureWrapper("LapEigMap")
 def get_lap_eig_map(feat_dim: int, adj: np.ndarray, **kwargs) -> np.ndarray:
     L = sp.csr_matrix(np.diag(adj.sum(1)) - adj)
-    assert (L != L.T).size == 0, "The input network must be undirected."
+    assert (L != L.T).sum() == 0, "The input network must be undirected."
+
+    # Symmetric normalized graph Laplacian
+    D_inv_sqrt = sp.diags(1 / np.sqrt(adj.sum(1)))
+    L = D_inv_sqrt @ L @ D_inv_sqrt
+
     eigvals, eigvecs = sp.linalg.eigsh(L, which="SM", k=feat_dim + 1)
+    sorted_idx = eigvals.argsort()
+    eigvals = eigvals[sorted_idx]
+    eigvecs = eigvecs[:, sorted_idx]
+
     assert (eigvals[1:] > 1e-8).all(), f"Network appears to be disconnected.\n{eigvals=}"
     feat = eigvecs[:, 1:] / np.sqrt((eigvecs[:, 1:] ** 2).sum(0))  # l2 normalize
+
     return feat
 
 
