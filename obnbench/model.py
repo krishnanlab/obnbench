@@ -246,6 +246,8 @@ class MPModule(nn.Module):
         self.norm_kwargs = norm_kwargs or {}
         if norm_type == "LayerNorm":
             self.norm_kwargs.setdefault("mode", "node")
+        elif norm_type == "DiffGroupNorm":
+            self.norm_kwargs.setdefault("groups", 6)
         if norm_type != "PairNorm":
             # Need to pass feature dimension except for PairNorm
             self.norm_kwargs["in_channels"] = None
