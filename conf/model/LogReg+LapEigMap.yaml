@@ -11,7 +11,8 @@ model:
     enable: false
   post_cands:
     enable: false
-node_encoders: LapEigMap
+dataset:
+  node_encoders: LapEigMap
 node_encoder_params:
   LapEigMap:
     raw_dim: 128

@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Dict, List, Tuple
 
 import hydra
@@ -8,8 +7,6 @@ import pandas as pd
 from nleval import data, label
 from nleval.util.converter import GenePropertyConverter
 from omegaconf import DictConfig, OmegaConf
-
-from obnbench.utils import get_data_dir, get_gene_list_path, normalize_path
 
 
 def get_network_construct(network_name):
@@ -27,17 +24,16 @@ def get_network_construct(network_name):
 
 
 def load_data(
-    homedir: Path,
+    datadir: str,
+    gene_list_path: str,
     network_name: str,
     label_name: str,
     log_level: str = "INFO",
 ):
-    datadir = get_data_dir(homedir)
-
     gcls, kwargs = get_network_construct(network_name)
     g = gcls(datadir, **kwargs)
 
-    splitter, filter_ = get_splitter_filter(homedir)
+    splitter, filter_ = get_splitter_filter(datadir, gene_list_path)
     lsc = getattr(data, label_name)(datadir, transform=filter_)
 
     return g, lsc, splitter
@@ -94,10 +90,7 @@ def print_label_stats(lsc, splitter, common_genes):
     nleval.logger.info(f"\n{stats_df.to_markdown(index=False)}")
 
 
-def get_splitter_filter(homedir: Path, log_level: str = "INFO"):
-    datadir = get_data_dir(homedir)
-    gene_list_path = get_gene_list_path(homedir)
-
+def get_splitter_filter(datadir: str, gene_list_path: str, log_level: str = "INFO"):
     pubmedcnt_converter = GenePropertyConverter(datadir, name="PubMedCount")
     splitter = label.split.RatioPartition(
         *(0.6, 0.2, 0.2),
@@ -121,9 +114,8 @@ def get_splitter_filter(homedir: Path, log_level: str = "INFO"):
 def main(cfg: DictConfig):
     nleval.logger.info(f"Running with settings:\n{OmegaConf.to_yaml(cfg)}")
 
-    cfg.homedir = normalize_path(cfg.homedir)
-    datadir = get_data_dir(cfg.homedir)
-    gene_list_path = get_gene_list_path(cfg.homedir)
+    datadir = cfg.paths.dataset_dir
+    gene_list_path = cfg.paths.gene_list_path
 
     common_genes = None
     for network_name in cfg.networks:
@@ -144,7 +136,7 @@ def main(cfg: DictConfig):
         for i in sorted(common_genes):
             f.write(f"{i}\n")
 
-    splitter, filter_ = get_splitter_filter(cfg.homedir)
+    splitter, filter_ = get_splitter_filter(datadir, gene_list_path)
     for label_name in cfg.labels:
         lsc = getattr(data, label_name)(datadir, transform=filter_,
                                         version=cfg.data_version)

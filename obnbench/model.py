@@ -1,15 +1,18 @@
+import os.path as osp
 import time
 from collections import OrderedDict
 from math import ceil
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import lightning.pytorch as pl
+import nleval
+import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch_geometric.nn as pygnn
+import wandb
 from omegaconf import DictConfig
-from torch import Tensor
 
 import obnbench.metrics
 from obnbench import optimizers, schedulers
@@ -35,144 +38,45 @@ norm_register = {
 
 class ModelModule(pl.LightningModule):
 
-    def __init__(self, cfg: DictConfig):
+    splits = ["train", "val", "test"]
+
+    def __init__(self, cfg: DictConfig, node_ids: List[str], task_ids: List[str]):
         super().__init__()
 
-        # Register cfg as self.hparams
-        self.save_hyperparameters(cfg)
+        # Save IDs info for logging
+        self.node_ids = node_ids
+        self.task_ids = task_ids
 
+        self.save_hyperparameters(cfg)  # register cfg as self.hparams
+        self.setup_metrics()
+
+        # Build model
         self.feature_encoder = build_feature_encoder(cfg)
         self.mp_layers = build_mp_module(cfg)
         self.pred_head = build_pred_head(cfg)
         self.post_prop, self.pred_act, self.post_cands = build_post_proc(cfg)
 
-        self.setup_metrics()
-
     def setup_metrics(self):
         self.metrics = nn.ModuleDict()
+        self.final_pred, self.final_true, self.final_scores = {}, {}, []
         metric_kwargs = {
             "task": "multilabel",
             "num_labels": self.hparams._shared.dim_out,
             "validate_args": False,
-            "average": "macro",
         }
-        for split in ["train", "val", "test"]:
+        for split in self.splits:
             for metric_name in self.hparams.metric.options:
                 metric_cls = getattr(obnbench.metrics, metric_name)
-                self.metrics[f"{split}/{metric_name}"] = metric_cls(**metric_kwargs)
 
-    def forward(self, batch):
-        batch = self.feature_encoder(batch)
-        batch = self.mp_layers(batch)
-        batch = self.pred_head(batch)
-        pred, true = self._post_processing(batch)  # FIX: move to end of steps?
-        return pred, true
+                # Metrics to be calculated step/epoch-wise
+                self.metrics[f"{split}/{metric_name}"] = \
+                    metric_cls(average="macro", **metric_kwargs)
 
-    def _shared_step(self, batch, split):
-        # XXX: only allow full batch training now for several reasons (1) post
-        # propagation and correction needs access to the full graph, (2) metrics
-        # should be computed on the full graph.
-        # To resolve (1), need to extract post processing (accordingly the
-        # metrics computations also) to a shared private end_of_epoch func.
-        # This will also automatically resolve (2).
-        tic = time.perf_counter()
-        batch.split = split
+                # Metrics for final evaluation (record perf of individual task)
+                self.metrics[f"final/{split}_{metric_name}"] = \
+                    metric_cls(average="none", **metric_kwargs)
 
-        # NOTE: split masking is done in _post_processing
-        pred, true = self(batch)
-
-        logger_opts = {
-            "on_step": False,
-            "on_epoch": True,
-            "logger": True,
-            "batch_size": pred.shape[0],
-        }
-
-        # Compute classification loss for training
-        if split == "train":
-            loss = F.binary_cross_entropy(pred, true)
-            self.log(f"{split}/loss", loss.item(), **logger_opts)
-            self._maybe_log_grad_norm(logger_opts)
-        else:
-            loss = None
-
-        # Compute and log metrics at eval epoch
-        self._maybe_log_metrics(pred, true, split, logger_opts)
-
-        self.log(f"{split}/time_epoch", time.perf_counter() - tic, **logger_opts)
-
-        return loss
-
-    # TODO: reset_parameters
-
-    def _maybe_log_grad_norm(self, logger_opts):
-        if not self.hparams.trainer.watch_grad_norm:
-            return
-
-        grad_norms = [
-            p.grad.detach().norm(2)
-            for p in self.parameters() if p.grad is not None
-        ]
-        grad_norm = torch.stack(grad_norms).norm(2).item() if grad_norms else 0
-        self.log("train/grad_norm", grad_norm, **logger_opts)
-
-    @torch.no_grad()
-    def _maybe_log_metrics(self, pred, true, split, logger_opts):
-        if (
-            (self.current_epoch + 1) % self.hparams.trainer.eval_interval != 0
-            and split == "train"
-        ):
-            return
-
-        for metric_name, metric_obj in self.metrics.items():
-            if metric_name.startswith(f"{split}/"):
-                metric_obj(pred, true)
-                self.log(metric_name, metric_obj, **logger_opts)
-
-    def _post_processing(self, batch):
-        pred, true = batch.x, batch.y
-
-        if self.post_prop is not None:
-            pred = self.post_prop(
-                pred,
-                batch.edge_index,
-                batch.edge_weight,
-            )
-
-        pred = self.pred_act(pred)
-
-        if not self.training and self.post_cands is not None:
-            pred = self.post_cands(
-                pred,
-                true,
-                batch.train_mask.squeeze(-1),
-                batch.edge_index,
-                batch.edge_weight,
-            )
-
-        # Apply split masking
-        if batch.split is not None:
-            mask = batch[f"{batch.split}_mask"].squeeze(-1)
-            pred, true = pred[mask], true[mask]
-
-        return pred, true
-
-    def training_step(self, batch, *args, **kwargs):
-        return self._shared_step(batch, split="train")
-
-    def validation_step(self, batch, *args, **kwargs):
-        self._shared_step(batch, split="val")
-        # HACK: Enable early testing that was deliberaly disabled by Lightning
-        # https://github.com/Lightning-AI/lightning/issues/5245
-        # Note that the early access to testing performance is **not** used for
-        # model selection and hyperparameter tuning by any means. Instead, it is
-        # only used to see if the trend of the testing and validation curves
-        # differ significantly, which indicates there is some problem witht the
-        # data split.
-        self._shared_step(batch, split="test")
-
-    def test_step(self, batch, *args, **kwargs):
-        self._shared_step(batch, split="test")
+            self.final_pred[split], self.final_true[split] = [], []
 
     def configure_optimizers(self):
         optimizer_cls = getattr(optimizers, self.hparams.optim.optimizer)
@@ -206,6 +110,174 @@ class ModelModule(pl.LightningModule):
             }
 
         return lr_scheduler_config
+
+    def forward(self, batch):
+        batch = self.feature_encoder(batch)
+        batch = self.mp_layers(batch)
+        batch = self.pred_head(batch)
+        pred, true = self._post_processing(batch)  # FIX: move to end of steps?
+        return pred, true
+
+    def _post_processing(self, batch):
+        pred, true = batch.x, batch.y
+
+        if self.post_prop is not None:
+            pred = self.post_prop(
+                pred,
+                batch.edge_index,
+                batch.edge_weight,
+            )
+
+        pred = self.pred_act(pred)
+
+        if not self.training and self.post_cands is not None:
+            pred = self.post_cands(
+                pred,
+                true,
+                batch.train_mask.squeeze(-1),
+                batch.edge_index,
+                batch.edge_weight,
+            )
+
+        # Apply split masking
+        if batch.split is not None:
+            mask = batch[f"{batch.split}_mask"].squeeze(-1)
+            pred, true = pred[mask], true[mask]
+
+        return pred, true
+
+    def _shared_step(self, batch, split, final: bool = True):
+        # XXX: only allow full batch training now for several reasons (1) post
+        # propagation and correction needs access to the full graph, (2) metrics
+        # should be computed on the full graph.
+        # To resolve (1), need to extract post processing (accordingly the
+        # metrics computations also) to a shared private end_of_epoch func.
+        # This will also automatically resolve (2).
+        tic = time.perf_counter()
+        batch.split = split
+
+        # NOTE: split masking is done in _post_processing
+        pred, true = self(batch)
+
+        logger_opts = {
+            "on_step": False,
+            "on_epoch": True,
+            "logger": True,
+            "batch_size": pred.shape[0],
+        }
+
+        # Compute classification loss for training
+        if split == "train":
+            loss = F.binary_cross_entropy(pred, true)
+            self.log(f"{split}/loss", loss.item(), **logger_opts)
+            self._maybe_log_grad_norm(logger_opts)
+        else:
+            loss = None
+
+        self._maybe_log_metrics(pred, true, split, logger_opts)
+        self._maybe_prepare_final_metrics(pred, true, split, final)
+
+        self.log(f"{split}/time_epoch", time.perf_counter() - tic, **logger_opts)
+
+        return loss
+
+    # TODO: reset_parameters
+
+    def _maybe_log_grad_norm(self, logger_opts):
+        if not self.hparams.trainer.watch_grad_norm:
+            return
+
+        grad_norms = [
+            p.grad.detach().norm(2)
+            for p in self.parameters() if p.grad is not None
+        ]
+        grad_norm = torch.stack(grad_norms).norm(2).item() if grad_norms else 0.
+        self.log("train/grad_norm", grad_norm, **logger_opts)
+
+    @torch.no_grad()
+    def _maybe_log_metrics(self, pred, true, split, logger_opts):
+        if (
+            (self.current_epoch + 1) % self.hparams.trainer.eval_interval != 0
+            and split == "train"
+        ):
+            return
+
+        for metric_name, metric_obj in self.metrics.items():
+            if metric_name.startswith(f"{split}/"):
+                metric_obj(pred, true)
+                self.log(metric_name, metric_obj, **logger_opts)
+
+    def _maybe_prepare_final_metrics(self, pred, true, split, final):
+        if final:
+            self.final_pred[split].append(pred.detach())
+            self.final_true[split].append(true.detach())
+
+    def _compute_final_metrics(self, split):
+        pred = torch.vstack(self.final_pred[split])
+        true = torch.vstack(self.final_true[split])
+
+        for metric_name, metric_obj in self.metrics.items():
+            prefix = f"final/{split}_"
+            if not metric_name.startswith(prefix):
+                continue
+
+            score_type = metric_name.replace(prefix, "")
+            scores = metric_obj(pred, true).tolist()
+            for task_id, task_score in zip(self.task_ids, scores):
+                self.final_scores.append(
+                    {
+                        "split": split,
+                        "task_id": task_id,
+                        "score_type": score_type,
+                        "score_value": task_score,
+                    }
+                )
+
+            metric_obj.reset()
+
+    def log_final_results(self):
+        score_df = pd.DataFrame(self.final_scores)
+
+        for logger in self.loggers:
+            if isinstance(logger, pl.loggers.CSVLogger):
+                out_path = osp.join(logger.log_dir, "final_scores.csv")
+                score_df.to_csv(out_path)
+                nleval.logger.info(f"Final results saved to {out_path}")
+
+            elif isinstance(logger, pl.loggers.WandbLogger):
+                logger.log_table("final_scores", dataframe=score_df)
+
+            else:
+                nleval.logger.error(f"Unknown logger type {type(logger)}")
+
+    def training_step(self, batch, *args, **kwargs):
+        return self._shared_step(batch, split="train")
+
+    def validation_step(self, batch, *args, **kwargs):
+        self._shared_step(batch, split="val")
+        # HACK: Enable early testing that was deliberaly disabled by Lightning
+        # https://github.com/Lightning-AI/lightning/issues/5245
+        # Note that the early access to testing performance is **not** used for
+        # model selection and hyperparameter tuning by any means. Instead, it is
+        # only used to see if the trend of the testing and validation curves
+        # differ significantly, which indicates there is some problem witht the
+        # data split.
+        self._shared_step(batch, split="test")
+
+    def on_test_epoch_start(self):
+        # Reset final outputs
+        for obj in [self.final_pred, self.final_true]:
+            for split in obj:
+                obj[split].clear()
+        self.final_scores.clear()
+
+    def test_step(self, batch, *args, **kwargs):
+        for split in self.splits:
+            self._shared_step(batch, split=split, final=True)
+
+    def on_test_epoch_end(self, *args, **kwargs):
+        for split in self.splits:
+            self._compute_final_metrics(split)
 
 
 class MPModule(nn.Module):
@@ -407,7 +479,7 @@ class PredictionHeadModule(nn.Module):
 
 
 def build_feature_encoder(cfg: DictConfig):
-    feat_names = cfg.node_encoders.split("+")
+    feat_names = cfg.dataset.node_encoders.split("+")
 
     fe_list = []
     for i, feat_name in enumerate(feat_names):
@@ -450,7 +522,7 @@ def build_mp_module(cfg: DictConfig):
         act=cfg.model.act,
         act_first=cfg.model.act_first,
         residual_type=cfg.model.residual_type,
-        use_edge_feature=cfg.use_edge_feature,
+        use_edge_feature=cfg.model.use_edge_feature,
         mp_kwargs=cfg.model.mp_kwargs,
         norm_kwargs=cfg.model.norm_kwargs,
     )

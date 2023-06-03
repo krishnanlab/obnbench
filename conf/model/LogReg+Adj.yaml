@@ -11,7 +11,8 @@ model:
     enable: false
   post_cands:
     enable: false
-node_encoders: Adj
+dataset:
+  node_encoders: Adj
 node_encoder_params:
   Adj:
     raw_bn: false

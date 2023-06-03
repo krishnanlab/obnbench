@@ -11,7 +11,8 @@ model:
     enable: false
   post_cands:
     enable: false
-node_encoders: LINE2
+dataset:
+  node_encoders: LINE2
 node_encoder_params:
   LINE2:
     raw_dim: 128

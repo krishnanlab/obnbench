@@ -1,17 +1,23 @@
 ---
-homedir: .
-device: auto
-network: ???
-label: ???
+name: dev  # set experiment name
+name_tag: null  # if specified, the final name becomes ${name}-${name_tag}
+group: main
 seed: 0
-name_tag: null
-runid: 0
 num_workers: 0  # 0 uses all available threads
-out_dir: results
-hp_tune: false
 log_level: INFO
+save_results: false  # enable CSVLogger to save results
+paths:
+  homedir: .
+  runtime_dir: ${paths.homedir}/runtime
+  result_dir: ${paths.homedir}/results/${group}
+  dataset_dir: ${paths.homedir}/datasets
+  gene_list_path: ${paths.homedir}/genes.txt
+dataset:
+  network: ???
+  label: ???
+  node_encoders: OneHotLogDeg
 wandb:
-  use: false
+  use: true
   entity: RemyLiu
   project: OBNB-dev
 metric:
@@ -24,7 +30,7 @@ metric:
 trainer:
   accelerator: auto
   devices: 1
-  inference_only: false  # turn on for LabelPropagation
+  inference_only: false  # turn on for LabelProp
   max_epochs: 50_000
   eval_interval: 20
   early_stopping_patience: 1000
@@ -44,6 +50,7 @@ model:
   act_first: false
   pred_head_layers: 1
   skip_pred_act: false
+  use_edge_feature: true
   post_prop:
     enable: false
     num_layers: 10
@@ -62,8 +69,6 @@ model:
     autoscale: false
     scale: 1.0
     cached: true
-node_encoders: OneHotLogDeg
-use_edge_feature: true
 optim:
   lr: 0.01
   weight_decay: 1e-6
@@ -187,7 +192,7 @@ node_encoder_params:
     raw_dropout: 0.2
     dropout: 0.2
     layers: 0
-  LabelReuse:  # turn off dropout and remove enc for LabelPropagation
+  LabelReuse:  # turn off dropout and remove enc for LabelProp
     raw_bn: true
     enc_dim: 128
     raw_dropout: 0.5
@@ -199,3 +204,6 @@ node_encoder_params:
     raw_dropout: 0.0
     dropout: 0.2
     layers: 2
+hydra:
+  run:
+    dir: ${paths.runtime_dir}/hydra/${now:%Y-%m-%d}/${now:%H-%M-%S}
