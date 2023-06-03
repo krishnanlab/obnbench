@@ -10,7 +10,7 @@ model:
     root_weight: true
     project: true
     bias: true
-  residual_type: skipsum
+  residual_type: skipsumlnorm
   dropout: 0.5
   norm_type: BatchNorm
   norm_kwargs: null

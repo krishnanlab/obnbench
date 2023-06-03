@@ -380,6 +380,28 @@ def setup_callbacks(cfg: DictConfig):
     return [lr_monitor, ckpt, early_stopping]
 
 
+def _patch_fix_scale_edge_weights(dataset, g):
+    if (edge_weight := dataset._data.edge_weight) is not None:
+        if (min_edge_weight := edge_weight.min().item()) < 0:
+            raise ValueError(
+                "Negative edge weights not supported yet, "
+                f"{min_edge_weight=}",
+            )
+
+        if (max_edge_weight := edge_weight.max().item()) > 1:
+            warnings.warn(
+                f"Max edge weight = {max_edge_weight:.2f}. Rsaling edge "
+                "weights to [0, 1].\nThis will be patched in the near future.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+
+            dataset._data.edge_weight /= max_edge_weight
+            for edge_weight_dict in g._edge_data:
+                for idx in edge_weight_dict:
+                    edge_weight_dict[idx] /= max_edge_weight
+
+
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg: DictConfig):
     nleval.logger.info(f"Running with settings:\n{OmegaConf.to_yaml(cfg)}")
@@ -396,6 +418,7 @@ def main(cfg: DictConfig):
 
     # Preprocessing
     g = getattr(nleval.data, cfg.network)(data_dir, log_level="WARNING")
+    _patch_fix_scale_edge_weights(dataset, g)
     precompute_features(cfg, dataset, g)
     infer_dimensions(cfg, dataset)
 

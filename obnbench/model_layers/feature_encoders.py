@@ -64,7 +64,7 @@ class BaseFeatureEncoder(nn.Module):
         return batch
 
 
-class CompoasedFeatureEncoder(BaseFeatureEncoder):
+class ComposedFeatureEncoder(BaseFeatureEncoder):
 
     def __init__(self, *, fe_list: List[BaseFeatureEncoder], **kwargs):
         super().__init__(**kwargs)
@@ -73,7 +73,7 @@ class CompoasedFeatureEncoder(BaseFeatureEncoder):
         self.feature_encoders = nn.ModuleList(fe_list)
 
     def get_raw_features(self, batch):
-        xs = [enc(batch).x for enc in self.featture_encoders]
+        xs = [enc(batch).x for enc in self.feature_encoders]
         return torch.cat(xs, dim=1)
 
 
@@ -187,7 +187,7 @@ class LabelReuseFeatureEncoder(BaseFeatureEncoder):
 
 __all__ = [
     "AdjFeatureEncoder",
-    "CompoasedFeatureEncoder",
+    "ComposedFeatureEncoder",
     "ConstantFeatureEncoder",
     "LINE1FeatureEncoder",
     "LINE2FeatureEncoder",

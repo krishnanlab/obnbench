@@ -246,6 +246,8 @@ class MPModule(nn.Module):
         self.norm_kwargs = norm_kwargs or {}
         if norm_type == "LayerNorm":
             self.norm_kwargs.setdefault("mode", "node")
+        elif norm_type == "DiffGroupNorm":
+            self.norm_kwargs.setdefault("groups", 6)
         if norm_type != "PairNorm":
             # Need to pass feature dimension except for PairNorm
             self.norm_kwargs["in_channels"] = None
@@ -345,10 +347,12 @@ class MPModule(nn.Module):
     def _skipsum_forward(self, batch):
         for i, layer in enumerate(self.layers):
             x_prev = batch.x
-            batch = self._layer_forward(layer, batch)
+            batch = layer["conv"](batch)
+            # batch = self._layer_forward(layer, batch)
             if self.res_norms:
                 batch.x = self.res_norms[i](batch.x)
             batch.x = batch.x + x_prev
+            batch.x = layer["post_conv"](batch.x)
         return batch
 
     def _catlast_forward(self, batch):
@@ -406,11 +410,11 @@ def build_feature_encoder(cfg: DictConfig):
     feat_names = cfg.node_encoders.split("+")
 
     fe_list = []
-    for feat_name in feat_names:
+    for i, feat_name in enumerate(feat_names):
         fe_cfg = cfg.node_encoder_params.get(feat_name)
         fe_cls = getattr(feature_encoders, f"{feat_name}FeatureEncoder")
         fe = fe_cls(
-            dim_feat=cfg._shared.fe_raw_dims[0],
+            dim_feat=cfg._shared.fe_raw_dims[i],
             dim_encoder=cfg.model.hid_dim,
             layers=fe_cfg.layers,
             dropout=fe_cfg.dropout,
@@ -423,8 +427,8 @@ def build_feature_encoder(cfg: DictConfig):
     if len(fe_list) == 1:
         return fe_list[0]
     else:
-        fe_cfg = cfg.node_encoder_params.Compoased
-        return feature_encoders.CompoasedFeatureEncoder(
+        fe_cfg = cfg.node_encoder_params.Composed
+        return feature_encoders.ComposedFeatureEncoder(
             dim_feat=cfg._shared.composed_fe_dim_in,
             dim_encoder=cfg.model.hid_dim,
             layers=fe_cfg.layers,

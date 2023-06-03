@@ -26,8 +26,8 @@ trainer:
   devices: 1
   inference_only: false  # turn on for LabelPropagation
   max_epochs: 50_000
-  eval_interval: 50
-  early_stopping_patience: 2000
+  eval_interval: 20
+  early_stopping_patience: 1000
   gradient_clip_val: 0.02  # set to null to disable
   fast_dev_run: false
   watch_grad_norm: true
@@ -36,7 +36,7 @@ model:
   mp_type: GCNConv
   mp_layers: 3
   mp_kwargs: null
-  residual_type: skipsum
+  residual_type: skipsumlnorm
   dropout: 0.5
   norm_type: BatchNorm
   norm_kwargs: null
