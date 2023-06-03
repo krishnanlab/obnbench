@@ -169,15 +169,17 @@ def main(cfg: DictConfig):
         cfg.dataset.label,
         selected_genes=gene_list,
     )
+    nleval.logger.info(f"Dataset loaded: {dataset}\n{dataset._data}")
 
     # Preprocessing
     g = getattr(nleval.data, cfg.dataset.network)(data_dir, log_level="WARNING")
     _patch_fix_scale_edge_weights(dataset, g)
     precompute_features(cfg, dataset, g)
     infer_dimensions(cfg, dataset)
+    nleval.logger.info(f"Processed data:\n{dataset._data}")
 
     # Set up model
-    model = ModelModule(cfg)
+    model = ModelModule(cfg, node_ids=dataset.node_ids, task_ids=dataset.task_ids)
     nleval.logger.info(f"Model constructed:\n{model}")
 
     # Set up data module and trainer
@@ -206,19 +208,8 @@ def main(cfg: DictConfig):
         else:
             ckpt = None
 
-        trainer.validate(model, datamodule=data, verbose=True, ckpt_path=ckpt)
-
-    # # Train and evaluat model
-    # if cfg.model in GNN_METHODS:
-    #     mdl_trainer.train(mdl, dataset)
-    #     results = get_gnn_results(mdl, dataset, cfg.device)
-    # else:
-    #     results = mdl_trainer.eval_multi_ovr(mdl, dataset, consider_negative=True)
-
-    # # Save results as JSON
-    # results_json = results_to_json(lsc.label_ids, results)
-    # with open(result_path, "w") as f:
-    #     json.dump(results_json, f, indent=4)
+        trainer.test(model, datamodule=data, verbose=True, ckpt_path=ckpt)
+        model.log_final_results()
 
 
 if __name__ == "__main__":
