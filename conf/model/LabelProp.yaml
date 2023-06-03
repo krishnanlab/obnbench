@@ -15,7 +15,8 @@ model:
     cached: true
   post_cands:
     enable: false
-node_encoders: LabelReuse
+dataset:
+  node_encoders: LabelReuse
 node_encoder_params:
   LabelReuse:
     raw_bn: false

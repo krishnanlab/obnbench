@@ -11,8 +11,8 @@ model:
     enable: false
   post_cands:
     enable: false
-node_encoder: Node2vec
-node_encoders: Node2vec
+dataset:
+  node_encoder: Node2vec
 node_encoder_params:
   Node2vec:
     raw_dim: 128
