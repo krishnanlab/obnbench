@@ -1,0 +1,9 @@
+# @package _global_
+---
+name: dev
+name_tag: null
+group: main
+save_results: false
+wandb:
+  name: null
+  project: OBNB-dev

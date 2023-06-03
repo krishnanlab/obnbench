@@ -36,6 +36,7 @@ def setup_loggers(cfg: DictConfig):
     loggers = []
     if cfg.wandb.use:
         wandb_logger = pl.loggers.WandbLogger(
+            name=cfg.wandb.name,
             project=cfg.wandb.project,
             entity=cfg.wandb.entity,
             save_dir=cfg.paths.runtime_dir,
@@ -109,7 +110,7 @@ def main(cfg: DictConfig):
     setup_configs(cfg)
     loggers = setup_loggers(cfg)
     pl.seed_everything(cfg.seed)
-    nleval.logger.info(f"Running with settings:\n{OmegaConf.to_yaml(cfg)}")
+    nleval.logger.info(f"Run configs:\n{OmegaConf.to_yaml(cfg, resolve=True)}")
 
     # Load data
     data_dir = cfg.paths.dataset_dir

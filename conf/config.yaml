@@ -1,4 +1,8 @@
 ---
+defaults:
+  - _self_
+  - /run_mode: dev
+  - /model: LabelProp
 name: dev  # set experiment name
 name_tag: null  # if specified, the final name becomes ${name}-${name_tag}
 group: main
