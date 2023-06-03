@@ -1,10 +1,12 @@
 import warnings
+from contextlib import contextmanager
 from math import ceil
 
 import hydra
 import lightning.pytorch as pl
 import nleval
 import numpy as np
+import wandb
 from nleval.dataset_pyg import OpenBiomedNetBench
 from omegaconf import DictConfig, OmegaConf
 
@@ -26,6 +28,9 @@ def setup_configs(cfg: DictConfig):
                 "cfg.name is set.",
             )
         cfg.name = f"{cfg.name}-{cfg.name_tag}"
+
+    # Offset by -1 to make up the +=1 in run loops
+    cfg.seed -= 1
 
 
 def setup_loggers(cfg: DictConfig):
@@ -84,34 +89,30 @@ def setup_callbacks(cfg: DictConfig):
 
 
 def _patch_fix_scale_edge_weights(dataset, g):
-    if (edge_weight := dataset._data.edge_weight) is not None:
-        if (min_edge_weight := edge_weight.min().item()) < 0:
-            raise ValueError(
-                "Negative edge weights not supported yet, "
-                f"{min_edge_weight=}",
-            )
+    if (edge_weight := dataset._data.edge_weight) is None:
+        return
 
-        if (max_edge_weight := edge_weight.max().item()) > 1:
-            warnings.warn(
-                f"Max edge weight = {max_edge_weight:.2f}. Rsaling edge "
-                "weights to [0, 1].\nThis will be patched in the near future.",
-                RuntimeWarning,
-                stacklevel=2,
-            )
+    if (min_edge_weight := edge_weight.min().item()) < 0:
+        raise ValueError(
+            "Negative edge weights not supported yet, "
+            f"{min_edge_weight=}",
+        )
 
-            dataset._data.edge_weight /= max_edge_weight
-            for edge_weight_dict in g._edge_data:
-                for idx in edge_weight_dict:
-                    edge_weight_dict[idx] /= max_edge_weight
+    if (max_edge_weight := edge_weight.max().item()) > 1:
+        warnings.warn(
+            f"Max edge weight = {max_edge_weight:.2f}. Rsaling edge "
+            "weights to [0, 1].\nThis will be patched in the near future.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+
+        dataset._data.edge_weight /= max_edge_weight
+        for edge_weight_dict in g._edge_data:
+            for idx in edge_weight_dict:
+                edge_weight_dict[idx] /= max_edge_weight
 
 
-@hydra.main(version_base=None, config_path="conf", config_name="config")
-def main(cfg: DictConfig):
-    setup_configs(cfg)
-    loggers = setup_loggers(cfg)
-    pl.seed_everything(cfg.seed)
-    nleval.logger.info(f"Run configs:\n{OmegaConf.to_yaml(cfg, resolve=True)}")
-
+def setup_data_module(cfg: DictConfig):
     # Load data
     data_dir = cfg.paths.dataset_dir
     gene_list = np.loadtxt(cfg.paths.gene_list_path, dtype=str).tolist()
@@ -130,38 +131,67 @@ def main(cfg: DictConfig):
     infer_dimensions(cfg, dataset)
     nleval.logger.info(f"Processed data:\n{dataset._data}")
 
-    # Set up model
-    model = ModelModule(cfg, node_ids=dataset.node_ids, task_ids=dataset.task_ids)
-    nleval.logger.info(f"Model constructed:\n{model}")
-
-    # Set up data module and trainer
+    # Wrap into Datamodule
     data = DataModule(dataset, num_workers=cfg.num_workers, pin_memory=True)
-    callbacks = setup_callbacks(cfg)
-    trainer = pl.Trainer(
-        accelerator=cfg.trainer.accelerator,
-        devices=cfg.trainer.devices,
-        max_epochs=cfg.trainer.max_epochs,
-        check_val_every_n_epoch=cfg.trainer.eval_interval,
-        fast_dev_run=cfg.trainer.fast_dev_run,
-        gradient_clip_val=cfg.trainer.gradient_clip_val,
-        logger=loggers,
-        callbacks=callbacks,
-        enable_progress_bar=True,
-        log_every_n_steps=1,  # full-batch training
-    )
 
-    # Train and evaluate model
+    return data
+
+
+@contextmanager
+def run_context(cfg: DictConfig):
     with warnings.catch_warnings():
         warnings.simplefilter("once")
+        nleval.logger.info(f"Run configs:\n{OmegaConf.to_yaml(cfg, resolve=True)}")
 
-        if not cfg.trainer.inference_only:
-            trainer.fit(model, datamodule=data)
-            ckpt = "best"
-        else:
-            ckpt = None
+        try:
+            yield
+        finally:
+            if wandb.run is not None:
+                wandb.run.finish()
 
-        trainer.test(model, datamodule=data, verbose=True, ckpt_path=ckpt)
-        model.log_final_results()
+
+@hydra.main(version_base=None, config_path="conf", config_name="config")
+def main(cfg: DictConfig):
+    setup_configs(cfg)
+
+    for _ in range(cfg.num_runs):
+        cfg.seed += 1
+        loggers = setup_loggers(cfg)
+        callbacks = setup_callbacks(cfg)
+        pl.seed_everything(cfg.seed)
+
+        with run_context(cfg):
+            data = setup_data_module(cfg)
+            model = ModelModule(
+                cfg,
+                node_ids=data.dataset.node_ids,
+                task_ids=data.dataset.task_ids,
+            )
+            nleval.logger.info(f"Model constructed:\n{model}")
+
+            # Set up data module and trainer
+            trainer = pl.Trainer(
+                accelerator=cfg.trainer.accelerator,
+                devices=cfg.trainer.devices,
+                max_epochs=cfg.trainer.max_epochs,
+                check_val_every_n_epoch=cfg.trainer.eval_interval,
+                fast_dev_run=cfg.trainer.fast_dev_run,
+                gradient_clip_val=cfg.trainer.gradient_clip_val,
+                logger=loggers,
+                callbacks=callbacks,
+                enable_progress_bar=True,
+                log_every_n_steps=1,  # full-batch training
+            )
+
+            # Train and evaluate model
+            if not cfg.trainer.inference_only:
+                trainer.fit(model, datamodule=data)
+                ckpt = "best"
+            else:
+                ckpt = None
+
+            trainer.test(model, datamodule=data, verbose=True, ckpt_path=ckpt)
+            model.log_final_results()
 
 
 if __name__ == "__main__":

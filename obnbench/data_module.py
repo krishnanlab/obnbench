@@ -15,6 +15,7 @@ class DataModule(pl.LightningModule):
         super().__init__()
 
     def _setup_loader(self, dataset, sampler, num_workers, pin_memory):
+        self.dataset = dataset
         pw = num_workers > 1
         if sampler == "full_batch":
             # NOTE: Technically we only need one dataloader, whcih is the same

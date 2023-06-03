@@ -7,6 +7,7 @@ name: dev  # set experiment name
 name_tag: null  # if specified, the final name becomes ${name}-${name_tag}
 group: main
 seed: 0
+num_runs: 1
 num_workers: 0  # 0 uses all available threads
 log_level: INFO
 save_results: false  # enable CSVLogger to save results
