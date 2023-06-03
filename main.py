@@ -1,5 +1,3 @@
-import json
-import os
 import warnings
 from math import ceil
 
@@ -9,58 +7,11 @@ import nleval
 import numpy as np
 from nleval.dataset_pyg import OpenBiomedNetBench
 from omegaconf import DictConfig, OmegaConf
-from typing import Dict, List, Optional, Tuple, Union
 
 from obnbench.data_module import DataModule
 from obnbench.model import ModelModule
 from obnbench.preprocess import precompute_features, infer_dimensions
 from obnbench.utils import get_num_workers
-
-
-def _get_paths(cfg: DictConfig, opt: Optional[Dict[str, float]] = None) -> Tuple[str, str]:
-    # Get output file name and path
-    out_dir = os.path.join(cfg.homedir, cfg.out_dir)
-    os.makedirs(out_dir, exist_ok=True)
-
-    # Only results are saved directly under the out_dir as json, no logs
-    # <out_dir>/{network}_{label}_{model}_{seed}.json
-    # If name_tag is specified, then
-    # <out_dir>/{network}_{label}_{model}_{name_tag}_{seed}.json
-    if not cfg.hp_tune:
-        log_path = None
-        exp_name = "_".join([i.lower() for i in (cfg.dataset.network, cfg.dataset.label, cfg.model)])
-        if cfg.name_tag is not None:
-            exp_name = f"{exp_name}_{cfg.name_tag}"
-        result_path = os.path.join(cfg.homedir, out_dir, f"{exp_name}_{cfg.seed}.json")
-
-    # Nested dir struct for organizing different hyperparameter tuning exps
-    # <out_dir>/{method}/{settings}/{dataset}/{seed}
-    else:
-        dataset = "_".join(i.lower() for i in (cfg.dataset.network, cfg.dataset.label))
-        settings = "_".join(f"{i.replace('_', '-')}={j}" for i, j in opt.items()) if opt else "none"
-        out_path = os.path.join(cfg.homedir, out_dir, cfg.model, settings, dataset, str(cfg.seed))
-        os.makedirs(out_path, exist_ok=True)
-
-        result_path = os.path.join(out_path, "score.json")
-        log_path = os.path.join(out_path, "run.log")
-
-    nleval.logger.info(f"Results will be saved to {result_path}")
-
-    return result_path, log_path
-
-
-def results_to_json(
-    label_ids: List[str],
-    results: Dict[str, List[float]],
-) -> List[Dict[str, Union[float, str]]]:
-    """Convert results into JSON format."""
-    results_json = []
-    for i, label_id in enumerate(label_ids):
-        new_item = {"task_name": label_id}
-        for name in results:
-            new_item[name] = results[name][i]
-        results_json.append(new_item)
-    return results_json
 
 
 def setup_configs(cfg: DictConfig):
