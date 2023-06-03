@@ -1,6 +1,7 @@
 # @package _global_
 ---
 model:
+  name: GIN
   hid_dim: 128
   mp_type: GINConv
   mp_layers: 3

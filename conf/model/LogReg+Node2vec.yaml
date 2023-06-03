@@ -3,6 +3,7 @@
 defaults:
   - /optim: SGDConvex
 model:
+  name: LogReg+Node2vec
   hid_dim: 128  # only used when post_head_layers > 1
   mp_layers: 0
   skip_pred_act: false

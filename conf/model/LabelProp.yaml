@@ -3,6 +3,7 @@
 trainer:
   inference_only: true  # no training
 model:
+  name: LabelProp
   mp_layers: 0
   pred_head_layers: 0
   skip_pred_act: true
