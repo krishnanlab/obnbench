@@ -213,9 +213,9 @@ def get_embedding(**kwargs) -> None:
 
 @PreCompFeatureWrapper("LabelReuse")
 def get_label_resuse(dataset: Dataset, **kwargs) -> torch.Tensor:
-    feat = torch.zeros_like(dataset.data.y, dtype=torch.float)
-    train_mask = dataset.data.train_mask[:, 0]
-    feat[train_mask] = dataset.data.y[train_mask]
+    feat = torch.zeros_like(dataset._data.y, dtype=torch.float)
+    train_mask = dataset._data.train_mask[:, 0]
+    feat[train_mask] = dataset._data.y[train_mask]
     feat /= feat.sum(0)  # normalize
     return feat
 
@@ -254,7 +254,7 @@ def infer_dimensions(cfg: DictConfig, dataset: Dataset):
     node_encoders = cfg.dataset.node_encoders.split("+")
 
     # Infer number of nodes and tasks
-    num_nodes, dim_out = dataset.data.y.shape
+    num_nodes, dim_out = dataset._data.y.shape
 
     # Infer feature encoder dimensions
     fe_raw_dims, fe_processed_dims = [], []
