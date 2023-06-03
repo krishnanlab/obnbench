@@ -24,7 +24,6 @@ def get_network_construct(network_name):
 
 
 def load_data(
-    # homedir: Path,
     datadir: str,
     gene_list_path: str,
     network_name: str,
