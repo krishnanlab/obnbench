@@ -44,6 +44,7 @@ model:
   act_first: false
   pred_head_layers: 1
   skip_pred_act: false
+  use_edge_feature: true
   post_prop:
     enable: false
     num_layers: 10
@@ -63,7 +64,6 @@ model:
     scale: 1.0
     cached: true
 node_encoders: OneHotLogDeg
-use_edge_feature: true
 optim:
   lr: 0.01
   weight_decay: 1e-6
