@@ -10,7 +10,6 @@ import numpy as np
 import scipy.sparse as sp
 import torch.nn as nn
 import wandb
-from lightning.pytorch.loggers import WandbLogger
 from nleval import Dataset
 from nleval.dataset_pyg import OpenBiomedNetBench
 from nleval.ext.grape import grape_embed
@@ -35,13 +34,7 @@ from get_data import load_data
 from obnbench.data_module import DataModule
 from obnbench.model import ModelModule
 from obnbench.preprocess import precompute_features, infer_dimensions
-from obnbench.utils import (
-    get_device,
-    get_num_workers,
-    normalize_path,
-    get_data_dir,
-    get_gene_list_path,
-)
+from obnbench.utils import get_num_workers
 
 GNN_METHODS = ["GCN", "GAT", "GIN", "GraphSAGE"]
 GML_METHODS = [
@@ -140,22 +133,22 @@ def _get_paths(cfg: DictConfig, opt: Optional[Dict[str, float]] = None) -> Tuple
     os.makedirs(out_dir, exist_ok=True)
 
     # Only results are saved directly under the out_dir as json, no logs
-    # <out_dir>/{network}_{label}_{model}_{runid}.json
+    # <out_dir>/{network}_{label}_{model}_{seed}.json
     # If name_tag is specified, then
-    # <out_dir>/{network}_{label}_{model}_{name_tag}_{runid}.json
+    # <out_dir>/{network}_{label}_{model}_{name_tag}_{seed}.json
     if not cfg.hp_tune:
         log_path = None
-        exp_name = "_".join([i.lower() for i in (cfg.network, cfg.label, cfg.model)])
+        exp_name = "_".join([i.lower() for i in (cfg.dataset.network, cfg.dataset.label, cfg.model)])
         if cfg.name_tag is not None:
             exp_name = f"{exp_name}_{cfg.name_tag}"
-        result_path = os.path.join(cfg.homedir, out_dir, f"{exp_name}_{cfg.runid}.json")
+        result_path = os.path.join(cfg.homedir, out_dir, f"{exp_name}_{cfg.seed}.json")
 
     # Nested dir struct for organizing different hyperparameter tuning exps
-    # <out_dir>/{method}/{settings}/{dataset}/{runid}
+    # <out_dir>/{method}/{settings}/{dataset}/{seed}
     else:
-        dataset = "_".join(i.lower() for i in (cfg.network, cfg.label))
+        dataset = "_".join(i.lower() for i in (cfg.dataset.network, cfg.dataset.label))
         settings = "_".join(f"{i.replace('_', '-')}={j}" for i, j in opt.items()) if opt else "none"
-        out_path = os.path.join(cfg.homedir, out_dir, cfg.model, settings, dataset, str(cfg.runid))
+        out_path = os.path.join(cfg.homedir, out_dir, cfg.model, settings, dataset, str(cfg.seed))
         os.makedirs(out_path, exist_ok=True)
 
         result_path = os.path.join(out_path, "score.json")
@@ -356,6 +349,50 @@ def get_gnn_results(mdl, dataset, device) -> Dict[str, List[float]]:
     return results
 
 
+def setup_configs(cfg: DictConfig):
+    # Resolve workers
+    cfg.num_workers = get_num_workers(cfg.num_workers)
+
+    # Combine name with name_tag
+    if cfg.name_tag is not None:
+        if cfg.name is None:
+            raise ValueError(
+                f"cfg.name_tag can only be set ({cfg.name_tag}) when "
+                "cfg.name is set.",
+            )
+        cfg.name = f"{cfg.name}-{cfg.name_tag}"
+
+
+def setup_loggers(cfg: DictConfig):
+    # Set local logger level
+    nleval.logger.setLevel(cfg.log_level)
+
+    # Set up Lightning loggers
+    loggers = []
+    if cfg.wandb.use:
+        wandb_logger = pl.loggers.WandbLogger(
+            project=cfg.wandb.project,
+            entity=cfg.wandb.entity,
+            save_dir=cfg.paths.runtime_dir,
+            group=cfg.group,
+        )
+        loggers.append(wandb_logger)
+    if cfg.save_results:
+        csv_logger = pl.loggers.CSVLogger(
+            save_dir=cfg.paths.result_dir,
+            name=cfg.name,
+            version=f"run_{cfg.seed}",
+        )
+        loggers.append(csv_logger)
+    if not loggers:
+        raise ValueError(
+            "At least one of the following must be set to true to properly "
+            "set up the logger: cfg.save_results, cfg.wandb.use",
+        )
+
+    return loggers
+
+
 def setup_callbacks(cfg: DictConfig):
     lr_monitor = pl.callbacks.LearningRateMonitor(
         logging_interval="epoch",
@@ -404,35 +441,33 @@ def _patch_fix_scale_edge_weights(dataset, g):
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg: DictConfig):
-    nleval.logger.info(f"Running with settings:\n{OmegaConf.to_yaml(cfg)}")
-    cfg.homedir = normalize_path(cfg.homedir)
-    cfg.device = get_device(cfg.device)
-    cfg.num_workers = get_num_workers(cfg.num_workers)
+    setup_configs(cfg)
+    loggers = setup_loggers(cfg)
     pl.seed_everything(cfg.seed)
+    nleval.logger.info(f"Running with settings:\n{OmegaConf.to_yaml(cfg)}")
 
     # Load data
-    gene_list_path = get_gene_list_path(cfg.homedir)
-    data_dir = get_data_dir(cfg.homedir)
-    gene_list = np.loadtxt(gene_list_path, dtype=str).tolist()
-    dataset = OpenBiomedNetBench(data_dir, cfg.network, cfg.label, selected_genes=gene_list)
+    data_dir = cfg.paths.dataset_dir
+    gene_list = np.loadtxt(cfg.paths.gene_list_path, dtype=str).tolist()
+    dataset = OpenBiomedNetBench(
+        data_dir,
+        cfg.dataset.network,
+        cfg.dataset.label,
+        selected_genes=gene_list,
+    )
 
     # Preprocessing
-    g = getattr(nleval.data, cfg.network)(data_dir, log_level="WARNING")
+    g = getattr(nleval.data, cfg.dataset.network)(data_dir, log_level="WARNING")
     _patch_fix_scale_edge_weights(dataset, g)
     precompute_features(cfg, dataset, g)
     infer_dimensions(cfg, dataset)
 
-    # g, lsc, splitter = load_data(cfg.homedir, cfg.network, cfg.label, cfg.log_level)
-    # mdl, mdl_trainer, g, feat, result_path = set_up_mdl(cfg, g, lsc, cfg.log_level)
-    # dataset = Dataset(graph=g, feature=feat, label=lsc, splitter=splitter)
-    # nleval.logger.info(lsc.stats())
-
-    # model = GNN(cfg)
+    # Set up model
     model = ModelModule(cfg)
     nleval.logger.info(f"Model constructed:\n{model}")
 
+    # Set up data module and trainer
     data = DataModule(dataset, num_workers=cfg.num_workers, pin_memory=True)
-    wandb_logger = WandbLogger(project=cfg.wandb.project, entity=cfg.wandb.entity)
     callbacks = setup_callbacks(cfg)
     trainer = pl.Trainer(
         accelerator=cfg.trainer.accelerator,
@@ -441,12 +476,13 @@ def main(cfg: DictConfig):
         check_val_every_n_epoch=cfg.trainer.eval_interval,
         fast_dev_run=cfg.trainer.fast_dev_run,
         gradient_clip_val=cfg.trainer.gradient_clip_val,
-        logger=wandb_logger,
+        logger=loggers,
         callbacks=callbacks,
         enable_progress_bar=True,
         log_every_n_steps=1,  # full-batch training
     )
 
+    # Train and evaluate model
     with warnings.catch_warnings():
         warnings.simplefilter("once")
 

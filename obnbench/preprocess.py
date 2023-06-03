@@ -223,11 +223,13 @@ def get_label_resuse(dataset: Dataset, **kwargs) -> torch.Tensor:
 def precompute_features(cfg: DictConfig, dataset: Dataset, g: SparseGraph):
     # Catch invalid node encoders before executing
     invalid_fe = []
-    for feat_name in (node_encoders := cfg.node_encoders.split("+")):
+    for feat_name in (node_encoders := cfg.dataset.node_encoders.split("+")):
         if feat_name not in precomp_func_register:
             invalid_fe.append(feat_name)
     if invalid_fe:
-        raise ValueError(f"Invalid node encoders {invalid_fe} in {cfg.node_encoders}")
+        raise ValueError(
+            f"Invalid node encoders {invalid_fe} in {cfg.dataset.node_encoders}",
+        )
 
     # Prepare shared data arguments
     data_dict = {"dataset": dataset, "g": g, "adj": g.to_dense_graph().mat}
@@ -249,7 +251,7 @@ def precompute_features(cfg: DictConfig, dataset: Dataset, g: SparseGraph):
 def infer_dimensions(cfg: DictConfig, dataset: Dataset):
     # NOTE: this function is called after precompute_features, so we don't need
     # to check the validity of the node_encoders setting again.
-    node_encoders = cfg.node_encoders.split("+")
+    node_encoders = cfg.dataset.node_encoders.split("+")
 
     # Infer number of nodes and tasks
     num_nodes, dim_out = dataset.data.y.shape

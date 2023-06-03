@@ -1,7 +1,7 @@
 import time
 from collections import OrderedDict
 from math import ceil
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional
 
 import lightning.pytorch as pl
 import torch
@@ -9,7 +9,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch_geometric.nn as pygnn
 from omegaconf import DictConfig
-from torch import Tensor
 
 import obnbench.metrics
 from obnbench import optimizers, schedulers
@@ -113,7 +112,7 @@ class ModelModule(pl.LightningModule):
             p.grad.detach().norm(2)
             for p in self.parameters() if p.grad is not None
         ]
-        grad_norm = torch.stack(grad_norms).norm(2).item() if grad_norms else 0
+        grad_norm = torch.stack(grad_norms).norm(2).item() if grad_norms else 0.
         self.log("train/grad_norm", grad_norm, **logger_opts)
 
     @torch.no_grad()
@@ -407,7 +406,7 @@ class PredictionHeadModule(nn.Module):
 
 
 def build_feature_encoder(cfg: DictConfig):
-    feat_names = cfg.node_encoders.split("+")
+    feat_names = cfg.dataset.node_encoders.split("+")
 
     fe_list = []
     for i, feat_name in enumerate(feat_names):
@@ -450,7 +449,7 @@ def build_mp_module(cfg: DictConfig):
         act=cfg.model.act,
         act_first=cfg.model.act_first,
         residual_type=cfg.model.residual_type,
-        use_edge_feature=cfg.use_edge_feature,
+        use_edge_feature=cfg.model.use_edge_feature,
         mp_kwargs=cfg.model.mp_kwargs,
         norm_kwargs=cfg.model.norm_kwargs,
     )
