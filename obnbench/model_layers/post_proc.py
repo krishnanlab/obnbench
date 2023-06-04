@@ -35,7 +35,7 @@ class FeaturePropagation(pygnn.MessagePassing):
         dropout: float = 0.0,
         cached: bool = False,
         max_iter: int = 100,
-        tol: float = 1e-5,
+        tol: float = 1e-12,
     ):
         super().__init__(aggr="add", flow="source_to_target")
 
@@ -75,17 +75,19 @@ class FeaturePropagation(pygnn.MessagePassing):
                 self._cached_norm_edge_weight = norm_edge_weight
 
         x0 = x
-        for _ in range(self.num_layers):
-            x = F.dropout(x, p=self.dropout, training=self.training)
+        for i in range(self.num_layers):
+            x_prev = F.dropout(x, p=self.dropout, training=self.training)
+
             # propagate_type: (x: Tensor, edge_ewight: Tensor)
-            x = self.propagate(edge_index, x=x, edge_weight=norm_edge_weight)
+            x = self.propagate(edge_index, x=x_prev, edge_weight=norm_edge_weight)
             x = self.alpha * x + (1 - self.alpha) * x0
 
             # Check convergence
             if self.tol is not None:
                 with torch.no_grad():
-                    err = (x - x0).abs().mean()
+                    err = (x - x_prev).abs().mean()
                     if err < self.tol:
+                        # print(f"FeaturePropagation converged at {i} step")
                         break
         else:
             # Check if convergence failed

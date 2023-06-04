@@ -1,16 +1,17 @@
 # @package _global_
 ---
 model:
+  name: GAT
   hid_dim: 128
   mp_type: GATConv
   mp_layers: 3
   mp_kwargs:
-    heads: 3
+    heads: 2
     concat: false
     dropout: 0.05
   residual_type: skipsumlnorm
   dropout: 0.5
-  norm_type: BatchNorm
+  norm_type: none
   norm_kwargs: null
   act: relu
   act_first: false

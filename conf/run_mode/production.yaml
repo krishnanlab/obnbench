@@ -1,0 +1,9 @@
+# @package _global_
+---
+name: ${dataset.network}-${dataset.label}-${model.name}
+name_tag: null
+group: main
+save_results: false
+wandb:
+  name: ${name}
+  project: OBNB

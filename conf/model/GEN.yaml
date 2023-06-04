@@ -1,6 +1,7 @@
 # @package _global_
 ---
 model:
+  name: GEN
   hid_dim: 128
   mp_type: GENConv
   mp_layers: 3
@@ -19,7 +20,7 @@ model:
     edge_dim: null  # dimension should match dim_out of the conv layer
   residual_type: skipsumlnorm
   dropout: 0.5
-  norm_type: BatchNorm
+  norm_type: none
   norm_kwargs: null
   act: relu
   act_first: false

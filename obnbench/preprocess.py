@@ -1,6 +1,7 @@
 import time
 from functools import wraps
 from pprint import pformat
+from typing import Any, Dict, Optional
 
 import nleval
 import numpy as np
@@ -12,6 +13,7 @@ from nleval.ext.pecanpy import pecanpy_embed
 from nleval.graph import SparseGraph
 from nleval.util.logger import display_pbar
 from omegaconf import DictConfig, open_dict
+from sklearn.decomposition import PCA
 from sklearn.preprocessing import KBinsDiscretizer
 from sklearn.random_projection import GaussianRandomProjection, SparseRandomProjection
 from torch_geometric.data import Dataset
@@ -83,24 +85,32 @@ def get_const(feat_dim: int, adj: np.ndarray, **kwargs) -> np.ndarray:
 
 
 @PreCompFeatureWrapper("RandomNormal")
-def get_random_normal(feat_dim: int, adj: np.ndarray, **kwargs) -> np.ndarray:
-    feat = np.random.default_rng(0).random((adj.shape[0], feat_dim))
+def get_random_normal(
+    feat_dim: int,
+    adj: np.ndarray,
+    random_state: Optional[int] = None,
+    **kwargs,
+) -> np.ndarray:
+    feat = np.random.default_rng(random_state).random((adj.shape[0], feat_dim))
     return feat
 
 
 @PreCompFeatureWrapper("Orbital")
 def get_orbital_counts(
     g: SparseGraph,
-    n_jobs: int = 1,
-    log_level: str = "INFO",
+    num_workers: int = 1,
+    feat_kwargs: Optional[Dict[str, Any]] = None,
+    show_progress: bool = True,
     **kwargs,
 ) -> np.ndarray:
+    feat_kwargs = feat_kwargs or {}
+    feat_kwargs.setdefault("graphlet_size", 3)
     feat = orbital_feat_extract(
         g,
-        graphlet_size=4,
-        n_jobs=n_jobs,
+        n_jobs=num_workers,
         as_array=True,
-        verbose=display_pbar(log_level),
+        verbose=show_progress,
+        **feat_kwargs,
     )
     return feat
 
@@ -144,53 +154,128 @@ def get_rand_walk_diag(feat_dim: int, adj: np.ndarray, **kwargs) -> np.ndarray:
 
 
 @PreCompFeatureWrapper("RandProjGaussian")
-def get_rand_proj_gaussian(feat_dim: int, adj: np.ndarray, **kwargs) -> np.ndarray:
-    grp = GaussianRandomProjection(n_components=feat_dim)
+def get_rand_proj_gaussian(
+    feat_dim: int,
+    adj: np.ndarray,
+    random_state: Optional[int] = None,
+    **kwargs,
+) -> np.ndarray:
+    grp = GaussianRandomProjection(n_components=feat_dim, random_state=random_state)
     feat = grp.fit_transform(adj)
     return feat
 
 
 @PreCompFeatureWrapper("RandProjSparse")
-def get_rand_proj_sparse(feat_dim: int, adj: np.ndarray, **kwargs) -> np.ndarray:
-    srp = SparseRandomProjection(n_components=feat_dim, dense_output=True)
+def get_rand_proj_sparse(
+    feat_dim: int,
+    adj: np.ndarray,
+    random_state: Optional[int] = None,
+    **kwargs,
+) -> np.ndarray:
+    srp = SparseRandomProjection(
+        n_components=feat_dim,
+        dense_output=True,
+        random_state=random_state,
+    )
     feat = srp.fit_transform(adj)
     return feat
 
 
 @PreCompFeatureWrapper("LINE1")
-def get_line1_emb(feat_dim: int, g: SparseGraph, **kwargs) -> np.ndarray:
-    feat = grape_embed(g, "FirstOrderLINEEnsmallen", dim=feat_dim, as_array=True)
+def get_line1_emb(
+    feat_dim: int,
+    g: SparseGraph,
+    random_state: Optional[int] = None,
+    show_progress: bool = True,
+    **kwargs,
+) -> np.ndarray:
+    feat = grape_embed(
+        g,
+        "FirstOrderLINEEnsmallen",
+        dim=feat_dim,
+        as_array=True,
+        random_state=random_state,
+        verbose=show_progress,
+    )
     return feat
 
 
 @PreCompFeatureWrapper("LINE2")
-def get_line2_emb(feat_dim: int, g: SparseGraph, **kwargs) -> np.ndarray:
-    feat = grape_embed(g, "SecondOrderLINEEnsmallen", dim=feat_dim, as_array=True)
+def get_line2_emb(
+    feat_dim: int,
+    g: SparseGraph,
+    random_state: Optional[int] = None,
+    show_progress: bool = True,
+    **kwargs,
+) -> np.ndarray:
+    feat = grape_embed(
+        g,
+        "SecondOrderLINEEnsmallen",
+        dim=feat_dim,
+        as_array=True,
+        random_state=random_state,
+        verbose=show_progress
+    )
     return feat
 
 
 @PreCompFeatureWrapper("Node2vec")
-def get_n2v_emb(feat_dim: int, g: SparseGraph, n_jobs=1, **kwargs) -> np.ndarray:
+def get_n2v_emb(
+    feat_dim: int,
+    g: SparseGraph,
+    num_workers: int = 1,
+    random_state: Optional[int] = None,
+    show_progress: bool = True,
+    **kwargs,
+) -> np.ndarray:
     feat = pecanpy_embed(
         g,
         mode="PreCompFirstOrder",
-        workers=n_jobs,
-        verbose=True,
+        workers=num_workers,
+        verbose=show_progress,
         dim=feat_dim,
         as_array=True,
+        random_state=random_state,
     )
     return feat
 
 
 @PreCompFeatureWrapper("Walklets")
-def get_walklets_emb(feat_dim: int, g: SparseGraph, **kwargs) -> np.ndarray:
-    feat = grape_embed(
+def get_walklets_emb(
+    feat_dim: int,
+    g: SparseGraph,
+    random_state: Optional[int] = None,
+    feat_kwargs: Optional[Dict[str, Any]] = None,
+    **kwargs,
+) -> np.ndarray:
+    feat_kwargs = feat_kwargs or {}
+    feat_kwargs.setdefault("epochs", 1)
+    feat_kwargs.setdefault("window_size", 4)
+
+    # NOTE: The resulding feat is a concatenation of (window_size x 2) number
+    # of embeddings, each has the dimension of feat_dim.
+    feat_raw = grape_embed(
         g,
         "WalkletsSkipGramEnsmallen",
-        dim=feat_dim,
+        dim=feat_dim * feat_kwargs["window_size"],  # one emb per-window (both-sides)
         as_array=True,
         grape_enable=True,
+        random_state=random_state,
+        **feat_kwargs,
     )
+
+    # Reduce multscale embedding to feat_dim via PCA following arxiv:1605.02115
+    if feat_raw.shape[1] > feat_dim:
+        pca = PCA(n_components=feat_dim, random_state=random_state)
+        feat = pca.fit_transform(feat_raw)
+        evr = pca.explained_variance_ratio_.sum()
+        nleval.logger.info(
+            "Reduced concatenated walklets embedding dimensions from "
+            f"{feat_raw.shape[1]} to {feat.shape[1]} (EVR={evr:.2%})."
+        )
+    else:
+        feat = feat_raw
+
     return feat
 
 
@@ -213,9 +298,9 @@ def get_embedding(**kwargs) -> None:
 
 @PreCompFeatureWrapper("LabelReuse")
 def get_label_resuse(dataset: Dataset, **kwargs) -> torch.Tensor:
-    feat = torch.zeros_like(dataset.data.y, dtype=torch.float)
-    train_mask = dataset.data.train_mask[:, 0]
-    feat[train_mask] = dataset.data.y[train_mask]
+    feat = torch.zeros_like(dataset._data.y, dtype=torch.float)
+    train_mask = dataset._data.train_mask[:, 0]
+    feat[train_mask] = dataset._data.y[train_mask]
     feat /= feat.sum(0)  # normalize
     return feat
 
@@ -232,16 +317,25 @@ def precompute_features(cfg: DictConfig, dataset: Dataset, g: SparseGraph):
         )
 
     # Prepare shared data arguments
-    data_dict = {"dataset": dataset, "g": g, "adj": g.to_dense_graph().mat}
+    data_dict = {
+        "dataset": dataset,
+        "g": g,
+        "adj": g.to_dense_graph().mat,
+        "num_workers": cfg.num_workers,
+        "show_progress": display_pbar(cfg.log_level),
+        "random_state": cfg.seed,
+    }
 
     tic = time.perf_counter()
     nleval.logger.info("Start pre-computing features")
     for feat_name in node_encoders:
         fe_cfg = cfg.node_encoder_params.get(feat_name)
         feat_dim = fe_cfg.get("raw_dim", None)
+        feat_kwargs = dict(fe_cfg.get("feat_kwargs", None) or {})
         precomp_func_register[feat_name](
             feat_dim=feat_dim,
             log_level=cfg.log_level,
+            feat_kwargs=feat_kwargs,
             **data_dict,
         )
     elapsed = time.perf_counter() - tic
@@ -254,7 +348,7 @@ def infer_dimensions(cfg: DictConfig, dataset: Dataset):
     node_encoders = cfg.dataset.node_encoders.split("+")
 
     # Infer number of nodes and tasks
-    num_nodes, dim_out = dataset.data.y.shape
+    num_nodes, dim_out = dataset._data.y.shape
 
     # Infer feature encoder dimensions
     fe_raw_dims, fe_processed_dims = [], []

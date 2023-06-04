@@ -11,6 +11,8 @@ class DataModule(pl.LightningModule):
         num_workers: int = 1,
         pin_memory: bool = True,
     ):
+        self.node_ids = dataset.node_ids
+        self.task_ids = dataset.task_ids
         self._setup_loader(dataset, sampler, num_workers, pin_memory)
         super().__init__()
 
