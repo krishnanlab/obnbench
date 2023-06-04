@@ -51,7 +51,7 @@ model:
   mp_kwargs: null
   residual_type: skipsumlnorm
   dropout: 0.5
-  norm_type: BatchNorm
+  norm_type: none
   norm_kwargs: null
   act: relu
   act_first: false

@@ -13,7 +13,7 @@ model:
   post_cands:
     enable: false
 dataset:
-  node_encoder: Node2vec
+  node_encoders: Node2vec
 node_encoder_params:
   Node2vec:
     raw_dim: 128
