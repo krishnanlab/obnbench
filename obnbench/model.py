@@ -11,7 +11,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch_geometric.nn as pygnn
-import wandb
 from omegaconf import DictConfig
 
 import obnbench.metrics

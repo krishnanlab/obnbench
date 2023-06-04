@@ -6,6 +6,7 @@ import hydra
 import lightning.pytorch as pl
 import nleval
 import numpy as np
+import torch
 import wandb
 from nleval.dataset_pyg import OpenBiomedNetBench
 from omegaconf import DictConfig, OmegaConf
@@ -162,11 +163,7 @@ def main(cfg: DictConfig):
 
         with run_context(cfg):
             data = setup_data_module(cfg)
-            model = ModelModule(
-                cfg,
-                node_ids=data.dataset.node_ids,
-                task_ids=data.dataset.task_ids,
-            )
+            model = ModelModule(cfg, node_ids=data.node_ids, task_ids=data.task_ids)
             nleval.logger.info(f"Model constructed:\n{model}")
 
             # Set up data module and trainer
@@ -192,6 +189,11 @@ def main(cfg: DictConfig):
 
             trainer.test(model, datamodule=data, verbose=True, ckpt_path=ckpt)
             model.log_final_results()
+
+            # Clean up for next run (doesnt seem to be working:
+            # https://github.com/Lightning-AI/lightning/issues/3275)
+            del data, model, trainer
+            torch.cuda.empty_cache()
 
 
 if __name__ == "__main__":
