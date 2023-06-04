@@ -111,11 +111,12 @@ node_encoder_params:
     layers: 1
   Orbital:
     enc_dim: 128
-    graphlet_size: 3
     raw_bn: true
     raw_dropout: 0.0
     dropout: 0.2
     layers: 1
+    feat_kwargs:
+      graphlet_size: 3
   SVD:
     raw_dim: 128
     enc_dim: 128
@@ -172,6 +173,16 @@ node_encoder_params:
     raw_dropout: 0.5
     dropout: 0.2
     layers: 1
+    feat_kwargs:
+      p: 1.0  #  return parameter for node2vec
+      q: 1.0  # in-out parameter for node2vec
+      mode: PreCompFirstOrder  # PecanPy mode
+      extend: false  # true for node2vec+ doi.org/10.1093/bioinformatics/btad047
+      gamma: 0.0  # node2vec+ thresholding parameter
+      num_walks: 10  # default PecanPy setting
+      walk_length: 80  # default PecanPy setting
+      window_size: 10  # default PecanPy setting
+      epochs: 1  # Gensim Word2vec
   Walklets:
     raw_dim: 128
     enc_dim: 128
@@ -179,6 +190,11 @@ node_encoder_params:
     raw_dropout: 0.5
     dropout: 0.2
     layers: 1
+    feat_kwargs:
+      walk_length: 11  # default Walklets setting  arxiv:1605.02115
+      iterations: 1000  # default Walklets setting for number of walks per node
+      window_size: 3  # default Walklets setting (up to third order nbhd)
+      epochs: 1  # Gensim Word2vec
   Adj:
     enc_dim: 128
     raw_bn: true
