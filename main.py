@@ -46,7 +46,7 @@ def setup_loggers(cfg: DictConfig):
             project=cfg.wandb.project,
             entity=cfg.wandb.entity,
             save_dir=cfg.paths.runtime_dir,
-            group=cfg.group,
+            group=cfg.wandb.group,
         )
         loggers.append(wandb_logger)
     if cfg.save_results:
@@ -190,8 +190,7 @@ def main(cfg: DictConfig):
             trainer.test(model, datamodule=data, verbose=True, ckpt_path=ckpt)
             model.log_final_results()
 
-            # Clean up for next run (doesnt seem to be working:
-            # https://github.com/Lightning-AI/lightning/issues/3275)
+            # Clean up for next run
             del data, model, trainer
             torch.cuda.empty_cache()
 

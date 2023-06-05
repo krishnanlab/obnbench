@@ -145,7 +145,7 @@ class ModelModule(pl.LightningModule):
 
         return pred, true
 
-    def _shared_step(self, batch, split, final: bool = True):
+    def _shared_step(self, batch, split, final: bool = False):
         # XXX: only allow full batch training now for several reasons (1) post
         # propagation and correction needs access to the full graph, (2) metrics
         # should be computed on the full graph.
@@ -182,8 +182,9 @@ class ModelModule(pl.LightningModule):
 
     # TODO: reset_parameters
 
+    @torch.no_grad()
     def _maybe_log_grad_norm(self, logger_opts):
-        if not self.hparams.trainer.watch_grad_norm:
+        if (not self.training) or (not self.hparams.trainer.watch_grad_norm):
             return
 
         grad_norms = [
