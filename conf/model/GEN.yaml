@@ -4,7 +4,7 @@ model:
   name: GEN
   hid_dim: 128
   mp_type: GENConv
-  mp_layers: 3
+  mp_layers: 5
   mp_kwargs:
     aggr: softmax
     t: 1.0
@@ -18,8 +18,8 @@ model:
     eps: 1e-7
     bias: true
     edge_dim: null  # dimension should match dim_out of the conv layer
-  residual_type: skipsumlnorm
-  dropout: 0.5
+  residual_type: skipsum
+  dropout: 0.2
   norm_type: none
   norm_kwargs: null
   act: relu
