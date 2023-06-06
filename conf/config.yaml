@@ -91,27 +91,23 @@ optim:
 node_encoder_params:
   OneHotLogDeg:
     raw_dim: 32
-    enc_dim: 128
     raw_bn: true
     raw_dropout: 0.0
     dropout: 0.2
     layers: 1
   Constant:
     raw_dim: 1
-    enc_dim: 128
     raw_bn: false
     raw_dropout: 0.0
     dropout: 0.2
     layers: 1
   RandomNormal:
     raw_dim: 32
-    enc_dim: 128
     raw_bn: true
     raw_dropout: 0.0
     dropout: 0.2
     layers: 1
   Orbital:
-    enc_dim: 128
     raw_bn: true
     raw_dropout: 0.0
     dropout: 0.2
@@ -120,56 +116,48 @@ node_encoder_params:
       graphlet_size: 3
   SVD:
     raw_dim: 128
-    enc_dim: 128
     raw_bn: true
     raw_dropout: 0.5
     dropout: 0.2
     layers: 1
   LapEigMap:
     raw_dim: 128
-    enc_dim: 128
     raw_bn: true
     raw_dropout: 0.0
     dropout: 0.2
     layers: 1
   RandomWalkDiag:
-    raw_dim: 128
-    enc_dim: 128
+    raw_dim: 20
     raw_bn: true
     raw_dropout: 0.0
     dropout: 0.2
     layers: 1
   RandProjGaussian:
     raw_dim: 128
-    enc_dim: 128
     raw_bn: true
     raw_dropout: 0.2
     dropout: 0.2
     layers: 1
   RandProjSparse:
     raw_dim: 128
-    enc_dim: 128
     raw_bn: true
     raw_dropout: 0.2
     dropout: 0.2
     layers: 1
   LINE1:
     raw_dim: 128
-    enc_dim: 128
     raw_bn: true
     raw_dropout: 0.5
     dropout: 0.2
     layers: 1
   LINE2:
     raw_dim: 128
-    enc_dim: 128
     raw_bn: true
     raw_dropout: 0.5
     dropout: 0.2
     layers: 1
   Node2vec:
     raw_dim: 128
-    enc_dim: 128
     raw_bn: true
     raw_dropout: 0.5
     dropout: 0.2
@@ -186,7 +174,6 @@ node_encoder_params:
       epochs: 5  # default Gensim Word2vec setting
   Walklets:
     raw_dim: 128
-    enc_dim: 128
     raw_bn: true
     raw_dropout: 0.5
     dropout: 0.2
@@ -197,33 +184,28 @@ node_encoder_params:
       window_size: 3  # up to third order neighborhoods
       epochs: 5  # default Gensim Word2vec setting
   Adj:
-    enc_dim: 128
     raw_bn: true
     raw_dropout: 0.5
     dropout: 0.2
     layers: 1
   AdjEmbBag:
     raw_dim: 128
-    enc_dim: 128
     raw_bn: false
     raw_dropout: 0.2
     dropout: 0.2
     layers: 0
   Embedding:
     raw_dim: 128
-    enc_dim: 128
     raw_bn: false
     raw_dropout: 0.2
     dropout: 0.2
     layers: 0
   LabelReuse:  # turn off dropout and remove enc for LabelProp
     raw_bn: true
-    enc_dim: 128
     raw_dropout: 0.5
     dropout: 0.2
     layers: 1
   Composed:
-    enc_dim: 128
     raw_bn: false
     raw_dropout: 0.0
     dropout: 0.2

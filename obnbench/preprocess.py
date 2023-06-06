@@ -351,6 +351,7 @@ def infer_dimensions(cfg: DictConfig, dataset: Dataset):
     num_nodes, dim_out = dataset._data.y.shape
 
     # Infer feature encoder dimensions
+    hid_dim = cfg.model.hid_dim
     fe_raw_dims, fe_processed_dims = [], []
     for feat_name in node_encoders:
         fe_cfg = cfg.node_encoder_params.get(feat_name)
@@ -360,7 +361,7 @@ def infer_dimensions(cfg: DictConfig, dataset: Dataset):
             raw_dim = fe_cfg.raw_dim
         else:
             raw_dim = dataset._data[f"rawfeat_{feat_name}"].shape[1]
-        encoded_dim = raw_dim if fe_cfg.layers == 0 else fe_cfg.enc_dim
+        encoded_dim = raw_dim if fe_cfg.layers == 0 else hid_dim
 
         fe_raw_dims.append(raw_dim)
         fe_processed_dims.append(encoded_dim)
@@ -372,10 +373,10 @@ def infer_dimensions(cfg: DictConfig, dataset: Dataset):
     else:  # composed feature encoder
         composed_fe_dim_in = sum(fe_processed_dims)
         fe_cfg = cfg.node_encoder_params.Composed
-        mp_dim_in = composed_fe_dim_in if fe_cfg.layers == 0 else fe_cfg.enc_dim
+        mp_dim_in = composed_fe_dim_in if fe_cfg.layers == 0 else hid_dim
 
     # Infer prediction head input dimension
-    pred_head_dim_in = mp_dim_in if cfg.model.mp_layers == 0 else cfg.model.hid_dim
+    pred_head_dim_in = mp_dim_in if cfg.model.mp_layers == 0 else hid_dim
 
     inferred_dims_dict = {
         "fe_raw_dims": fe_raw_dims,
