@@ -3,7 +3,7 @@
 model:
   name: GAT
   hid_dim: 128
-  mp_type: GATConv
+  mp_type: GATv2Conv
   mp_layers: 5
   mp_kwargs:
     heads: 2
