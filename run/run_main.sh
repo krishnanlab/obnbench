@@ -2,7 +2,7 @@
 
 # GLOBAL VAR ####
 [[ -z $SEED ]] && SEED=0
-[[ -z $NUM_RUNS ]] && NUM_RUNS=10
+[[ -z $NUM_RUNS ]] && NUM_RUNS=5
 [[ -z $DRY_RUN ]] && DRY_RUN=0
 [[ -z $RUN_MODE ]] && RUN_MODE=production
 [[ -z $USE_WANDB ]] && USE_WANDB=True

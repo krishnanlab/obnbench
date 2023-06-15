@@ -2,6 +2,7 @@
 data_version: nledata-v0.1.0-dev6
 paths:
   homedir: .
+  runtime_dir: ${paths.homedir}/runtime
   dataset_dir: ${paths.homedir}/datasets
   gene_list_path: ${paths.homedir}/genes.txt
 labels:
@@ -23,3 +24,6 @@ networks:
   - PCNet
   - ProteomeHD
   - SIGNOR
+hydra:
+  run:
+    dir: ${paths.runtime_dir}/hydra/${now:%Y-%m-%d}/${now:%H-%M-%S}
