@@ -4,11 +4,11 @@ from math import ceil
 
 import hydra
 import lightning.pytorch as pl
-import nleval
+import obnb
 import numpy as np
 import torch
 import wandb
-from nleval.dataset_pyg import OpenBiomedNetBench
+from obnb.dataset import OpenBiomedNetBenchPyG
 from omegaconf import DictConfig, OmegaConf
 
 from obnbench.data_module import DataModule
@@ -36,7 +36,7 @@ def setup_configs(cfg: DictConfig):
 
 def setup_loggers(cfg: DictConfig):
     # Set local logger level
-    nleval.logger.setLevel(cfg.log_level)
+    obnb.logger.setLevel(cfg.log_level)
 
     # Set up Lightning loggers
     loggers = []
@@ -116,21 +116,21 @@ def _patch_fix_scale_edge_weights(dataset, g):
 def setup_data_module(cfg: DictConfig):
     # Load data
     data_dir = cfg.paths.dataset_dir
-    gene_list = np.loadtxt(cfg.paths.gene_list_path, dtype=str).tolist()
-    dataset = OpenBiomedNetBench(
+    # gene_list = np.loadtxt(cfg.paths.gene_list_path, dtype=str).tolist()
+    dataset = OpenBiomedNetBenchPyG(
         data_dir,
         cfg.dataset.network,
         cfg.dataset.label,
-        selected_genes=gene_list,
+        # selected_genes=gene_list,
     )
-    nleval.logger.info(f"Dataset loaded: {dataset}\n{dataset._data}")
+    obnb.logger.info(f"Dataset loaded: {dataset}\n{dataset._data}")
 
     # Preprocessing
-    g = getattr(nleval.data, cfg.dataset.network)(data_dir, log_level="WARNING")
+    g = getattr(obnb.data, cfg.dataset.network)(data_dir, log_level="WARNING")
     _patch_fix_scale_edge_weights(dataset, g)
     precompute_features(cfg, dataset, g)
     infer_dimensions(cfg, dataset)
-    nleval.logger.info(f"Processed data:\n{dataset._data}")
+    obnb.logger.info(f"Processed data:\n{dataset._data}")
 
     # Wrap into Datamodule
     data = DataModule(dataset, num_workers=cfg.num_workers, pin_memory=True)
@@ -142,7 +142,7 @@ def setup_data_module(cfg: DictConfig):
 def run_context(cfg: DictConfig):
     with warnings.catch_warnings():
         warnings.simplefilter("once")
-        nleval.logger.info(f"Run configs:\n{OmegaConf.to_yaml(cfg, resolve=True)}")
+        obnb.logger.info(f"Run configs:\n{OmegaConf.to_yaml(cfg, resolve=True)}")
 
         try:
             yield
@@ -164,7 +164,7 @@ def main(cfg: DictConfig):
         with run_context(cfg):
             data = setup_data_module(cfg)
             model = ModelModule(cfg, node_ids=data.node_ids, task_ids=data.task_ids)
-            nleval.logger.info(f"Model constructed:\n{model}")
+            obnb.logger.info(f"Model constructed:\n{model}")
 
             # Set up data module and trainer
             trainer = pl.Trainer(

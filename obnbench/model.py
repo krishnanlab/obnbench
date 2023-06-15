@@ -5,7 +5,7 @@ from math import ceil
 from typing import Any, Dict, List, Optional
 
 import lightning.pytorch as pl
-import nleval
+import obnb
 import pandas as pd
 import torch
 import torch.nn as nn
@@ -242,13 +242,13 @@ class ModelModule(pl.LightningModule):
             if isinstance(logger, pl.loggers.CSVLogger):
                 out_path = osp.join(logger.log_dir, "final_scores.csv")
                 score_df.to_csv(out_path)
-                nleval.logger.info(f"Final results saved to {out_path}")
+                obnb.logger.info(f"Final results saved to {out_path}")
 
             elif isinstance(logger, pl.loggers.WandbLogger):
                 logger.log_table("final_scores", dataframe=score_df)
 
             else:
-                nleval.logger.error(f"Unknown logger type {type(logger)}")
+                obnb.logger.error(f"Unknown logger type {type(logger)}")
 
     def training_step(self, batch, *args, **kwargs):
         return self._shared_step(batch, split="train")

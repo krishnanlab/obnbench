@@ -2,10 +2,10 @@ from typing import Dict, List, Tuple
 
 import hydra
 import numpy as np
-import nleval
+import obnb
 import pandas as pd
-from nleval import data, label
-from nleval.util.converter import GenePropertyConverter
+from obnb import data, label
+from obnb.util.converter import GenePropertyConverter
 from omegaconf import DictConfig, OmegaConf
 
 
@@ -55,8 +55,8 @@ def print_label_stats(lsc, splitter, common_genes):
 
     df = pd.DataFrame(y_effective)
     num_effective_classes = df[0].unique().size - 1
-    nleval.logger.info(f"Total number of classes: {num_classes}")
-    nleval.logger.info(f"Total number of effective classes: {num_effective_classes:,}")
+    obnb.logger.info(f"Total number of classes: {num_classes}")
+    obnb.logger.info(f"Total number of effective classes: {num_effective_classes:,}")
 
     stats_lst = []
     mask_names = ["train", "val", "test"]
@@ -87,7 +87,7 @@ def print_label_stats(lsc, splitter, common_genes):
         },
         index={i: j for i, j in enumerate(mask_names)},
     )
-    nleval.logger.info(f"\n{stats_df.to_markdown(index=False)}")
+    obnb.logger.info(f"\n{stats_df.to_markdown(index=False)}")
 
 
 def get_splitter_filter(datadir: str, gene_list_path: str, log_level: str = "INFO"):
@@ -112,7 +112,7 @@ def get_splitter_filter(datadir: str, gene_list_path: str, log_level: str = "INF
 
 @hydra.main(version_base=None, config_path="conf", config_name="data_config")
 def main(cfg: DictConfig):
-    nleval.logger.info(f"Running with settings:\n{OmegaConf.to_yaml(cfg)}")
+    obnb.logger.info(f"Running with settings:\n{OmegaConf.to_yaml(cfg)}")
 
     datadir = cfg.paths.dataset_dir
     gene_list_path = cfg.paths.gene_list_path
@@ -131,7 +131,7 @@ def main(cfg: DictConfig):
         else:
             common_genes = common_genes.intersection(set(g.node_ids))
 
-    nleval.logger.info(f"Exporting {len(common_genes):,} common genes {gene_list_path}")
+    obnb.logger.info(f"Exporting {len(common_genes):,} common genes {gene_list_path}")
     with open(gene_list_path, "w") as f:
         for i in sorted(common_genes):
             f.write(f"{i}\n")
@@ -141,7 +141,7 @@ def main(cfg: DictConfig):
         lsc = getattr(data, label_name)(datadir, transform=filter_,
                                         version=cfg.data_version)
 
-        nleval.logger.info(f"Start obtaining stats for {label_name}")
+        obnb.logger.info(f"Start obtaining stats for {label_name}")
         print_label_stats(lsc, splitter, common_genes)
 
 
