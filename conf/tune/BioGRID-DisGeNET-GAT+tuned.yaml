@@ -1,0 +1,63 @@
+---
+name: BioGRID-DisGeNET-GAT+tuned
+entity: RemyLiu
+project: OBNB-dev
+program: main.py
+command:
+  - ${env}
+  - ${interpreter}
+  - ${program}
+  - "seed=42"  # set a different seed from production runs
+  - "run_mode=tune"
+  - "dataset.network=BioGRID"
+  - "dataset.label=DisGeNET"
+  - "dataset.node_encoders=Node2vec+OneHotLogDeg+LabelReuse"
+  - "model=GAT+CS"
+  - ${args_no_hyphens}  # hydra style arg parsing
+method: bayes
+metric:
+  name: val/APOP
+  goal: maximize
+parameters:
+  model.mp_layers:
+    min: 1
+    max: 8
+    distribution: int_uniform
+  model.hid_dim:
+    values:
+      - 64
+      - 128
+      - 192
+      - 256
+  model.mp_kwargs.heads:
+    min: 1
+    max: 4
+    distribution: int_uniform
+  model.mp_kwargs.dropout:
+    values:
+      - 0.0
+      - 0.05
+      - 0.1
+  model.residual_type:
+    values:
+      - none
+      - skipsum
+      - skipsumbnorm
+      - catlast
+  model.dropout:
+    values:
+      - 0.1
+      - 0.2
+      - 0.3
+  model.norm_type:
+    values:
+      - none
+      - BatchNorm
+      - DiffGroupNorm
+  model.act:
+    values:
+      - relu
+      - prelu
+      - gelu
+      - selu
+      - elu

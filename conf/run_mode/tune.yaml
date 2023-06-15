@@ -1,0 +1,11 @@
+# @package _global_
+---
+name: tune
+name_tag: null
+group: tune/${dataset.network}-${dataset.label}-${model.name}
+save_results: false
+wandb:
+  name: null
+  project: OBNB-dev
+trainer:
+  early_stopping_patience: 200

@@ -1,0 +1,42 @@
+---
+name: BioGRID-DisGeNET-LogReg+Walklets
+entity: RemyLiu
+project: OBNB-dev
+program: main.py
+command:
+  - ${env}
+  - ${interpreter}
+  - ${program}
+  - "seed=42"  # set a different seed from production runs
+  - "run_mode=tune"
+  - "dataset.network=BioGRID"
+  - "dataset.label=DisGeNET"
+  - "model=LogReg+Walklets"
+  - ${args_no_hyphens}  # hydra style arg parsing
+method: bayes
+metric:
+  name: val/APOP
+  goal: maximize
+parameters:
+  node_encoder_params.Walklets.feat_kwargs.walk_length:
+    values:
+      - 11
+      - 30
+      - 50
+      - 80
+  node_encoder_params.Walklets.feat_kwargs.iterations:
+    values:
+      - 1000
+      - 100
+      - 50
+      - 10
+  node_encoder_params.Walklets.feat_kwargs.window_size:
+    values:
+      - 2
+      - 3
+      - 5
+  node_encoder_params.Walklets.feat_kwargs.epochs:
+    values:
+      - 1
+      - 5
+      - 10
