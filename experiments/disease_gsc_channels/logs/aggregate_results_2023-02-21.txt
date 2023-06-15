@@ -1,37 +1,0 @@
-[INFO][nleval][parse_args] Settings:
-{'basedir': 'experiments/disease_gsc_channels',
- 'dry_run': False,
- 'log_level': 'INFO',
- 'methods': ['GCN',
-             'GAT',
-             'GIN',
-             'GraphSAGE',
-             'ADJ-LogReg',
-             'ADJ-SVM',
-             'N2V-LogReg',
-             'N2V-SVM',
-             'LabelProp'],
- 'mode': 'main',
- 'output_path': 'aggregated_results/',
- 'results_path': 'auto',
- 'suffix_date': True}
-[INFO][nleval][main] Raw results path to aggregate from: results
-[INFO][nleval][main] Results will be aggregated from experiments/disease_gsc_channels/results
-[INFO][nleval][main] Start aggregating results for methods: ['GCN', 'GAT', 'GIN', 'GraphSAGE', 'ADJ-LogReg', 'ADJ-SVM', 'N2V-LogReg', 'N2V-SVM', 'LabelProp']
-  0%|          | 0/493 [00:00<?, ?it/s]  4%|▍         | 21/493 [00:00<00:02, 207.57it/s]  9%|▊         | 43/493 [00:00<00:02, 210.35it/s] 13%|█▎        | 65/493 [00:00<00:02, 212.71it/s] 18%|█▊        | 87/493 [00:00<00:01, 209.30it/s] 23%|██▎       | 111/493 [00:00<00:01, 215.74it/s] 27%|██▋       | 135/493 [00:00<00:01, 223.62it/s] 32%|███▏      | 158/493 [00:00<00:01, 225.57it/s] 37%|███▋      | 181/493 [00:00<00:01, 226.18it/s] 42%|████▏     | 205/493 [00:00<00:01, 228.57it/s] 46%|████▌     | 228/493 [00:01<00:01, 228.72it/s] 51%|█████     | 252/493 [00:01<00:01, 231.02it/s] 56%|█████▌    | 276/493 [00:01<00:00, 230.41it/s] 61%|██████    | 301/493 [00:01<00:00, 233.91it/s] 66%|██████▌   | 325/493 [00:01<00:00, 227.17it/s] 71%|███████   | 350/493 [00:01<00:00, 232.39it/s] 76%|███████▌  | 374/493 [00:01<00:00, 231.97it/s] 81%|████████  | 398/493 [00:01<00:00, 234.19it/s] 86%|████████▌ | 422/493 [00:01<00:00, 235.24it/s] 91%|█████████ | 447/493 [00:01<00:00, 237.43it/s] 96%|█████████▌| 471/493 [00:02<00:00, 235.58it/s]100%|██████████| 493/493 [00:02<00:00, 228.92it/s]
-[INFO][nleval][main] Aggregated results:
-        task_name  train_log2pr  val_log2pr  ...     label      method  runid
-0   MONDO:0021129      3.904843    1.426979  ...       hpo  adj-logreg      0
-1   MONDO:0000088      4.505235    0.641201  ...       hpo  adj-logreg      0
-2   MONDO:0002259      3.186413    0.815039  ...       hpo  adj-logreg      0
-3   MONDO:0019288      4.429684    1.356194  ...       hpo  adj-logreg      0
-4   MONDO:0005453      2.643515    1.126509  ...       hpo  adj-logreg      0
-..            ...           ...         ...  ...       ...         ...    ...
-91  MONDO:0015650      5.141592    1.834358  ...  diseases         gcn      4
-92  MONDO:0015244      5.868263    2.523373  ...  diseases         gcn      4
-93  MONDO:0020133      7.784595    2.451887  ...  diseases         gcn      4
-94  MONDO:0019042      2.953723    0.767926  ...  diseases         gcn      4
-95  MONDO:0024322      5.297123    3.793480  ...  diseases         gcn      4
-
-[72094 rows x 11 columns]
-[INFO][nleval][main] Results saved to experiments/disease_gsc_channels/aggregated_results/main_results_2023-02-21.csv
