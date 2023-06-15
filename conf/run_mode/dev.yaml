@@ -3,6 +3,7 @@
 name: dev
 name_tag: null
 group: dev
+num_runs: 1
 save_results: false
 wandb:
   name: null

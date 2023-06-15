@@ -10,7 +10,7 @@ model:
     hidden_channels: 256
     eps: 0.0
     train_eps: false
-  residual_type: skipsum
+  residual_type: skipsumbnorm
   dropout: 0.2
   norm_type: DiffGroupNorm
   norm_kwargs: null
