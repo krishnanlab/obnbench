@@ -36,9 +36,9 @@ class BaseFeatureEncoder(nn.Module):
                 hidden_channels=dim_encoder,
                 num_layers=layers,
                 dropout=dropout,
-                norm=None,
+                norm="batch_norm",
                 act="relu",
-                plain_last=True,
+                plain_last=False,
             )
         else:
             self.enc = None
