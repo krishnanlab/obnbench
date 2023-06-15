@@ -1,23 +1,25 @@
 ---
-homedir: .
 data_version: nledata-v0.1.0-dev6
+paths:
+  homedir: .
+  dataset_dir: ${paths.homedir}/datasets
+  gene_list_path: ${paths.homedir}/genes.txt
 labels:
   - GOBP
   - DisGeNET
   - DISEASES
-  - DisGeNET_Curated
-  - DisGeNET_BEFREE
-  - DisGeNET_Animal
-  - DisGeNET_GWAS
-  - DISEASES_ExperimentsFiltered
-  - DISEASES_KnowledgeFiltered
-  - DISEASES_TextminingFiltered
-  - HPO
 networks:
   - STRING
   - BioGRID
-  - HumanBaseTopGlobal
   - HumanNet  # same as HumanNet-XC
-  - HumanNet_FN
-  - HumanNet_CC
   - ConsensusPathDB
+  - BioPlex
+  - ComPPIHumanInt
+  - FunCoup
+  - HIPPIE
+  - HuRI
+  - HuMAP
+  - OmniPath
+  - PCNet
+  - ProteomeHD
+  - SIGNOR
