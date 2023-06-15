@@ -182,7 +182,6 @@ class ModelModule(pl.LightningModule):
 
     # TODO: reset_parameters
 
-    @torch.no_grad()
     def _maybe_log_grad_norm(self, logger_opts):
         if (not self.training) or (not self.hparams.trainer.watch_grad_norm):
             return
@@ -191,8 +190,9 @@ class ModelModule(pl.LightningModule):
             p.grad.detach().norm(2)
             for p in self.parameters() if p.grad is not None
         ]
-        grad_norm = torch.stack(grad_norms).norm(2).item() if grad_norms else 0.
-        self.log("train/grad_norm", grad_norm, **logger_opts)
+        if grad_norms:
+            grad_norm = torch.stack(grad_norms).norm(2).item()
+            self.log("train/grad_norm", grad_norm, **logger_opts)
 
     @torch.no_grad()
     def _maybe_log_metrics(self, pred, true, split, logger_opts):
