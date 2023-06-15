@@ -73,9 +73,9 @@ model:
     correction_alpha: 1.0
     smoothing_alpha: 0.8
     correction_norm: sym
-    smoothing_norm: left
+    smoothing_norm: sym
     autoscale: false
-    scale: 1.0
+    scale: 1.5
     cached: true
 optim:
   lr: 0.01
