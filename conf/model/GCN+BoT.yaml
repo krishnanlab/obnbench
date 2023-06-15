@@ -1,14 +1,16 @@
 # @package _global_
 ---
 model:
-  name: GAT
+  name: GCN+BoT
   hid_dim: 128
-  mp_type: GATv2Conv
+  mp_type: GCNConv
   mp_layers: 5
   mp_kwargs:
-    heads: 1
-    concat: false
-    dropout: 0.05
+    improved: false
+    cached: true
+    add_self_loops: true
+    normalize: true
+    bias: true
   residual_type: skipsumbnorm
   dropout: 0.2
   norm_type: DiffGroupNorm
@@ -21,4 +23,6 @@ model:
   post_prop:
     enable: false
   post_cands:
-    enable: false
+    enable: true
+dataset:
+  node_encoders: Node2vec+LabelReuse

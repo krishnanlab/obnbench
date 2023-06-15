@@ -1,17 +1,17 @@
 # @package _global_
 ---
 model:
-  name: GATv2
+  name: GAT+BoT
   hid_dim: 128
   mp_type: GATv2Conv
-  mp_layers: 3
+  mp_layers: 5
   mp_kwargs:
-    heads: 2
+    heads: 1
     concat: false
     dropout: 0.05
-  residual_type: skipsumlnorm
-  dropout: 0.5
-  norm_type: none
+  residual_type: skipsumbnorm
+  dropout: 0.2
+  norm_type: DiffGroupNorm
   norm_kwargs: null
   act: relu
   act_first: false
@@ -21,4 +21,6 @@ model:
   post_prop:
     enable: false
   post_cands:
-    enable: false
+    enable: true
+dataset:
+  node_encoders: Node2vec+LabelReuse

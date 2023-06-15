@@ -1,16 +1,16 @@
-# nleval-benchmark
+# Benchmarking repository for the Open Biomedical Network Benchmark
 
-This is a benchmarking repository accompanying the [`nleval`](https://github.com/krishnanlab/NetworkLearningEval) Python package.
+This is a benchmarking repository accompanying the [`obnb`](https://github.com/krishnanlab/obnb) Python package.
 
 ## Getting started
 
 ### Set up environment
 
-Use the setup script provided to set up the `nleval` environment
+Use the setup script provided to set up the `obnb` environment
 
 ```bash
-git clone https://b10200cbde7d/r/NetworkLearningEval-A862 && cd NetworkLearningEval
-source install.sh cu102  # other options are [cpu,cu113]
+git clone git@github.com:krishnanlab/obnb.git && cd obnb
+source install.sh cu117  # other options are [cpu,cu118]
 pip install -e .[ext]  # install extension modules (PecanPy, GRAPE, ...)
 ```
 

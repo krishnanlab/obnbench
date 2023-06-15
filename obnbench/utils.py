@@ -1,5 +1,5 @@
 import numba
-from nleval import logger
+from obnb import logger
 
 
 def get_num_workers(num_workers: int) -> int:

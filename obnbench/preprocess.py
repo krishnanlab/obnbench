@@ -3,15 +3,15 @@ from functools import wraps
 from pprint import pformat
 from typing import Any, Dict, Optional
 
-import nleval
+import obnb
 import numpy as np
 import scipy.sparse as sp
 import torch
-from nleval.ext.grape import grape_embed
-from nleval.ext.orbital_features import orbital_feat_extract
-from nleval.ext.pecanpy import pecanpy_embed
-from nleval.graph import SparseGraph
-from nleval.util.logger import display_pbar
+from obnb.ext.grape import grape_embed
+from obnb.ext.orbital_features import orbital_feat_extract
+from obnb.ext.pecanpy import pecanpy_embed
+from obnb.graph import SparseGraph
+from obnb.util.logger import display_pbar
 from omegaconf import DictConfig, open_dict
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import KBinsDiscretizer
@@ -35,7 +35,7 @@ class PreCompFeatureWrapper:
 
         @wraps(func)
         def wrapped_func(dataset: Dataset, *args, **kwargs) -> Dataset:
-            nleval.logger.info(f"Precomputing raw features for {self.fe_name}")
+            obnb.logger.info(f"Precomputing raw features for {self.fe_name}")
             feat = func(*args, dataset=dataset, **kwargs)
 
             if isinstance(feat, np.ndarray):
@@ -69,7 +69,7 @@ def get_onehot_logdeg(feat_dim: int, adj: np.ndarray, **kwargs) -> np.ndarray:
         encode="onehot-dense",
         strategy="uniform",
     ).fit_transform(log_deg)
-    nleval.logger.info(f"Bins stats:\n{feat.sum(0)}")
+    obnb.logger.info(f"Bins stats:\n{feat.sum(0)}")
     return feat
 
 
@@ -269,7 +269,7 @@ def get_walklets_emb(
         pca = PCA(n_components=feat_dim, random_state=random_state)
         feat = pca.fit_transform(feat_raw)
         evr = pca.explained_variance_ratio_.sum()
-        nleval.logger.info(
+        obnb.logger.info(
             "Reduced concatenated walklets embedding dimensions from "
             f"{feat_raw.shape[1]} to {feat.shape[1]} (EVR={evr:.2%})."
         )
@@ -327,7 +327,7 @@ def precompute_features(cfg: DictConfig, dataset: Dataset, g: SparseGraph):
     }
 
     tic = time.perf_counter()
-    nleval.logger.info("Start pre-computing features")
+    obnb.logger.info("Start pre-computing features")
     for feat_name in node_encoders:
         fe_cfg = cfg.node_encoder_params.get(feat_name)
         feat_dim = fe_cfg.get("raw_dim", None)
@@ -339,7 +339,7 @@ def precompute_features(cfg: DictConfig, dataset: Dataset, g: SparseGraph):
             **data_dict,
         )
     elapsed = time.perf_counter() - tic
-    nleval.logger.info(f"Precomputation done! Took {elapsed:.2f} seconds.")
+    obnb.logger.info(f"Precomputation done! Took {elapsed:.2f} seconds.")
 
 
 def infer_dimensions(cfg: DictConfig, dataset: Dataset):
@@ -351,6 +351,7 @@ def infer_dimensions(cfg: DictConfig, dataset: Dataset):
     num_nodes, dim_out = dataset._data.y.shape
 
     # Infer feature encoder dimensions
+    hid_dim = cfg.model.hid_dim
     fe_raw_dims, fe_processed_dims = [], []
     for feat_name in node_encoders:
         fe_cfg = cfg.node_encoder_params.get(feat_name)
@@ -360,7 +361,7 @@ def infer_dimensions(cfg: DictConfig, dataset: Dataset):
             raw_dim = fe_cfg.raw_dim
         else:
             raw_dim = dataset._data[f"rawfeat_{feat_name}"].shape[1]
-        encoded_dim = raw_dim if fe_cfg.layers == 0 else fe_cfg.enc_dim
+        encoded_dim = raw_dim if fe_cfg.layers == 0 else hid_dim
 
         fe_raw_dims.append(raw_dim)
         fe_processed_dims.append(encoded_dim)
@@ -372,10 +373,10 @@ def infer_dimensions(cfg: DictConfig, dataset: Dataset):
     else:  # composed feature encoder
         composed_fe_dim_in = sum(fe_processed_dims)
         fe_cfg = cfg.node_encoder_params.Composed
-        mp_dim_in = composed_fe_dim_in if fe_cfg.layers == 0 else fe_cfg.enc_dim
+        mp_dim_in = composed_fe_dim_in if fe_cfg.layers == 0 else hid_dim
 
     # Infer prediction head input dimension
-    pred_head_dim_in = mp_dim_in if cfg.model.mp_layers == 0 else cfg.model.hid_dim
+    pred_head_dim_in = mp_dim_in if cfg.model.mp_layers == 0 else hid_dim
 
     inferred_dims_dict = {
         "fe_raw_dims": fe_raw_dims,
@@ -386,8 +387,8 @@ def infer_dimensions(cfg: DictConfig, dataset: Dataset):
         "dim_out": dim_out,
         "num_nodes": num_nodes,
     }
-    nleval.logger.info(f"Node encoders: {node_encoders}")
-    nleval.logger.info(f"Inferred module dimensions:\n{pformat(inferred_dims_dict)}")
+    obnb.logger.info(f"Node encoders: {node_encoders}")
+    obnb.logger.info(f"Inferred module dimensions:\n{pformat(inferred_dims_dict)}")
 
     with open_dict(cfg):
         cfg._shared = inferred_dims_dict

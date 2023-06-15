@@ -1,0 +1,39 @@
+---
+name: BioGRID-DisGeNET-LogReg+Node2vec
+entity: RemyLiu
+project: OBNB-dev
+program: main.py
+command:
+  - ${env}
+  - ${interpreter}
+  - ${program}
+  - "seed=42"  # set a different seed from production runs
+  - "run_mode=tune"
+  - "dataset.network=BioGRID"
+  - "dataset.label=DisGeNET"
+  - "model=LogReg+Node2vec"
+  - ${args_no_hyphens}  # hydra style arg parsing
+method: bayes
+metric:
+  name: val/APOP
+  goal: maximize
+parameters:
+  node_encoder_params.Node2vec.feat_kwargs.num_walks:
+    values:
+      - 5
+      - 10
+      - 15
+  node_encoder_params.Node2vec.feat_kwargs.walk_length:
+    values:
+      - 40
+      - 80
+      - 120
+  node_encoder_params.Node2vec.feat_kwargs.window_size:
+    values:
+      - 5
+      - 10
+      - 15
+      - 20
+  node_encoder_params.Node2vec.feat_kwargs.epochs:
+    values:
+      - 5

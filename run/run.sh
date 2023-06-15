@@ -9,9 +9,7 @@
 
 NETWORKS=(
     BioGRID
-    ConsensusPathDB
     HumanNet
-    STRING
 )
 LABELS=(
     DisGeNET
@@ -19,6 +17,7 @@ LABELS=(
 )
 MODELS=(
     LabelProp
+    # Logistic Regression
     LogReg+Adj
     LogReg+SVD
     LogReg+LINE1
@@ -26,13 +25,24 @@ MODELS=(
     LogReg+Node2vec
     LogReg+Walklets
     LogReg+LapEigMap
+    # GNN
     GAT
-    GATv2
     GCN
-    GEN
     GIN
     GatedGCN
     SAGE
+    # GNN with Correct & Smooth
+    GAT+CS
+    GCN+CS
+    GIN+CS
+    GatedGCN+CS
+    SAGE+CS
+    # GNN with bag of tricks (Node2vec features, label reuse, correct and smooth)
+    GAT+BoT
+    GCN+BoT
+    GIN+BoT
+    GatedGCN+BoT
+    SAGE+BoT
 )
 
 CUR_FILE_DIR=$(dirname $(realpath $0))
@@ -101,3 +111,5 @@ for network in ${networks[@]}; do
         done
     done
 done
+
+wait

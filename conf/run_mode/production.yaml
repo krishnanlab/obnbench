@@ -3,7 +3,8 @@
 name: ${dataset.network}-${dataset.label}-${model.name}
 name_tag: null
 group: main
-save_results: false
+num_runs: 5
+save_results: true
 wandb:
   name: ${name}
   project: OBNB

@@ -5,7 +5,7 @@ from math import ceil
 from typing import Any, Dict, List, Optional
 
 import lightning.pytorch as pl
-import nleval
+import obnb
 import pandas as pd
 import torch
 import torch.nn as nn
@@ -145,7 +145,7 @@ class ModelModule(pl.LightningModule):
 
         return pred, true
 
-    def _shared_step(self, batch, split, final: bool = True):
+    def _shared_step(self, batch, split, final: bool = False):
         # XXX: only allow full batch training now for several reasons (1) post
         # propagation and correction needs access to the full graph, (2) metrics
         # should be computed on the full graph.
@@ -183,15 +183,16 @@ class ModelModule(pl.LightningModule):
     # TODO: reset_parameters
 
     def _maybe_log_grad_norm(self, logger_opts):
-        if not self.hparams.trainer.watch_grad_norm:
+        if (not self.training) or (not self.hparams.trainer.watch_grad_norm):
             return
 
         grad_norms = [
             p.grad.detach().norm(2)
             for p in self.parameters() if p.grad is not None
         ]
-        grad_norm = torch.stack(grad_norms).norm(2).item() if grad_norms else 0.
-        self.log("train/grad_norm", grad_norm, **logger_opts)
+        if grad_norms:
+            grad_norm = torch.stack(grad_norms).norm(2).item()
+            self.log("train/grad_norm", grad_norm, **logger_opts)
 
     @torch.no_grad()
     def _maybe_log_metrics(self, pred, true, split, logger_opts):
@@ -241,13 +242,13 @@ class ModelModule(pl.LightningModule):
             if isinstance(logger, pl.loggers.CSVLogger):
                 out_path = osp.join(logger.log_dir, "final_scores.csv")
                 score_df.to_csv(out_path)
-                nleval.logger.info(f"Final results saved to {out_path}")
+                obnb.logger.info(f"Final results saved to {out_path}")
 
             elif isinstance(logger, pl.loggers.WandbLogger):
                 logger.log_table("final_scores", dataframe=score_df)
 
             else:
-                nleval.logger.error(f"Unknown logger type {type(logger)}")
+                obnb.logger.error(f"Unknown logger type {type(logger)}")
 
     def training_step(self, batch, *args, **kwargs):
         return self._shared_step(batch, split="train")

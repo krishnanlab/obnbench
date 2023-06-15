@@ -1,10 +1,12 @@
 # @package _global_
 ---
+dataset:
+  node_encoders: Node2vec+OneHotLogDeg+LabelReuse
 model:
-  name: GCN
-  hid_dim: 128
+  name: GCN+tuned
+  hid_dim: 192
   mp_type: GCNConv
-  mp_layers: 5
+  mp_layers: 3
   mp_kwargs:
     improved: false
     cached: true
@@ -12,10 +14,10 @@ model:
     normalize: true
     bias: true
   residual_type: skipsumbnorm
-  dropout: 0.2
+  dropout: 0.3
   norm_type: DiffGroupNorm
   norm_kwargs: null
-  act: relu
+  act: selu
   act_first: false
   skip_pred_act: false
   pred_head_layers: 1
@@ -23,4 +25,4 @@ model:
   post_prop:
     enable: false
   post_cands:
-    enable: false
+    enable: true
