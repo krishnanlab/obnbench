@@ -31,12 +31,6 @@ MODELS=(
     GIN
     GatedGCN
     SAGE
-    # GNN with Correct & Smooth
-    GAT+CS
-    GCN+CS
-    GIN+CS
-    GatedGCN+CS
-    SAGE+CS
     # GNN with bag of tricks (Node2vec features, label reuse, correct and smooth)
     GAT+BoT
     GCN+BoT
