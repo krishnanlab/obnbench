@@ -1,0 +1,6 @@
+---
+defaults:
+  - /model: GAT
+name: GAT+CS
+post_cands:
+  enable: true

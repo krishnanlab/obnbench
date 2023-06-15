@@ -1,0 +1,6 @@
+---
+defaults:
+  - /model: SAGE
+name: SAGE+CS
+post_cands:
+  enable: true

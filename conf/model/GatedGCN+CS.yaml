@@ -1,0 +1,6 @@
+---
+defaults:
+  - /model: GatedGCN
+name: GatedGCN+CS
+post_cands:
+  enable: true

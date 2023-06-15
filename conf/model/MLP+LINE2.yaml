@@ -1,0 +1,20 @@
+# @package _global_
+---
+model:
+  name: MLP+LINE2
+  mp_layers: 0
+  skip_pred_act: false
+  pred_head_layers: 1
+  post_prop:
+    enable: false
+  post_cands:
+    enable: false
+dataset:
+  node_encoders: LINE2
+node_encoder_params:
+  LINE2:
+    raw_dim: 128
+    raw_bn: false
+    raw_dropout: 0.0
+    dropout: 0.2
+    layers: 2

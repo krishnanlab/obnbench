@@ -1,0 +1,6 @@
+---
+defaults:
+  - /model: GIN
+name: GIN+CS
+post_cands:
+  enable: true
