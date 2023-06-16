@@ -103,11 +103,12 @@ tune the model configuration on a particular dataset.
 
 ## Results anallysis
 
-To run the [notebooks](notebook), first download our benchmarking results (or you can rerun all the benchmarking
-experiments yourself using our run scripts described above).
+To run the [notebooks](notebook), first download our benchmarking results
+(or you can rerun all the benchmarking experiments yourself using our run scripts described above).
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8048305.svg)](https://doi.org/10.5281/zenodo.8048305)
 
 ```bash
-gdown --fuzzy -O results/main.csv.gz https://drive.google.com/file/d/1JUP3eTKuQnROMJ3xKpekNSOZJBPTmsuJ/view
+wget -O results/main.csv.gz https://zenodo.org/record/8048305/files/main.csv.gz
 ```
 
 ## Data stats (`obnbdata-0.1.0`) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8045270.svg)](https://doi.org/10.5281/zenodo.8045270)

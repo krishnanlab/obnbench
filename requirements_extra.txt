@@ -3,4 +3,3 @@ lightning==2.0.2
 torchmetrics==0.11.4
 wandb==0.15.3
 seaborn==0.12.2
-gdown==4.7.1
