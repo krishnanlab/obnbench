@@ -4,22 +4,31 @@ This is a benchmarking repository accompanying the [`obnb`](https://github.com/k
 
 ## Set up environment
 
-Use the setup script provided to set up the `obnb` environment
-
 ```bash
-git clone git@github.com:krishnanlab/obnb.git && cd obnb
-source install.sh cu117  # other options are [cpu,cu118]
-pip install -e .[ext]  # install extension modules (PecanPy, GRAPE, ...)
+conda create -n obnb python=3.8 -y && conda activate obnb
+
+# Install PyTorch and PyG with CUDA 11.7
+conda install pytorch=2.0.1 torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
+conda install pyg=2.3.0 -c pyg -y
+
+pip install obnb[ext]==0.1.0  # install obnb with extension modules (PecanPy, GraPE, ...)
+pip install -r requirements_extra.txt  # extra dependencies for benchmarking
+
+conda clean --all -y  # clean up
 ```
 
-Install additional dependencies, e.g.,
+The extra dependencies are, e.g.,
 
 - [`Hydra`](https://github.com/facebookresearch/hydra) for managing experiments.
 - [`Lightning`](https://lightning.ai/docs/pytorch/latest/) for organizing model training framework.
 - [`WandB`](https://docs.wandb.ai/) for logging metrics.
 
+**Note**: if you do not need to run the benchmarking experiments and only want to play around
+with our benchmarking results with one of the [notebooks](notebook), you can skip the installation
+for PyTorch and PyG.
+
 ```bash
-pip install -r requirements_extra.txt
+pip install obnb[ext]==0.1.0
 ```
 
 ## Set up data (optional)

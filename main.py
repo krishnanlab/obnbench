@@ -5,7 +5,6 @@ from math import ceil
 import hydra
 import lightning.pytorch as pl
 import obnb
-import numpy as np
 import torch
 import wandb
 from obnb.dataset import OpenBiomedNetBenchPyG
