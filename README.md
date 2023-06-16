@@ -101,8 +101,7 @@ experiments yourself using our run scripts described above).
 gdown --fuzzy -O results/main.csv.gz https://drive.google.com/file/d/1JUP3eTKuQnROMJ3xKpekNSOZJBPTmsuJ/view
 ```
 
-## Data stats (`obnbdata-0.1.0`)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8045270.svg)](https://doi.org/10.5281/zenodo.8045270)
+## Data stats (`obnbdata-0.1.0`) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8045270.svg)](https://doi.org/10.5281/zenodo.8045270)
 
 ### Networks
 
