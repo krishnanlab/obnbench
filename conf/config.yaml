@@ -3,7 +3,7 @@ defaults:
   - _self_
   - /run_mode: dev
   - /model: GCN
-name: dev  # set experiment name
+name: ${dataset.network}-${dataset.label}-${model.name}
 name_tag: null  # if specified, the final name becomes ${name}-${name_tag}
 group: main
 seed: 0

@@ -1,10 +1,9 @@
 # @package _global_
 ---
-name: dev
-name_tag: null
 group: dev
 num_runs: 1
-save_results: false
+save_results: true
 wandb:
+  use: false
   name: null
   project: OBNB-dev

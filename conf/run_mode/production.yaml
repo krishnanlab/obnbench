@@ -1,7 +1,5 @@
 # @package _global_
 ---
-name: ${dataset.network}-${dataset.label}-${model.name}
-name_tag: null
 group: main
 num_runs: 5
 save_results: true
