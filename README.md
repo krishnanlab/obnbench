@@ -134,7 +134,7 @@ gdown --fuzzy -O results/main.csv.gz https://drive.google.com/file/d/1JUP3eTKuQn
 
 ### Labels
 
-#### DISEASES
+#### [DISEASES](https://diseases.jensenlab.org/About)
 
 | Network | Num. tasks | Num. pos. avg. | Num. pos. std. | Num. pos. med. |
 | :------ | ---------: | -------------: | -------------: | -------------: |
@@ -154,7 +154,7 @@ gdown --fuzzy -O results/main.csv.gz https://drive.google.com/file/d/1JUP3eTKuQn
 | SIGNOR | 89 | 144.6 | 89.4 | 117.0 |
 | STRING | 146 | 175.4 | 135.6 | 126.0 |
 
-#### DisGeNET
+#### [DisGeNET](https://www.disgenet.org/)
 
 | Network | Num. tasks | Num. pos. avg. | Num. pos. std. | Num. pos. med. |
 | :------ | ---------: | -------------: | -------------: | -------------: |
@@ -174,7 +174,7 @@ gdown --fuzzy -O results/main.csv.gz https://drive.google.com/file/d/1JUP3eTKuQn
 | SIGNOR | 219 | 147.3 | 81.9 | 124.0 |
 | STRING | 296 | 208.0 | 140.6 | 162.0 |
 
-#### GOBP
+#### [GOBP](http://geneontology.org/)
 
 | Network | Num. tasks | Num. pos. avg. | Num. pos. std. | Num. pos. med. |
 | :------ | ---------: | -------------: | -------------: | -------------: |
