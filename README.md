@@ -2,9 +2,7 @@
 
 This is a benchmarking repository accompanying the [`obnb`](https://github.com/krishnanlab/obnb) Python package.
 
-## Getting started
-
-### Set up environment
+## Set up environment
 
 Use the setup script provided to set up the `obnb` environment
 
@@ -24,7 +22,7 @@ Install additional dependencies, e.g.,
 pip install -r requirements_extra.txt
 ```
 
-### Set up data (optional)
+## Set up data (optional)
 
 Run `get_data.py` to download and set up data for all the experiments.
 Data will be saved under the `datasets/` directory by default, and will take up approximately 6 GB of space.
@@ -37,7 +35,7 @@ This step is completely optional and directly runing the training script will wo
 But runing `get_data.py` once before training prevents multiple parallel jobs doing the same data preprocessing
 work if the processed data is not available yet.
 
-### Run experiments
+## Run experiments
 
 After setting up the data, one can run a single experiment by specifying the choices of network, label, and model:
 
@@ -45,7 +43,7 @@ After setting up the data, one can run a single experiment by specifying the cho
 python main.py dataset.network=BioGRID dataset.label=DisGeNET model=GCN
 ```
 
-Check out the `conf/model/` directory for all available model presets.
+Check out the [`conf/model/`](conf/model) directory for all available model presets.
 The main model presets are:
 
 - `GCN`
@@ -56,7 +54,7 @@ The main model presets are:
 - `LogReg+Node2vec`
 - `LogReg+Walklets`
 
-### Runing batch of parallel jobs
+### Run batch of parallel jobs
 
 ```bash
 cd run
@@ -94,7 +92,17 @@ wandb sweep conf/tune/BioGRID-DisGeNET-GCN.yaml
 Then, follow the instruction from the command above to spawn sweep agents to automatically
 tune the model configuration on a particular dataset.
 
+## Results anallysis
+
+To run the [notebooks](notebook), first download our benchmarking results (or you can rerun all the benchmarking
+experiments yourself using our run scripts described above).
+
+```bash
+gdown --fuzzy -O results/main.csv.gz https://drive.google.com/file/d/1JUP3eTKuQnROMJ3xKpekNSOZJBPTmsuJ/view
+```
+
 ## Data stats (`obnbdata-0.1.0`)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8045270.svg)](https://doi.org/10.5281/zenodo.8045270)
 
 ### Networks
 
