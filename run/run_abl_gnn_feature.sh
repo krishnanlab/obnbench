@@ -1,7 +1,7 @@
 #!/bin/bash --login
 #
-# Example:
-# $ sh GCN BioGRID Node2vec
+# Example (run under the project root directory):
+# $ sh run/run_abl_gnn_features.sh GCN BioGRID Node2vec
 
 # GLOBAL VAR ####
 [[ -z $SEED ]] && SEED=0

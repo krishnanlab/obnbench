@@ -1,8 +1,8 @@
 #!/bin/bash --login
 #
-# Example:
-# $ sh GCN BioGRID
-# $ sh LogReg+Adj BioGRID
+# Example (run under the project root directory):
+# $ sh run/run_abl_cs.sh GCN BioGRID
+# $ sh run/run_abl_cs.sh LogReg+Adj BioGRID
 
 # GLOBAL VAR ####
 [[ -z $SEED ]] && SEED=0

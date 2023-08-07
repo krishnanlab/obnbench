@@ -1,7 +1,7 @@
 #!/bin/bash --login
 #
-# Example:
-# $ sh GCN BioGRID
+# Example (run under the project root directory):
+# $ sh run/run_abl_gnn_cs_label.sh GCN BioGRID
 
 # GLOBAL VAR ####
 [[ -z $SEED ]] && SEED=0
