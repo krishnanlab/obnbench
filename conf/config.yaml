@@ -164,8 +164,8 @@ node_encoder_params:
     layers: 1
     feat_kwargs:
       num_walks: 10
-      walk_length: 40
-      window_size: 5
+      walk_length: 80
+      window_size: 10
       p: 1.0  # return parameter for node2vec
       q: 1.0  # in-out parameter for node2vec
       mode: PreCompFirstOrder  # PecanPy mode

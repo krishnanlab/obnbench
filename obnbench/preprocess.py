@@ -226,16 +226,17 @@ def get_n2v_emb(
     num_workers: int = 1,
     random_state: Optional[int] = None,
     show_progress: bool = True,
+    feat_kwargs: Optional[Dict[str, Any]] = None,
     **kwargs,
 ) -> np.ndarray:
     feat = pecanpy_embed(
         g,
-        mode="PreCompFirstOrder",
         workers=num_workers,
         verbose=show_progress,
         dim=feat_dim,
         as_array=True,
         random_state=random_state,
+        **feat_kwargs,
     )
     return feat
 
