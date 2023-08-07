@@ -129,6 +129,10 @@ class WalkletsFeatureEncoder(BaseFeatureEncoder):
     ...
 
 
+class AttnWalkFeatureEncoder(BaseFeatureEncoder):
+    ...
+
+
 class AdjFeatureEncoder(BaseFeatureEncoder):
     ...
 

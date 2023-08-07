@@ -183,6 +183,19 @@ node_encoder_params:
       iterations: 10
       window_size: 3  # up to third order neighborhoods
       epochs: 5  # default Gensim Word2vec setting
+  AttnWalk:
+    raw_dim: 128
+    raw_bn: true
+    raw_dropout: 0.2
+    dropout: 0.2
+    layers: 1
+    feat_kwargs:
+      walk_length: 80
+      window_size: 3
+      beta: 0.5
+      epochs: 200
+      lr: 0.01
+      device: auto
   Adj:
     raw_bn: true
     raw_dropout: 0.2

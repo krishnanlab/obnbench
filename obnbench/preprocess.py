@@ -7,6 +7,7 @@ import obnb
 import numpy as np
 import scipy.sparse as sp
 import torch
+from obnb.ext.attnwalk import attnwalk_embed
 from obnb.ext.grape import grape_embed
 from obnb.ext.orbital_features import orbital_feat_extract
 from obnb.ext.pecanpy import pecanpy_embed
@@ -277,6 +278,27 @@ def get_walklets_emb(
     else:
         feat = feat_raw
 
+    return feat
+
+
+@PreCompFeatureWrapper("AttnWalk")
+def get_attnwalk_emb(
+    feat_dim: int,
+    g: SparseGraph,
+    show_progress: bool = True,
+    feat_kwargs: Optional[Dict[str, Any]] = None,
+    **kwargs,
+) -> np.ndarray:
+    feat, attn = attnwalk_embed(
+        g,
+        verbose=show_progress,
+        dim=feat_dim,
+        as_array=True,
+        return_attn=True,
+        **feat_kwargs
+    )
+    attn_str = ", ".join(f"{i:.4f}" for i in attn)
+    obnb.logger.info(f"AttnWalk attentions: [{attn_str}]")
     return feat
 
 
