@@ -13,7 +13,7 @@ from omegaconf import DictConfig, OmegaConf
 from obnbench.data_module import DataModule
 from obnbench.model import ModelModule
 from obnbench.preprocess import precompute_features, infer_dimensions
-from obnbench.utils import get_num_workers
+from obnbench.utils import get_num_workers, replace_random_split
 
 
 def setup_configs(cfg: DictConfig):
@@ -122,6 +122,10 @@ def setup_data_module(cfg: DictConfig):
         cfg.dataset.label,
         # selected_genes=gene_list,
     )
+
+    if cfg.dataset.random_split:
+        replace_random_split(dataset)
+
     obnb.logger.info(f"Dataset loaded: {dataset}\n{dataset._data}")
 
     # Preprocessing
