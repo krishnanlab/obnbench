@@ -22,4 +22,4 @@ model:
   post_cands:
     enable: true
 dataset:
-  node_encoders: Node2vec+LabelReuse
+  node_encoders: Node2vec+OneHotLogDeg+LabelReuse
