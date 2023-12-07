@@ -75,7 +75,7 @@ def replace_random_split(
             f"({min_num_pos=}, {random_state=})"
         )
 
-    dataset.train_mask, dataset.val_mask, dataset.test_mask = map(
+    dataset.train_mask[:], dataset.val_mask[:], dataset.test_mask[:] = map(
         partial(idx_ary_to_mask_tensor, size=dataset.num_nodes),
         (train_idx, val_idx, test_idx),
     )
