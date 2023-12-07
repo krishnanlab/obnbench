@@ -52,7 +52,7 @@ echo HOME_DIR=$HOME_DIR
 echo
 #################
 
-base_script="python main.py run_mode=${RUN_MODE} wandb.use=${USE_WANDB} num_runs=${NUM_RUNS} seed=${SEED}"
+base_script="python main.py run_mode=${RUN_MODE} wandb.use=${USE_WANDB} num_runs=1"
 
 parse_arg() {
     local name=$1
